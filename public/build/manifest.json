@@ -1,0 +1,140 @@
+{
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-TEmAk13K.eot",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-BpRar1d5.ttf",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-Bvl3VxMs.woff",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-B6OSyW2I.woff2",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.eot": {
+    "file": "assets/fa-brands-400-DnkPfk3o.eot",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.eot"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.svg": {
+    "file": "assets/fa-brands-400-cH1MgKbP.svg",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.svg"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.ttf": {
+    "file": "assets/fa-brands-400-CSYNqBb_.ttf",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.ttf"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.woff": {
+    "file": "assets/fa-brands-400-CEJbCg16.woff",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.woff"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-UxlILjvJ.woff2",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.woff2"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.eot": {
+    "file": "assets/fa-regular-400-BhTwtT8w.eot",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.eot"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.svg": {
+    "file": "assets/fa-regular-400-gwj8Pxq-.svg",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.svg"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.ttf": {
+    "file": "assets/fa-regular-400-D1vz6WBx.ttf",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.ttf"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.woff": {
+    "file": "assets/fa-regular-400-DFnMcJPd.woff",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.woff"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.woff2": {
+    "file": "assets/fa-regular-400-DGzu1beS.woff2",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-regular-400.woff2"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.eot": {
+    "file": "assets/fa-solid-900-B6Axprfb.eot",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.eot"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.svg": {
+    "file": "assets/fa-solid-900-B4ZZ7kfP.svg",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.svg"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.ttf": {
+    "file": "assets/fa-solid-900-mxuxnBEa.ttf",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.ttf"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.woff": {
+    "file": "assets/fa-solid-900-DOXgCApm.woff",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.woff"
+  },
+  "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-BUswJgRo.woff2",
+    "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.woff2"
+  },
+  "node_modules/admin-lte/plugins/summernote/font/summernote.eot": {
+    "file": "assets/summernote-CIJFJttR.eot",
+    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.eot"
+  },
+  "node_modules/admin-lte/plugins/summernote/font/summernote.ttf": {
+    "file": "assets/summernote-BFwDdmZ-.ttf",
+    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.ttf"
+  },
+  "node_modules/admin-lte/plugins/summernote/font/summernote.woff": {
+    "file": "assets/summernote-BpukxMI1.woff",
+    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.woff"
+  },
+  "node_modules/admin-lte/plugins/summernote/font/summernote.woff2": {
+    "file": "assets/summernote-CG9AQWUQ.woff2",
+    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.woff2"
+  },
+  "node_modules/jstree/dist/themes/default/32px.png": {
+    "file": "assets/32px-CHwblES-.png",
+    "src": "node_modules/jstree/dist/themes/default/32px.png"
+  },
+  "node_modules/jstree/dist/themes/default/40px.png": {
+    "file": "assets/40px-fA5gcXpO.png",
+    "src": "node_modules/jstree/dist/themes/default/40px.png"
+  },
+  "node_modules/jstree/dist/themes/default/throbber.gif": {
+    "file": "assets/throbber-DhAvNIJO.gif",
+    "src": "node_modules/jstree/dist/themes/default/throbber.gif"
+  },
+  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.eot": {
+    "file": "assets/MaterialIcons-Regular-BjXOXp5c.eot",
+    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.eot"
+  },
+  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.ttf": {
+    "file": "assets/MaterialIcons-Regular-DEUTIz1o.ttf",
+    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.ttf"
+  },
+  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff": {
+    "file": "assets/MaterialIcons-Regular-FsbMSDLx.woff",
+    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff"
+  },
+  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff2": {
+    "file": "assets/MaterialIcons-Regular-DOtZ65Va.woff2",
+    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-3ScMaSVA.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/32px-CHwblES-.png",
+      "assets/throbber-DhAvNIJO.gif",
+      "assets/40px-fA5gcXpO.png"
+    ],
+    "css": [
+      "assets/app-Dp5swm4V.css"
+    ],
+    "file": "assets/app-Dl1_EZIo.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}
