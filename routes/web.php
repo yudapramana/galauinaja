@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Api\WorkUnitController;
+use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
