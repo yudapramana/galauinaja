@@ -35,13 +35,15 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         tmt_pangkat: '',
         tmt_jabatan: '',
         employee: {},
-        doctypes: []
+        doctypes: [],
+        can_multiple_role: null,
+        roles: [],
+        rolenames: []
     }));
 
     const isAuthenticated = useStorage('AuthUserStore:isAuthenticated', ref(false));
     const myDocuments = useStorage('AuthUserStore:myDocuments', ref([]));
     const userDocuments = ref([]); // Untuk menyimpan dokumen user lain (admin view)
-
 
     const getMyDocuments = async () => {
         console.log('GetMyDocuments Get Called');

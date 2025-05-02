@@ -14,6 +14,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
@@ -35,10 +36,17 @@ Route::get('/set-admin', function() {
     $user = User::where('username', $nipadmin)->first();
 
     $user->update([
-        'role' => App\Enums\RoleType::SUPERADMIN->value
+        'role' => App\Enums\RoleType::SUPERADMIN->value,
+        'can_multiple_role' => true
     ]);
 
-    return 'done';
+    $user->roles()->syncWithoutDetaching([
+        Role::where('name', 'SUPERADMIN')->first()->id,
+        Role::where('name', 'ADMIN')->first()->id,
+        Role::where('name', 'REVIEWER')->first()->id,
+    ]);
+
+    return $user->fresh();
 });
 
 Route::get('/employee-to-user', function() {

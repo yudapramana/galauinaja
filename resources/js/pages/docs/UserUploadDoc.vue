@@ -1,10 +1,14 @@
 <template>
-  <div class="content-wrapper p-3">
-    <section class="content-header mb-3">
-      <h3 class="text-primary">📂 Upload Dokumen</h3>
+  <!-- <div class="content-wrapper p-3"> -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <h3 class="text-primary">📂 Upload Dokumen</h3>
+      </div>
     </section>
 
     <section class="content">
+      <div class="container-fluid">
+
       <div class="card shadow-sm rounded-lg">
         <div class="card-body p-3">
 
@@ -89,6 +93,7 @@
 
         </div>
       </div>
+    </div>
     </section>
 
     <!-- Preview Modal -->
@@ -174,7 +179,7 @@
       </div>
     </div>
 
-  </div>
+  <!-- </div> -->
 </template>
 
 <script setup>

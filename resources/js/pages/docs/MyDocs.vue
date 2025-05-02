@@ -1,61 +1,66 @@
 <template>
-  <div class="content-wrapper p-3">
-    <section class="content-header mb-3">
-      <h3 class="text-primary">📂 Daftar Dokumen</h3>
+  <!-- <div class="content-wrapper p-3"> -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <h3 class="text-primary">📂 Daftar Dokumen</h3>
+      </div>
     </section>
 
     <section class="content">
-      <div class="card shadow-sm rounded-lg">
-        <div class="card-body p-3">
+      <div class="container-fluid">
 
-          <!-- Search Box -->
-          <div class="input-group mb-3">
-            <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
+        <div class="card shadow-sm rounded-lg">
+          <div class="card-body p-3">
+
+            <!-- Search Box -->
+            <div class="input-group mb-3">
+              <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
+              </div>
             </div>
-          </div>
 
-          <!-- Loading State -->
-          <div v-if="isLoading" class="text-center p-5">
-            <div class="spinner-border text-primary mb-2" role="status">
-              <span class="sr-only">Loading...</span>
+            <!-- Loading State -->
+            <div v-if="isLoading" class="text-center p-5">
+              <div class="spinner-border text-primary mb-2" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <div class="text-muted">Memuat daftar dokumen...</div>
             </div>
-            <div class="text-muted">Memuat daftar dokumen...</div>
+
+            <!-- Tree List -->
+            <div v-else-if="filteredTree.length" class="tree">
+              <ul class="list-unstyled mb-0">
+                <li v-for="(doctype, index) in filteredTree" :key="doctype.id" class="mb-2">
+                  <div @click="toggleExpand(doctype)"
+                    class="d-flex align-items-center cursor-pointer py-1 px-2 bg-light rounded small">
+                    <i :class="doctype.expanded ? 'fas fa-folder-open text-warning' : 'fas fa-folder text-secondary'"
+                      class="mr-2"></i>
+                    <span class="ml-2 font-weight-bold">
+                      {{ index + 1 }}. {{ doctype.text }}
+                      <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length }}</span>
+                    </span>
+                  </div>
+
+                  <ul v-show="doctype.expanded" class="pl-4 mt-1">
+                    <li v-for="file in doctype.files" :key="file.id" @click="previewFile(file.file_url)"
+                      class="cursor-pointer p-1 rounded hover-bg-light small">
+                      <i class="fas fa-file-pdf text-danger mr-2"></i> {{ file.file_name }}
+                    </li>
+                    <li v-if="!doctype.files.length" class="text-muted small ml-4 mt-1">
+                      Tidak ada file diupload.
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+
+            <div v-else class="text-center p-5">
+              <span class="text-muted">Data tidak ditemukan.</span>
+            </div>
+
           </div>
-
-          <!-- Tree List -->
-          <div v-else-if="filteredTree.length" class="tree">
-            <ul class="list-unstyled mb-0">
-              <li v-for="(doctype, index) in filteredTree" :key="doctype.id" class="mb-2">
-                <div @click="toggleExpand(doctype)"
-                  class="d-flex align-items-center cursor-pointer py-1 px-2 bg-light rounded small">
-                  <i :class="doctype.expanded ? 'fas fa-folder-open text-warning' : 'fas fa-folder text-secondary'"
-                    class="mr-2"></i>
-                  <span class="ml-2 font-weight-bold">
-                    {{ index + 1 }}. {{ doctype.text }}
-                    <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length }}</span>
-                  </span>
-                </div>
-
-                <ul v-show="doctype.expanded" class="pl-4 mt-1">
-                  <li v-for="file in doctype.files" :key="file.id" @click="previewFile(file.file_url)"
-                    class="cursor-pointer p-1 rounded hover-bg-light small">
-                    <i class="fas fa-file-pdf text-danger mr-2"></i> {{ file.file_name }}
-                  </li>
-                  <li v-if="!doctype.files.length" class="text-muted small ml-4 mt-1">
-                    Tidak ada file diupload.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-
-
-          <div v-else class="text-center p-5">
-            <span class="text-muted">Data tidak ditemukan.</span>
-          </div>
-
         </div>
       </div>
     </section>
@@ -76,7 +81,7 @@
         </div>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script setup>

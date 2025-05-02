@@ -4,9 +4,9 @@ import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useSettingStore } from '../../stores/SettingStore';
 import CloudImage from '../../components/CloudImage.vue';
 import { getActivePinia } from "pinia"
+import { useLayoutStore } from '../../stores/LayoutStore';
 
-
-
+const layoutStore = useLayoutStore();
 const router = useRouter();
 const settingStore = useSettingStore();
 const authUserStore = useAuthUserStore();
@@ -111,55 +111,27 @@ const logout = () => {
 
             <!-- Right navbar links -->
             <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-                <!-- Messages Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <span class="nav-link">
-                        {{ authUserStore.user.employee.full_name }}
-                    </span>
-                </li>
-                <li class="nav-item dropdown">
-                    <form>
-                        <a href="#" @click.prevent="logout" class="nav-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </form>
+                <li v-if="layoutStore.canMultipleRole" class="nav-item">
+                    <button @click="layoutStore.switchLayout" class="btn btn-sm btn-primary mt-2 mr-2">
+                    Switch to Admin View
+                    </button>
                 </li>
 
-              
-                
-                <!-- Notifications Dropdown Menu -->
-                <!-- <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="far fa-bell"></i>
-                        <span class="badge badge-warning navbar-badge">15</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <span class="dropdown-header">15 Notifications</span>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-envelope mr-2"></i> 4 new messages
-                            <span class="float-right text-muted text-sm">3 mins</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-users mr-2"></i> 8 friend requests
-                            <span class="float-right text-muted text-sm">12 hours</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-file mr-2"></i> 3 new reports
-                            <span class="float-right text-muted text-sm">2 days</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-                    </div>
+                <li class="nav-item dropdown">
+                    <span class="nav-link">
+                    {{ authUserStore.user.employee.full_name }}
+                    </span>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-                        <i class="fas fa-th-large"></i>
+
+                <li class="nav-item dropdown">
+                    <form>
+                    <a href="#" @click.prevent="logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
                     </a>
-                </li> -->
+                    </form>
+                </li>
             </ul>
+
         </div>
     </nav>
 </template>

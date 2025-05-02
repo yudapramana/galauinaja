@@ -57,7 +57,8 @@ class User extends Authenticatable
         'formatted_created_at',
         'org_id',
         'org_name',
-        'nip_name'
+        'nip_name',
+        'role_names'
     ];
 
     public function getFormattedCreatedAtAttribute()
@@ -107,5 +108,41 @@ class User extends Authenticatable
     public function employee()
     {
         return $this->belongsTo('App\Models\Employee', 'id_employee', 'id');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function assignRole($roleName)
+    {
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $this->roles()->syncWithoutDetaching([$role->id]);
+        }
+    }
+
+    // Check if user has a specific role
+    public function hasRole($roleName)
+    {
+        return $this->roles->contains('name', $roleName);
+    }
+
+    // Check if user has any of the given roles (array)
+    public function hasAnyRole(array $roleNames)
+    {
+        return $this->roles()->whereIn('name', $roleNames)->exists();
+    }
+
+    public function getRoleNamesAttribute(): array
+    {
+        $roleNames = $this->roles->pluck('name')->toArray();
+
+        if (!in_array('USER', $roleNames)) {
+            $roleNames[] = 'USER';
+        }
+
+        return $roleNames;
     }
 }

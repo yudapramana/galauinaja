@@ -20,6 +20,7 @@ return new class () extends Migration {
             $table->string('avatar')->nullable();
             $table->integer('id_employee')->unsigned()->nullable();
 			$table->boolean('docs_update_state')->default(false);
+            $table->boolean('can_multiple_role')->default(false); // Allow multiple roles
             $table->rememberToken();
             $table->timestamps();
         });

@@ -46,6 +46,7 @@ const router = createRouter({
     history: createWebHistory(),
 });
 
+/**
 router.beforeEach(async (to, from) => {
     const authUserStore = useAuthUserStore();
     if(authUserStore.docsUpdateState){
@@ -77,59 +78,56 @@ router.beforeEach(async (to, from) => {
     }
 
     return true; // lanjutkan navigasi
+});
+ */
 
-   
-    // if (authUserStore.isAuthenticated && to.name !== 'app.login') {
-    //     await Promise.all([
-    //         authUserStore.getDocsUpdateState()
-    //     ]);
-    // }
+router.beforeEach(async (to, from) => {
+    const authUserStore = useAuthUserStore();
+
+    // Refresh docs update state jika perlu
+    if (authUserStore.docsUpdateState) {
+        await authUserStore.getDocsUpdateState();
+    }
+
+    // Layout untuk route user
+    if (to.name?.startsWith('user.')) {
+        document.body.classList.add('layout-top-nav');
+        document.body.classList.remove('sidebar-mini');
+    } else {
+        document.body.classList.add('sidebar-mini');
+        document.body.classList.remove('layout-top-nav');
+    }
+
+    const roleNames = authUserStore.user?.role_names || [];
+    const canMultipleRole = authUserStore.user?.can_multiple_role == 1;
+
+    console.log('canMultipleRole :' + canMultipleRole);
+
+    const isAdminRoute = to.name?.startsWith('admin.');
+    const isUserRoute = to.name?.startsWith('user.');
+
+    const isSuperadmin = roleNames.includes('SUPERADMIN');
+    const isAdmin = roleNames.includes('ADMIN');
+    const isPrivileged = isSuperadmin || isAdmin;
+
+    // ❌ Jika tidak boleh multiple role:
+    if (!canMultipleRole) {
+        // Admin/Superadmin dilarang akses route user
+        if (isPrivileged && isUserRoute) {
+            return from.name ? false : { name: 'admin.dashboard' };
+        }
+
+        // User biasa dilarang akses route admin
+        if (!isPrivileged && isAdminRoute) {
+            return from.name ? false : { name: 'user.dashboard' };
+        }
+    }
+
+    return true;
+});
 
 
-    // if (authUserStore.isAuthenticated && to.name !== 'app.login') {
-    //     const settingStore = useSettingStore();
-    //     const masterDataStore = useMasterDataStore();
-
-    //     // const monthYearStore = useMonthYearStore();
-    //     // const dashboardStore = useDashboardStore();
-
-        // await Promise.all([
-            // monthYearStore.setMonthYear(),
-            // authUserStore.getAuthUser(),
-            // settingStore.getSetting(),
-            // masterDataStore.getDoctypeList(),
-            // masterDataStore.getWorkunitList(),
-
-
-    //         // dashboardStore.getReportsCount(),
-    //         // dashboardStore.getStatsCount(),
-        // ]);
-    // }
-
-    // if(to.name == 'admin.dashboard' && (authUserStore.role == 'SUPERADMIN' || authUserStore.role == 'ADMIN')) {
-    //     document.body.classList.add('sidebar-mini');
-    //     document.body.classList.remove('layout-top-nav');
-    // } else {
-    //     document.body.classList.add('layout-top-nav');
-    //     document.body.classList.remove('sidebar-mini');
-    // }
-
-    // if(authUserStore.role == 'SUPERADMIN' || authUserStore.role == 'ADMIN') {
-    //     if (to.name?.startsWith('user.')) {
-    //         router.push('/admin/dashboard');
-    //     } else {
-    //         next(); // Allow access
-    //     }
-    // } else {
-    //     if (to.name?.startsWith('admin.')) {
-    //         router.push('/user/dashboard');
-    //     } else {
-    //         next(); // Allow access
-    //     }
-    // }
-    
-
-    // console.log('Navigating to:', to.path);
+// console.log('Navigating to:', to.path);
 
     // to.matched.forEach(record => {
     //     if (record.children) {
@@ -139,7 +137,6 @@ router.beforeEach(async (to, from) => {
     //         });
     //     }
     // });
-});
 
 app.use(pinia);
 app.use(router);
