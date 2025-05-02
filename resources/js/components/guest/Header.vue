@@ -111,9 +111,9 @@ const logout = () => {
 
             <!-- Right navbar links -->
             <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-                <li v-if="layoutStore.canMultipleRole" class="nav-item">
+                <li v-if="layoutStore.canMultipleRole.value" class="nav-item">
                     <button @click="layoutStore.switchLayout" class="btn btn-sm btn-primary mt-2 mr-2">
-                    Switch to Admin View
+                    Switch to Admin View {{ layoutStore.canMultipleRole.value }}
                     </button>
                 </li>
 

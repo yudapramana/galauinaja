@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\DocumentLogController;
 use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\User\DocumentController;
@@ -187,6 +188,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/api/emp-documents', [EmpDocumentController::class, 'index']);
     Route::put('/api/emp-documents/{id}/verify', [EmpDocumentController::class, 'verify']);
+
+
+    Route::get('/api/document-log/{id}', [DocumentLogController::class, 'show']);
 
 
 });

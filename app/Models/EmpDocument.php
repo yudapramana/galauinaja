@@ -34,7 +34,7 @@ class EmpDocument extends Model
 
     public function vervallog()
     {
-        return $this->hasMany('App\Models\VervalLog');
+        return $this->hasMany(VervalLog::class, 'id_document');
     }
 
     public function getFileUrlAttribute()

@@ -24,7 +24,7 @@ const layoutStore = useLayoutStore(); // Tambahkan ini
 
     <ul class="navbar-nav ml-auto">
       <!-- Tombol Switch Layout -->
-      <li v-if="layoutStore.canMultipleRole" class="nav-item">
+      <li v-if="layoutStore.canMultipleRole.value" class="nav-item">
         <button @click="layoutStore.switchLayout" class="btn btn-sm btn-primary mt-1 mr-2">
           Switch to User View
         </button>

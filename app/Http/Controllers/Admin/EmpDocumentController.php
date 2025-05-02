@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 
 use App\Models\EmpDocument;
+use App\Models\VervalLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EmpDocumentController extends Controller
 {
@@ -25,6 +27,27 @@ class EmpDocumentController extends Controller
         return response()->json($documents);
     }
 
+    // public function verify(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'status' => 'required|in:Approved,Rejected',
+    //         'verif_notes' => 'nullable|string',
+    //     ]);
+
+    //     $doc = EmpDocument::findOrFail($id);
+    //     $doc->status = $request->status;
+    //     $doc->verif_notes = $request->verif_notes;
+    //     $doc->save();
+
+    //     $user = $doc->employee->user;
+    //     $user->update(['docs_update_state' => true]);
+
+    //     return response()->json([
+    //         'message' => 'Dokumen berhasil diverifikasi.',
+    //         'data' => $doc,
+    //     ]);
+    // }
+
     public function verify(Request $request, $id)
     {
         $request->validate([
@@ -37,6 +60,16 @@ class EmpDocumentController extends Controller
         $doc->verif_notes = $request->verif_notes;
         $doc->save();
 
+        // Simpan ke tabel verval_logs
+        $vervalLog = new VervalLog();
+        $vervalLog->id_document = $doc->id;
+        $vervalLog->verval_status = $request->status;
+        $vervalLog->verified_by = Auth::id(); // ID admin yang melakukan verifikasi
+        $vervalLog->verif_notes = $request->verif_notes;
+        $vervalLog->created_at = now();
+        $vervalLog->save();
+
+        // Update state user
         $user = $doc->employee->user;
         $user->update(['docs_update_state' => true]);
 

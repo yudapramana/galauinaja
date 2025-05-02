@@ -46,10 +46,21 @@
 
                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
 
+                  <!-- <li v-for="file in doctype.files" :key="file.id"
+                    class="cursor-pointer p-1 rounded hover-bg-light small">
+                    <div @click="previewFile(file.file_url)" class="d-flex align-items-center">
+                      <i class="fas fa-file-pdf text-danger mr-2"></i>
+                      <span>{{ file.file_name }}</span>
+                      <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
+                        {{ file.status || 'Pending' }}
+                      </span>
+                    </div>
+                  </li> -->
+
                   <li v-for="file in doctype.files" :key="file.id"
                     class="cursor-pointer p-1 rounded hover-bg-light small">
                     <div class="d-flex align-items-center justify-content-between w-100">
-                      <div @click="previewFile(file)" class="d-flex align-items-center">
+                      <div @click="previewFile(file.file_url)" class="d-flex align-items-center">
                         <i class="fas fa-file-pdf text-danger mr-2"></i>
                         <span>{{ file.file_name }}</span>
                         <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
@@ -87,96 +98,18 @@
 
     <!-- Preview Modal -->
     <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-xl">
+      <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header p-2">
-            <h5 class="modal-title">📄 Preview Dokumen</h5>
-            <button type="button" class="close" @click="previewUrl = null; selectedPreviewFile = null"><span>&times;</span></button>
+            <h5 class="modal-title">Preview Dokumen</h5>
+            <button type="button" class="close" @click="previewUrl = null"><span>&times;</span></button>
           </div>
-          <div class="modal-body p-3">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <table class="table table-sm table-bordered">
-                  <tbody>
-                    <tr>
-                      <th style="width: 40%">Tipe Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Nomor Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Tanggal Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Parameter</th>
-                      <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Status</th>
-                      <td>
-                        <span class="badge" :class="badgeClass(selectedPreviewFile?.status)">
-                          {{ selectedPreviewFile?.status || 'Pending' }}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr v-if="selectedPreviewFile?.verif_notes">
-                      <th>Catatan Verifikator</th>
-                      <td class="text-danger">{{ selectedPreviewFile.verif_notes }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <!-- <div class="col-md-12 mt-4"> -->
-                  <h6 class="text-secondary mb-2">
-  <i class="fas fa-clipboard-check mr-1"></i> Riwayat Verifikasi
-</h6>
-
-<div v-if="isLoadingVerval" class="text-muted small d-flex align-items-center">
-  <i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...
-</div>
-
-<ul v-else-if="vervalLogs.length" class="list-group list-group-unbordered small mb-2">
-  <li
-    v-for="(log, idx) in vervalLogs"
-    :key="idx"
-    class="list-group-item py-2 px-2"
-    style="line-height: 1.4;"
-  >
-    <div>
-      <span class="font-weight-bold text-sm">{{ log.status }}</span>
-      <span class="text-muted mx-1">oleh</span>
-      <span class="font-italic text-sm">{{ log.verifier_name }}</span>
-      <small class="text-muted"> pada {{ log.verified_at }}</small>
-    </div>
-    <div v-if="log.notes" class="text-danger mt-1 small">
-      <i class="fas fa-comment-dots mr-1"></i>{{ log.notes }}
-    </div>
-  </li>
-</ul>
-
-<div v-else class="text-muted small">Tidak ada log verifikasi.</div>
-                </div>
-              <!-- </div> -->
-              <div class="col-md-6">
-                  <iframe
-                  :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`"
-                  class="w-100"
-                  style="height: 70vh; border: 1px solid #ccc;"
-                ></iframe>
-              </div>
-
-              
-
-
-            </div>
+          <div class="modal-body p-2">
+            <iframe :src="previewUrl" class="w-100" style="height: 90vh; border: none;"></iframe>
           </div>
         </div>
       </div>
     </div>
-
 
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
@@ -260,10 +193,7 @@ import { useAuthUserStore } from '../../stores/AuthUserStore';
 const treeData = ref([]);
 const previewUrl = ref(null);
 const searchQuery = ref('');
-const isLoading = ref(false);
-const selectedPreviewFile = ref(null);
-const vervalLogs = ref([]);
-const isLoadingVerval = ref(false);
+const isLoading = ref(false)
 
 
 const showUploadModal = ref(false);
@@ -302,19 +232,6 @@ const uploadForm = ref({
   file_id: null
 });
 
-const fetchVervalLog = async (fileId) => {
-  isLoadingVerval.value = true;
-  try {
-    const res = await axios.get(`/api/document-log/${fileId}`);
-    vervalLogs.value = res.data.data || [];
-  } catch (error) {
-    console.error('Gagal mengambil log verval:', error);
-    vervalLogs.value = [];
-  } finally {
-    isLoadingVerval.value = false;
-  }
-};
-
 const fetchData = async () => {
   console.log('eh kepanggil fetchdata didalam');
   // const docsRes = await axios.get('/api/my-documents');
@@ -335,10 +252,7 @@ const fetchData = async () => {
       id: doctype.id,
       text: doctype.text,
       expanded: true,
-      files: relatedFiles.map(file => ({
-        ...file,
-        doc_type_text: doctype.text
-      }))
+      files: relatedFiles
     };
   });
 };
@@ -347,10 +261,8 @@ const toggleExpand = (doctype) => {
   doctype.expanded = !doctype.expanded;
 };
 
-const previewFile = async (file) => {
-  selectedPreviewFile.value = file;
-  previewUrl.value = file.file_url;
-  await fetchVervalLog(file.id);
+const previewFile = (url) => {
+  previewUrl.value = url;
 };
 
 const clearSearch = () => {
@@ -435,6 +347,66 @@ const reuploadFile = (file, doctype) => {
     file_id: file.id  // Tambahkan ID file untuk PATCH
   };
 };
+
+// const submitUpload = async () => {
+//   if (!uploadForm.value.file) {
+//     Swal.fire({
+//       icon: 'warning',
+//       title: 'File Belum Dipilih',
+//       text: 'Silakan pilih file terlebih dahulu.'
+//     });
+//     return;
+//   }
+
+//   loadingUpload.value = true;
+
+//   const formData = new FormData();
+//   formData.append('doc_number', uploadForm.value.doc_number);
+//   formData.append('doc_date', uploadForm.value.doc_date);
+//   formData.append('parameter', uploadForm.value.parameter);
+//   formData.append('file', uploadForm.value.file);
+//   formData.append('id_doc_type', selectedDoctype.value.id);
+
+//   try {
+//     await axios.post('/api/upload-document', formData, {
+//       headers: { 'Content-Type': 'multipart/form-data' },
+//       onUploadProgress: (progressEvent) => {
+//         if (progressEvent.total) {
+//           uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+//         }
+//       }
+//     });
+
+//     Swal.fire({
+//       icon: 'success',
+//       title: 'Upload Berhasil!',
+//       showConfirmButton: false,
+//       timer: 1500
+//     });
+
+//     await refreshSingleFolder(selectedDoctype.value.id);
+//     closeUploadModal();
+//   } catch (error) {
+//     console.error(error);
+
+//     let message = 'Terjadi kesalahan saat mengupload file.';
+
+//     // Tampilkan pesan error validasi dari backend jika ada
+//     if (error.response && error.response.status === 422 && error.response.data.errors) {
+//       const errors = error.response.data.errors;
+//       message = Object.values(errors).flat().join('\n');
+//     }
+
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'Upload Gagal',
+//       text: message
+//     });
+//   } finally {
+//     loadingUpload.value = false; // Pastikan loading mati di akhir
+//     uploadProgress.value = 0;
+//   }
+// };
 
 const submitUpload = async () => {
   if (!uploadForm.value.file && !uploadForm.value.file_id) {

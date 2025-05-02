@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Document;
 use App\Models\EmpDocument;
 use App\Models\User;
+use App\Models\VervalLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -81,7 +82,7 @@ class DocumentController extends Controller
             'doc_number' => 'required|string|max:255',
             'doc_date' => 'required|date',
             'parameter' => 'nullable|string|max:255',
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // 2MB max
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -90,16 +91,11 @@ class DocumentController extends Controller
             ], 422);
         }
 
-
         // Upload file
         $file = $request->file('file');
-        // $filename = time() . '_' . $file->getClientOriginalName();
-        // $path = $file->storeAs('documents', $filename, 'public');
         $extension = $file->getClientOriginalExtension();
 
-        // return 'USERID: ' . $request->user_id;
-
-        if(isset($request->user_id)) {
+        if (isset($request->user_id)) {
             $user = User::find($request->user_id);
             $employee = $user->employee;
         } else {
@@ -109,9 +105,7 @@ class DocumentController extends Controller
         $employeeId = $employee->id;
         $docType = DocType::find($request->id_doc_type);
 
-        // Buat nama file
         $fileName = $docType->label . ($request->parameter ?? '') . '_' . $employee->nip . '.' . $extension;
-        // $fileName = $docType->label . $request->parameter . '_' .$employee->nip . '.'. $extension;
 
         // Cek apakah file_name sudah ada di database
         $fileNameExists = EmpDocument::where('file_name', $fileName)->exists();
@@ -124,12 +118,12 @@ class DocumentController extends Controller
         }
 
         $filePath = $file->storeAs(
-            'documents/'.$employee->nip,
+            'documents/' . $employee->nip,
             $fileName,
             'public'
         );
 
-        // Simpan ke database
+        // Simpan ke database dokumen
         $document = new EmpDocument();
         $document->id_employee = $employeeId;
         $document->id_doc_type = $request->id_doc_type;
@@ -138,12 +132,21 @@ class DocumentController extends Controller
         $document->doc_date = $request->doc_date;
         $document->parameter = $request->parameter;
         $document->file_path = $filePath;
-        if(isset($request->user_id)) {
+        if (isset($request->user_id)) {
             $document->status = 'Approved';
         }
         $document->save();
 
-        if(isset($request->user_id)) {
+        // Simpan ke verval_logs
+        $vervalLog = new VervalLog();
+        $vervalLog->id_document = $document->id;
+        $vervalLog->verval_status = isset($request->user_id) ? 'Approved' : 'Uploaded';
+        $vervalLog->verified_by = Auth::id(); // Admin yang melakukan upload atau user itu sendiri
+        $vervalLog->verif_notes = null; // Tidak ada catatan saat upload
+        $vervalLog->save();
+
+        // Update state jika oleh admin
+        if (isset($request->user_id)) {
             $user->docs_update_state = true;
             $user->save();
         }
@@ -152,6 +155,86 @@ class DocumentController extends Controller
             'message' => 'Dokumen berhasil diupload.'
         ]);
     }
+
+
+    // public function uploadDocument(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id_doc_type' => 'required|exists:doc_types,id',
+    //         'doc_number' => 'required|string|max:255',
+    //         'doc_date' => 'required|date',
+    //         'parameter' => 'nullable|string|max:255',
+    //         'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // 2MB max
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'errors' => $validator->errors()
+    //         ], 422);
+    //     }
+
+
+    //     // Upload file
+    //     $file = $request->file('file');
+    //     // $filename = time() . '_' . $file->getClientOriginalName();
+    //     // $path = $file->storeAs('documents', $filename, 'public');
+    //     $extension = $file->getClientOriginalExtension();
+
+    //     // return 'USERID: ' . $request->user_id;
+
+    //     if(isset($request->user_id)) {
+    //         $user = User::find($request->user_id);
+    //         $employee = $user->employee;
+    //     } else {
+    //         $employee = Auth::user()->employee;
+    //     }
+
+    //     $employeeId = $employee->id;
+    //     $docType = DocType::find($request->id_doc_type);
+
+    //     // Buat nama file
+    //     $fileName = $docType->label . ($request->parameter ?? '') . '_' . $employee->nip . '.' . $extension;
+    //     // $fileName = $docType->label . $request->parameter . '_' .$employee->nip . '.'. $extension;
+
+    //     // Cek apakah file_name sudah ada di database
+    //     $fileNameExists = EmpDocument::where('file_name', $fileName)->exists();
+    //     if ($fileNameExists) {
+    //         return response()->json([
+    //             'errors' => [
+    //                 'file_name' => ['File sudah diupload. Hapus dan tambahkan kembali jika ingin upload ulang.']
+    //             ]
+    //         ], 422);
+    //     }
+
+    //     $filePath = $file->storeAs(
+    //         'documents/'.$employee->nip,
+    //         $fileName,
+    //         'public'
+    //     );
+
+    //     // Simpan ke database
+    //     $document = new EmpDocument();
+    //     $document->id_employee = $employeeId;
+    //     $document->id_doc_type = $request->id_doc_type;
+    //     $document->doc_number = $request->doc_number;
+    //     $document->file_name = $fileName;
+    //     $document->doc_date = $request->doc_date;
+    //     $document->parameter = $request->parameter;
+    //     $document->file_path = $filePath;
+    //     if(isset($request->user_id)) {
+    //         $document->status = 'Approved';
+    //     }
+    //     $document->save();
+
+    //     if(isset($request->user_id)) {
+    //         $user->docs_update_state = true;
+    //         $user->save();
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Dokumen berhasil diupload.'
+    //     ]);
+    // }
 
     public function reupload(Request $request, $id)
     {
@@ -193,6 +276,14 @@ class DocumentController extends Controller
         $document->verif_notes = null;
 
         $document->save();
+
+         // Simpan ke verval_logs
+         $vervalLog = new VervalLog();
+         $vervalLog->id_document = $document->id;
+         $vervalLog->verval_status = isset($request->user_id) ? 'Approved' : 'Reuploaded';
+         $vervalLog->verified_by = Auth::id(); // Admin yang melakukan upload atau user itu sendiri
+         $vervalLog->verif_notes = null; // Tidak ada catatan saat upload
+         $vervalLog->save();
 
         return response()->json([
             'message' => 'Reupload berhasil.',
