@@ -124,24 +124,54 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         // }
     };
 
-    const logout = async () => {
-        axios.post('/logout')
-            .then((response) => {
-                router.push('/login');
-                // router.replace('/login');
-                // Clear token from local storage
-                isAuthenticated.value = false;
+    // const logout = async () => {
+    //     axios.post('/logout')
+    //         .then((response) => {
+    //             router.push('/login');
+    //             // router.replace('/login');
+    //             // Clear token from local storage
+    //             isAuthenticated.value = false;
 
-                // localStorage.removeItem('MasterDataStore:doctypeList');
-                // localStorage.removeItem('AuthUserStore:user');
-                // masterDataStore.doctypeList.value = [];
-                // authUserStore.user.value = null;
-                localStorage.clear();
-                sessionStorage.clear();
-                // user.value = null;
-                // window.location.reload();
+    //             // localStorage.removeItem('MasterDataStore:doctypeList');
+    //             // localStorage.removeItem('AuthUserStore:user');
+    //             // masterDataStore.doctypeList.value = [];
+    //             // authUserStore.user.value = null;
+    //             localStorage.clear();
+    //             sessionStorage.clear();
+    //             // user.value = null;
+    //             // window.location.reload();
+    //         });
+    // }
+
+    const logout = async () => {
+        try {
+            await axios.post('/logout');
+    
+            // Hapus local storage & session storage
+            localStorage.clear();
+            sessionStorage.clear();
+    
+            // Hapus semua cookies (hanya yang accessible dari JS)
+            document.cookie.split(";").forEach((cookie) => {
+                const eqPos = cookie.indexOf("=");
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             });
-    }
+    
+            // Hapus cache storage (jika digunakan, misalnya untuk PWA atau asset caching)
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map((name) => caches.delete(name)));
+            }
+    
+            // Update auth state dan redirect
+            isAuthenticated.value = false;
+            router.push('/login');
+        } catch (error) {
+            console.error("Logout gagal:", error);
+        }
+    };
+    
 
    
 
