@@ -36,5 +36,7 @@ class DatabaseSeeder extends Seeder
         $this->call(EmployeeTableSeeder::class);
         $this->call(SettingsTableSeeder::class);
         $this->call(DocTypesTableSeeder::class);
+        $this->call(RoleSeeder::class);
+
     }
 }
