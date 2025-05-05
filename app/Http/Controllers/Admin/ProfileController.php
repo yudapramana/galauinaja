@@ -16,7 +16,7 @@ class ProfileController extends Controller
     {
         // return $request->user()->only(['id', 'name', 'email', 'role', 'avatar', 'nama_pemeriksa', 'nip_pemeriksa', 'jabatan', 'org_name', 'org_id', 'print_layout', 'username']);
         $user = $request->user();
-        $user->load('employee');
+        $user->load('employee.work_unit');
         return $user;
     }
 

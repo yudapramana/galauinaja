@@ -3,21 +3,16 @@ import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useSettingStore } from '../../stores/SettingStore';
 import CloudImage from '../../components/CloudImage.vue';
-import { getActivePinia } from "pinia"
-import { useLayoutStore } from '../../stores/LayoutStore';
 
-const layoutStore = useLayoutStore();
 const router = useRouter();
 const settingStore = useSettingStore();
 const authUserStore = useAuthUserStore();
 
-
-
 const logout = () => {
     authUserStore.logout();
 };
-
 </script>
+
 <template>
     <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
         <div class="container">
@@ -33,105 +28,39 @@ const logout = () => {
             </button>
 
             <div class="collapse navbar-collapse order-3" id="navbarCollapse">
-                <!-- Left navbar links -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <!-- <a href="index3.html" class="nav-link">Home</a> -->
-                        <router-link to="/user/dashboard" active-class="active" class="nav-link">
-                            Home
-                        </router-link>
+                        <router-link to="/user/dashboard" active-class="active" class="nav-link">Home</router-link>
                     </li>
                     <li class="nav-item">
-                        <!-- <a href="#" class="nav-link">Contact</a> -->
-                        <router-link to="/user/profile" active-class="active" class="nav-link">
-                            Profil
-                        </router-link>
+                        <router-link to="/user/profile" active-class="active" class="nav-link">Profil</router-link>
                     </li>
                     <li class="nav-item">
-                        <!-- <a href="#" class="nav-link">Contact</a> -->
-                        <router-link to="/user/docs" active-class="active" class="nav-link">
-                            Dokumen
-                        </router-link>
+                        <router-link to="/user/docs" active-class="active" class="nav-link">Dokumen</router-link>
                     </li>
                     <li class="nav-item">
-                        <!-- <a href="#" class="nav-link">Contact</a> -->
-                        <router-link to="/user/upload" active-class="active" class="nav-link">
-                            Upload
-                        </router-link>
+                        <router-link to="/user/upload" active-class="active" class="nav-link">Upload</router-link>
                     </li>
-                    <!-- <li class="nav-item dropdown">
-                        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false" class="nav-link dropdown-toggle">Dropdown</a>
-                        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
-                            <li><a href="#" class="dropdown-item">Some action </a></li>
-                            <li><a href="#" class="dropdown-item">Some other action</a></li>
-
-                            <li class="dropdown-divider"></li>
-
-                            <li class="dropdown-submenu dropdown-hover">
-                                <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false"
-                                    class="dropdown-item dropdown-toggle">Hover for action</a>
-                                <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
-                                    <li>
-                                        <a tabindex="-1" href="#" class="dropdown-item">level 2</a>
-                                    </li>
-
-                                    <li class="dropdown-submenu">
-                                        <a id="dropdownSubMenu3" href="#" role="button" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false"
-                                            class="dropdown-item dropdown-toggle">level 2</a>
-                                        <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
-                                            <li><a href="#" class="dropdown-item">3rd level</a></li>
-                                            <li><a href="#" class="dropdown-item">3rd level</a></li>
-                                        </ul>
-                                    </li>
-
-                                    <li><a href="#" class="dropdown-item">level 2</a></li>
-                                    <li><a href="#" class="dropdown-item">level 2</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li> -->
                 </ul>
-
-                <!-- SEARCH FORM -->
-                <!-- <form class="form-inline ml-0 ml-md-3">
-                    <div class="input-group input-group-sm">
-                        <input class="form-control form-control-navbar" type="search" placeholder="Search"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-navbar" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form> -->
             </div>
 
-            <!-- Right navbar links -->
             <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-                <li v-if="layoutStore.canMultipleRole.value" class="nav-item">
-                    <button @click="layoutStore.switchLayout" class="btn btn-sm btn-primary mt-2 mr-2">
-                    Switch to Admin View {{ layoutStore.canMultipleRole.value }}
+                <li v-if="authUserStore.user.can_multiple_role" class="nav-item">
+                    <button @click="authUserStore.switchLayout" class="btn btn-sm btn-primary mt-2 mr-2">
+                        Switch to {{ authUserStore.activeLayout === 'admin' ? 'User' : 'Admin' }}
                     </button>
                 </li>
 
                 <li class="nav-item dropdown">
-                    <span class="nav-link">
-                    {{ authUserStore.user.employee.full_name }}
-                    </span>
+                    <span class="nav-link">{{ authUserStore.user.employee.full_name }}</span>
                 </li>
 
                 <li class="nav-item dropdown">
-                    <form>
                     <a href="#" @click.prevent="logout" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
-                    </form>
                 </li>
             </ul>
-
         </div>
     </nav>
 </template>

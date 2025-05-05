@@ -10,9 +10,9 @@ const route = useRoute();
 const router = useRouter();
 
 watch(() => [authUserStore.docsUpdateState, route.name], function () {
-    console.log('what is docsUpdate State: ' + authUserStore.docsUpdateState);    
-    if(authUserStore.docsUpdateState) {
-      authUserStore.getMyDocuments();
+    console.log('what is docsUpdate State: ' + authUserStore.docsUpdateState);
+    if (authUserStore.docsUpdateState) {
+        authUserStore.getMyDocuments();
     }
 });
 
@@ -21,18 +21,22 @@ watch(() => [authUserStore.docsUpdateState, route.name], function () {
 
 
 <template>
-    <HeaderApp v-if="authUserStore.isAuthenticated" />
 
-    <div class="content-wrapper" style="min-height: 283px;">
-        <!-- Main content -->
-        <div class="content">
-            <div class="container">
-                <router-view></router-view>
-                <!-- /.row -->
-            </div><!-- /.container-fluid -->
+    <body class="layout-top-nav">
+        <HeaderApp v-if="authUserStore.isAuthenticated" />
+
+        <div class="content-wrapper" style="min-height: 283px;">
+            <!-- Main content -->
+            <div class="content">
+                <div class="container">
+                    <router-view></router-view>
+                    <!-- /.row -->
+                </div><!-- /.container-fluid -->
+            </div>
+            <!-- /.content -->
         </div>
-        <!-- /.content -->
-    </div>
 
-    <FooterApp v-if="authUserStore.isAuthenticated" />
+        <FooterApp v-if="authUserStore.isAuthenticated" />
+
+    </body>
 </template>

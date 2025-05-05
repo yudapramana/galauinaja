@@ -46,42 +46,9 @@ const router = createRouter({
     history: createWebHistory(),
 });
 
-/**
-router.beforeEach(async (to, from) => {
-    const authUserStore = useAuthUserStore();
-    if(authUserStore.docsUpdateState){
-        await authUserStore.getDocsUpdateState();
-    }
-
-    console.log('to.name');
-    console.log(to.name);
-    if (to.name?.startsWith('user.')) {
-        console.log('masuk ubah body');
-        document.body.classList.add('layout-top-nav');
-        document.body.classList.remove('sidebar-mini');
-      } 
-
-    const role = authUserStore.user.role;
-
-    const isAdminRoute = to.name?.startsWith('admin.');
-    const isUserRoute = to.name?.startsWith('user.');
-
-    // Admin atau Superadmin tidak boleh akses route user
-    if ((role === 'SUPERADMIN' || role === 'ADMIN') && isUserRoute) {
-        // Cegah akses dan arahkan ke halaman sebelumnya atau root
-        return from.name ? false : { name: 'admin.dashboard' };
-    }
-
-    // User biasa tidak boleh akses route admin
-    if (!(role === 'SUPERADMIN' || role === 'ADMIN') && isAdminRoute) {
-        return from.name ? false : { name: 'user.dashboard' };
-    }
-
-    return true; // lanjutkan navigasi
-});
- */
 
 router.beforeEach(async (to, from) => {
+    console.log('App.js Duluan bagian router.beforeEach');
     const authUserStore = useAuthUserStore();
 
     // Refresh docs update state jika perlu
@@ -91,9 +58,11 @@ router.beforeEach(async (to, from) => {
 
     // Layout untuk route user
     if (to.name?.startsWith('user.')) {
+        authUserStore.activeLayout = 'user';
         document.body.classList.add('layout-top-nav');
         document.body.classList.remove('sidebar-mini');
     } else {
+        authUserStore.activeLayout = 'admin';
         document.body.classList.add('sidebar-mini');
         document.body.classList.remove('layout-top-nav');
     }

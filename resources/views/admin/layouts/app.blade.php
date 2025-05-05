@@ -48,7 +48,9 @@
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini">
+{{-- <body class="hold-transition sidebar-mini"> --}}
+
+<body class="layout-top-nav">
 
 
     <div id="app" v-cloak></div>

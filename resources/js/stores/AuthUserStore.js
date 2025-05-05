@@ -1,16 +1,20 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useStorage } from '@vueuse/core';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useMasterDataStore } from './MasterDataStore';
 
-
 export const useAuthUserStore = defineStore('AuthUserStore', () => {
-    const docsUpdateState =  useStorage('AuthUserStore:docsUpdateState', ref(true));
-    const firstLoadState = useStorage('AuthUserStore:firstLoadState', ref(true));
-    const masterDataStore = useMasterDataStore();
     const router = useRouter();
+    const masterDataStore = useMasterDataStore();
+
+    const docsUpdateState = useStorage('AuthUserStore:docsUpdateState', ref(true));
+    const firstLoadState = useStorage('AuthUserStore:firstLoadState', ref(true));
+    const isAuthenticated = useStorage('AuthUserStore:isAuthenticated', ref(false));
+    const activeLayout = useStorage('AuthUserStore:activeLayout', ref('user'));
+    const isLoading = useStorage('AuthUserStore:activeLayout', ref(false));
+
     const user = useStorage('AuthUserStore:user', ref({
         name: '',
         email: '',
@@ -28,7 +32,6 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         date_of_birth: '',
         gender: '',
         phone_number: '',
-        email: '',
         job_title: '',
         id_work_unit: '',
         employment_status: '',
@@ -38,38 +41,30 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         doctypes: [],
         can_multiple_role: null,
         roles: [],
-        rolenames: []
+        rolenames: [] // ← nama field sudah benar
     }));
 
-    const isAuthenticated = useStorage('AuthUserStore:isAuthenticated', ref(false));
     const myDocuments = useStorage('AuthUserStore:myDocuments', ref([]));
-    const userDocuments = ref([]); // Untuk menyimpan dokumen user lain (admin view)
+    const userDocuments = ref([]); // Untuk tampilan dokumen milik user lain (admin)
+    const isAdminRole = useStorage('AuthUserStore:isAdminRole', ref(false));
+
+    const switchLayout = () => {
+        activeLayout.value = activeLayout.value === 'admin' ? 'user' : 'admin';
+        router.push({ name: activeLayout.value === 'admin' ? 'admin.dashboard' : 'user.dashboard' });
+    };
 
     const getMyDocuments = async () => {
-        console.log('GetMyDocuments Get Called');
-        console.log('firstLoadState:' + firstLoadState.value);
-        console.log('docsUpdateState:' + docsUpdateState.value);
-
         if (firstLoadState.value || docsUpdateState.value) {
-            console.log('====Masuk ke mengambil myDocuments====');
-            await axios.get('/api/my-documents')
-            .then((response) => {
-                console.log('response.data.getMyDocuments');
-                console.log(response.data);
+            try {
+                const response = await axios.get('/api/my-documents');
                 myDocuments.value = response.data.data;
                 firstLoadState.value = false;
                 docsUpdateState.value = false;
-            })
-            .catch((error) => {
-                if (error.response && error.response.status === 401) {
-                    // Redirect langsung ke login page
-                    window.location.href = '/login';
-                } else {
-                    console.error('Terjadi kesalahan:', error);
-                }
-            });
+            } catch (error) {
+                handleAuthError(error);
+            }
         }
-    }
+    };
 
     const getDocumentsByUserId = async (userId) => {
         try {
@@ -78,114 +73,96 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         } catch (error) {
             handleAuthError(error);
         }
-    }
-
-    const getDocsUpdateState = async () => {
-        await axios.get('/api/docs-update-state')
-        .then((response) => {
-            console.log('response.data.getupdatestate');
-            console.log(response.data);
-            docsUpdateState.value = response.data.docs_update_state;
-        })
-        .catch((error) => {
-            // console.log(error.response.data)
-            docsUpdateState.value = false;
-            if (error.response && error.response.status === 401) {
-                // Redirect langsung ke login page
-                window.location.href = '/login';
-            } else {
-                docsUpdateState.value = false;
-                console.error('Terjadi kesalahan:', error);
-            }
-        });
-    }
-
-    const getAuthUser = async () => {
-        // console.log('user.value.name');
-        // console.log(user.value.name);
-
-        // if (user.value.name == '') {
-        await axios.get('/api/profile')
-            .then((response) => {
-                console.log('iko responsenyo');
-                console.log(response.data);
-                user.value = response.data;
-                docsUpdateState.value = user.docs_update_state;
-            })
-            .catch((error) => {
-                // console.log(error.response.data)
-                if (error.response && error.response.status === 401) {
-                    // Redirect langsung ke login page
-                    window.location.href = '/login';
-                } else {
-                    console.error('Terjadi kesalahan:', error);
-                }
-            });
-        // }
     };
 
-    // const logout = async () => {
-    //     axios.post('/logout')
-    //         .then((response) => {
-    //             router.push('/login');
-    //             // router.replace('/login');
-    //             // Clear token from local storage
-    //             isAuthenticated.value = false;
+    const getDocsUpdateState = async () => {
+        try {
+            const response = await axios.get('/api/docs-update-state');
+            docsUpdateState.value = response.data.docs_update_state;
+        } catch (error) {
+            handleAuthError(error);
+            docsUpdateState.value = false;
+        }
+    };
 
-    //             // localStorage.removeItem('MasterDataStore:doctypeList');
-    //             // localStorage.removeItem('AuthUserStore:user');
-    //             // masterDataStore.doctypeList.value = [];
-    //             // authUserStore.user.value = null;
-    //             localStorage.clear();
-    //             sessionStorage.clear();
-    //             // user.value = null;
-    //             // window.location.reload();
-    //         });
-    // }
+    const getAuthUser = async () => {
+        try {
+            isLoading.value = true;
+            const response = await axios.get('/api/profile');
+            user.value = response.data;
+            console.log('user.value: ');
+            console.log(user.value);
+            docsUpdateState.value = response.data.docs_update_state;
+
+            // Cek apakah user memiliki peran admin
+            const roles = response.data.role_names || [];
+            isAdminRole.value = roles.includes('SUPERADMIN') ||
+                roles.includes('ADMIN') ||
+                roles.includes('REVIEWER');
+
+            console.log('isAdminRole.value');
+            console.log(isAdminRole.value);
+
+        } catch (error) {
+            handleAuthError(error);
+        } finally {
+            isLoading.value = false;
+        }
+    };
 
     const logout = async () => {
         try {
             await axios.post('/logout');
-    
-            // Hapus local storage & session storage
+
+            // Bersihkan data lokal
             localStorage.clear();
             sessionStorage.clear();
-    
-            // Hapus semua cookies (hanya yang accessible dari JS)
-            document.cookie.split(";").forEach((cookie) => {
+            document.cookie.split(";").forEach(cookie => {
                 const eqPos = cookie.indexOf("=");
                 const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             });
-    
-            // Hapus cache storage (jika digunakan, misalnya untuk PWA atau asset caching)
+
             if ('caches' in window) {
                 const cacheNames = await caches.keys();
-                await Promise.all(cacheNames.map((name) => caches.delete(name)));
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
             }
-    
-            // Update auth state dan redirect
+
             isAuthenticated.value = false;
+
+            // Refresh CSRF token agar tidak error saat login ulang
+            await axios.get('/sanctum/csrf-cookie');
+
             router.push('/login');
         } catch (error) {
             console.error("Logout gagal:", error);
         }
     };
-    
 
-   
 
-    // return { user, isAuthenticated, docsUpdateState, myDocuments, getAuthUser, getDocsUpdateState, getMyDocuments, logout };
+    const handleAuthError = (error) => {
+        if (error.response && error.response.status === 401) {
+            window.location.href = '/login';
+        } else {
+            console.error('Terjadi kesalahan:', error);
+        }
+    };
+
     return {
         user,
         isAuthenticated,
         docsUpdateState,
+        firstLoadState,
         myDocuments,
         userDocuments,
+        isAdminRole,
+        activeLayout,
+        isLoading,
         getAuthUser,
         getDocsUpdateState,
         getMyDocuments,
         getDocumentsByUserId,
-        logout
+        logout,
+        switchLayout
     };
 });
