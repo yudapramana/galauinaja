@@ -38,7 +38,7 @@
                                 <td colspan="8" class="text-center">Tidak ada dokumen ditemukan.</td>
                             </tr>
                             <tr v-for="(doc, index) in documents" :key="doc.id">
-                                <td>{{ index + 1 }}</td>
+                                <td>{{ index + 1 + (meta.current_page - 1) * meta.per_page }}</td>
                                 <td>{{ doc.employee.full_name }}</td>
                                 <td>{{ doc.employee.nip }}</td>
                                 <td>{{ doc.doc_type.type_name }}</td>
@@ -49,24 +49,45 @@
                                         'badge badge-warning': doc.status === 'Pending',
                                         'badge badge-success': doc.status === 'Approved',
                                         'badge badge-danger': doc.status === 'Rejected',
-                                    }">{{ doc.status }}</span>
+                                    }">
+                                        {{ doc.status }}
+                                    </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary mr-1"
-                                        @click="openVerifModal(doc)">Verifikasi</button>
+                                    <button class="btn btn-sm btn-primary mr-1" @click="openVerifModal(doc)">
+                                        Verifikasi
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination -->
+                <div class="card-footer clearfix">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Menampilkan {{ meta.from }} - {{ meta.to }} dari {{ meta.total }} dokumen
+                        </div>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item" :class="{ disabled: meta.current_page === 1 }">
+                                <a class="page-link" href="#" @click.prevent="changePage(meta.current_page - 1)">«</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Halaman {{ meta.current_page }} / {{ meta.last_page }}</span>
+                            </li>
+                            <li class="page-item" :class="{ disabled: meta.current_page === meta.last_page }">
+                                <a class="page-link" href="#" @click.prevent="changePage(meta.current_page + 1)">»</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Modal Verifikasi -->
-
-        <!-- Modal Verifikasi -->
         <div class="modal fade" id="verifModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-xl" role="document"> <!-- Tambahkan modal-xl agar lebar -->
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header py-2">
                         <h5 class="modal-title">Verifikasi Dokumen Pegawai</h5>
@@ -76,7 +97,6 @@
                     </div>
 
                     <div class="modal-body row">
-                        <!-- Kolom kiri: preview PDF -->
                         <div class="col-md-7">
                             <div class="border rounded p-2" style="height: 500px; overflow: hidden;">
                                 <iframe v-if="selectedDoc?.file_url" :src="selectedDoc.file_url" width="100%"
@@ -87,7 +107,6 @@
                             </div>
                         </div>
 
-                        <!-- Kolom kanan: detail dan form -->
                         <div class="col-md-5">
                             <div class="mb-3">
                                 <p><strong>Nama:</strong> {{ selectedDoc?.employee?.full_name }}</p>
@@ -105,6 +124,20 @@
                                         <option value="Rejected">Ditolak</option>
                                     </select>
                                 </div>
+                                <div class="form-group" v-if="verifForm.status === 'Rejected'">
+                                    <label>Pilih Alasan Penolakan (opsional)</label>
+                                    <select class="form-control mb-2" @change="onRejectionNoteSelect($event)">
+                                        <option value="">-- Pilih alasan penolakan standar --</option>
+                                        <option v-for="item in rejectionNotes" :key="item.code" :value="item.note">
+                                            {{ item.code }} - {{ item.note }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <!-- <div class="form-group">
+                                    <label>Catatan Verifikasi</label>
+                                    <textarea v-model="verifForm.verif_notes" class="form-control" rows="4"
+                                        placeholder="Tulis catatan jika dokumen ditolak..."></textarea>
+                                </div> -->
                                 <div class="form-group">
                                     <label>Catatan Verifikasi</label>
                                     <textarea v-model="verifForm.verif_notes" class="form-control" rows="4"
@@ -123,48 +156,6 @@
                 </div>
             </div>
         </div>
-
-
-
-        <!-- <div class="modal fade" id="verifModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header py-2">
-                        <h5 class="modal-title">Verifikasi Dokumen</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span>&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body pt-2">
-                        <div class="mb-2">
-                            <strong>Dokumen:</strong> {{ selectedDoc?.doc_type?.name }}<br />
-                            <strong>Nomor:</strong> {{ selectedDoc?.doc_number }}<br />
-                            <strong>Tanggal:</strong> {{ selectedDoc?.doc_date }}<br />
-                            <a :href="selectedDoc?.file_path" target="_blank" class="btn btn-link p-0">Lihat Dokumen</a>
-                        </div>
-                        <form @submit.prevent="submitVerif">
-                            <div class="form-group">
-                                <label>Status Verifikasi</label>
-                                <select v-model="verifForm.status" class="form-control" required>
-                                    <option value="Approved">Disetujui</option>
-                                    <option value="Rejected">Ditolak</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Catatan Verifikasi</label>
-                                <textarea v-model="verifForm.verif_notes" class="form-control" rows="3"></textarea>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
-                                    <i v-if="isSubmitting" class="fas fa-spinner fa-spin me-1"></i>
-                                    Simpan
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </section>
 </template>
 
@@ -180,17 +171,54 @@ const isSubmitting = ref(false)
 const selectedDoc = ref(null)
 const verifForm = ref({ status: '', verif_notes: '' })
 
-const fetchDocuments = async () => {
+const meta = ref({
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+    from: 0,
+    to: 0,
+    last_page: 1,
+});
+
+const rejectionNotes = [
+    { code: 'G001', note: 'Dokumen yang diunggah tidak sesuai dengan jenis dokumen yang dipilih.' },
+    { code: 'G002', note: 'Identitas pada dokumen tidak sesuai dengan data pegawai.' },
+    { code: 'G003', note: 'Dokumen bukan termasuk dokumen resmi yang dibutuhkan.' },
+    { code: 'G004', note: 'Informasi pada dokumen tidak terbaca dengan jelas (buram/tidak fokus).' },
+    { code: 'G005', note: 'Dokumen tidak mencantumkan informasi identitas penting (nama, tanggal lahir, NIP/NIM, dsb.).' },
+    { code: 'G006', note: 'Dokumen tidak mencantumkan cap resmi, tanda tangan, atau atribut legalitas lainnya.' },
+    { code: 'G007', note: 'Format atau isi dokumen tidak relevan dengan tujuan verifikasi.' },
+    { code: 'G008', note: 'Dokumen rusak atau tidak dapat dibuka.' },
+    { code: 'G009', note: 'Tanggal dokumen tidak valid atau tidak sesuai konteks.' },
+    { code: 'G010', note: 'Dokumen mengandung data palsu atau terindikasi tidak asli.' },
+]
+
+const fetchDocuments = async (page = 1) => {
     isLoading.value = true
     try {
         const res = await axios.get('/api/emp-documents', {
-            params: { search: search.value },
+            params: {
+                search: search.value,
+                page,
+                per_page: meta.value.per_page,
+            },
         })
         documents.value = res.data.data
+        meta.value = {
+            ...meta.value,
+            ...res.data.meta,
+            ...res.data,
+        }
     } catch (err) {
         console.error('Gagal memuat dokumen', err)
     } finally {
         isLoading.value = false
+    }
+}
+
+const changePage = (page) => {
+    if (page >= 1 && page <= meta.value.last_page) {
+        fetchDocuments(page)
     }
 }
 
@@ -208,7 +236,7 @@ const submitVerif = async () => {
     try {
         await axios.put(`/api/emp-documents/${selectedDoc.value.id}/verify`, verifForm.value)
         $('#verifModal').modal('hide')
-        fetchDocuments()
+        fetchDocuments(meta.value.current_page)
     } catch (error) {
         alert('Gagal memverifikasi dokumen.')
     } finally {
@@ -216,6 +244,13 @@ const submitVerif = async () => {
     }
 }
 
-onMounted(fetchDocuments)
-watch(search, useDebounceFn(() => fetchDocuments(), 300))
+const onRejectionNoteSelect = (event) => {
+    const selected = event.target.value
+    if (selected) {
+        verifForm.value.verif_notes = selected
+    }
+}
+
+watch(search, useDebounceFn(() => fetchDocuments(1), 300))
+onMounted(() => fetchDocuments())
 </script>

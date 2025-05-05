@@ -11,6 +11,8 @@ const masterDataStore = useMasterDataStore();
 const toastr = useToastr();
 const errors = ref([]);
 const image_cloud_id = ref('');
+const isLoading = ref(false);
+const isChangingPassword = ref(false);
 
 const widget = window.cloudinary.createUploadWidget(
     {
@@ -32,6 +34,7 @@ function openUploadWidget() {
 }
 
 const updateProfile = () => {
+    isLoading.value = true;
     axios.put('/api/profile', {
         nip: authUserStore.user.employee.nip,
         full_name: authUserStore.user.employee.full_name,
@@ -45,14 +48,16 @@ const updateProfile = () => {
         tmt_pangkat: authUserStore.user.employee.tmt_pangkat,
         tmt_jabatan: authUserStore.user.employee.tmt_jabatan,
     })
-    .then((response) => {
-        toastr.success('Profile updated successfully!');
-    })
-    .catch((error) => {
-        if (error.response && error.response.status === 422) {
-            errors.value = error.response.data.errors;
-        }
-    });
+        .then((response) => {
+            toastr.success('Profile updated successfully!');
+        })
+        .catch((error) => {
+            if (error.response && error.response.status === 422) {
+                errors.value = error.response.data.errors;
+            }
+        }).finally(() => {
+            isLoading.value = false;
+        });
 };
 
 const logout = () => {
@@ -70,10 +75,10 @@ const handleFileChange = (event) => {
         axios.post('/api/upload-profile-image', {
             profile_picture: image_cloud_id.value
         })
-        .then((response) => {
-            authUserStore.getAuthUser();
-            toastr.success('Image uploaded successfully!');
-        });
+            .then((response) => {
+                authUserStore.getAuthUser();
+                toastr.success('Image uploaded successfully!');
+            });
     } else {
         toastr.error('Image failed to upload!');
     }
@@ -86,6 +91,7 @@ const changePasswordForm = reactive({
 });
 
 const handleChangePassword = () => {
+    isChangingPassword.value = true;
     errors.value = '';
     axios.post('/api/change-user-password', changePasswordForm)
         .then((response) => {
@@ -98,6 +104,9 @@ const handleChangePassword = () => {
             if (error.response && error.response.status === 422) {
                 errors.value = error.response.data.errors;
             }
+        })
+        .finally(() => {
+            isChangingPassword.value = false;
         });
 };
 
@@ -109,6 +118,8 @@ onMounted(() => {
 
 
 <template>
+
+
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -124,7 +135,7 @@ onMounted(() => {
             </div>
         </div>
     </div>
-    
+
     <div class="content">
         <div class="container-fluid">
             <div class="row" style="margin-bottom: 100px;">
@@ -140,7 +151,7 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-    
+
                 <div class="col-md-9">
                     <div class="card">
                         <div class="card-header p-2">
@@ -159,63 +170,79 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">NIP</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.nip" type="text" class="form-control" placeholder="NIP">
-                                                <span class="text-danger text-sm" v-if="errors && errors.nip">{{ errors.nip[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.nip" type="text"
+                                                    class="form-control" placeholder="NIP">
+                                                <span class="text-danger text-sm" v-if="errors && errors.nip">{{
+                                                    errors.nip[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Full Name</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.full_name" type="text" class="form-control" placeholder="Full Name">
-                                                <span class="text-danger text-sm" v-if="errors && errors.full_name">{{ errors.full_name[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.full_name" type="text"
+                                                    class="form-control" placeholder="Full Name">
+                                                <span class="text-danger text-sm" v-if="errors && errors.full_name">{{
+                                                    errors.full_name[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Date of Birth</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.date_of_birth" type="date" class="form-control">
-                                                <span class="text-danger text-sm" v-if="errors && errors.date_of_birth">{{ errors.date_of_birth[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.date_of_birth" type="date"
+                                                    class="form-control">
+                                                <span class="text-danger text-sm"
+                                                    v-if="errors && errors.date_of_birth">{{ errors.date_of_birth[0]
+                                                    }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Gender</label>
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.gender" class="form-control">
+                                                <select v-model="authUserStore.user.employee.gender"
+                                                    class="form-control">
                                                     <option value="">Select</option>
                                                     <option value="M">Male</option>
                                                     <option value="F">Female</option>
                                                 </select>
-                                                <span class="text-danger text-sm" v-if="errors && errors.gender">{{ errors.gender[0] }}</span>
+                                                <span class="text-danger text-sm" v-if="errors && errors.gender">{{
+                                                    errors.gender[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Phone</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.phone_number" type="text" class="form-control" placeholder="Phone Number">
-                                                <span class="text-danger text-sm" v-if="errors && errors.phone_number">{{ errors.phone_number[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.phone_number" type="text"
+                                                    class="form-control" placeholder="Phone Number">
+                                                <span class="text-danger text-sm"
+                                                    v-if="errors && errors.phone_number">{{ errors.phone_number[0]
+                                                    }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Email</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.email" type="email" class="form-control" placeholder="Email">
-                                                <span class="text-danger text-sm" v-if="errors && errors.email">{{ errors.email[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.email" type="email"
+                                                    class="form-control" placeholder="Email">
+                                                <span class="text-danger text-sm" v-if="errors && errors.email">{{
+                                                    errors.email[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Job Title</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.job_title" type="text" class="form-control" placeholder="Job Title">
-                                                <span class="text-danger text-sm" v-if="errors && errors.job_title">{{ errors.job_title[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.job_title" type="text"
+                                                    class="form-control" placeholder="Job Title">
+                                                <span class="text-danger text-sm" v-if="errors && errors.job_title">{{
+                                                    errors.job_title[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <!-- <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Work Unit</label>
                                             <div class="col-sm-10">
@@ -227,48 +254,63 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Work Unit</label>
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.id_work_unit" class="form-control">
+                                                <select v-model="authUserStore.user.employee.id_work_unit"
+                                                    class="form-control">
                                                     <option value="">Select Work Unit</option>
-                                                    <option v-for="unit in masterDataStore.workunitList" :key="unit.id" :value="unit.id">
+                                                    <option v-for="unit in masterDataStore.workunitList" :key="unit.id"
+                                                        :value="unit.id">
                                                         {{ unit.text }}
                                                     </option>
                                                 </select>
-                                                <span class="text-danger text-sm" v-if="errors && errors.id_work_unit">{{ errors.id_work_unit[0] }}</span>
+                                                <span class="text-danger text-sm"
+                                                    v-if="errors && errors.id_work_unit">{{ errors.id_work_unit[0]
+                                                    }}</span>
                                             </div>
                                         </div>
 
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Status</label>
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.employment_status" class="form-control">
+                                                <select v-model="authUserStore.user.employee.employment_status"
+                                                    class="form-control">
                                                     <option value="">Select</option>
                                                     <option value="PNS">PNS</option>
                                                     <option value="PPPK">PPPK</option>
                                                 </select>
-                                                <span class="text-danger text-sm" v-if="errors && errors.employment_status">{{ errors.employment_status[0] }}</span>
+                                                <span class="text-danger text-sm"
+                                                    v-if="errors && errors.employment_status">{{
+                                                        errors.employment_status[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">TMT Pangkat</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.tmt_pangkat" type="date" class="form-control">
-                                                <span class="text-danger text-sm" v-if="errors && errors.tmt_pangkat">{{ errors.tmt_pangkat[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.tmt_pangkat" type="date"
+                                                    class="form-control">
+                                                <span class="text-danger text-sm" v-if="errors && errors.tmt_pangkat">{{
+                                                    errors.tmt_pangkat[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">TMT Jabatan</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.tmt_jabatan" type="date" class="form-control">
-                                                <span class="text-danger text-sm" v-if="errors && errors.tmt_jabatan">{{ errors.tmt_jabatan[0] }}</span>
+                                                <input v-model="authUserStore.user.employee.tmt_jabatan" type="date"
+                                                    class="form-control">
+                                                <span class="text-danger text-sm" v-if="errors && errors.tmt_jabatan">{{
+                                                    errors.tmt_jabatan[0] }}</span>
                                             </div>
                                         </div>
-    
+
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
-                                                <button type="submit" class="btn btn-success"><i class="fa fa-save mr-1"></i> Save Changes</button>
+                                                <button type="submit" class="btn btn-success" :disabled="isLoading">
+                                                    <i v-if="isLoading" class="fa fa-spinner fa-spin mr-1"></i>
+                                                    <i v-else class="fa fa-save mr-1"></i>
+                                                    Save Changes
+                                                </button>
                                             </div>
                                         </div>
                                     </form>
@@ -284,7 +326,8 @@ onMounted(() => {
                                                     class="form-control " id="currentPassword"
                                                     placeholder="Current Password">
                                                 <span class="text-danger text-sm"
-                                                    v-if="errors && errors.current_password">{{ errors.current_password[0]
+                                                    v-if="errors && errors.current_password">{{
+                                                        errors.current_password[0]
                                                     }}</span>
                                             </div>
                                         </div>
@@ -309,22 +352,27 @@ onMounted(() => {
                                         </div>
                                         <div class="form-group row">
                                             <div class="offset-sm-3 col-sm-9">
-                                                <button type="submit" class="btn btn-success"><i
-                                                        class="fa fa-save mr-1"></i> Save Changes</button>
+                                                <button type="submit" class="btn btn-success"
+                                                    :disabled="isChangingPassword">
+                                                    <i v-if="isChangingPassword" class="fa fa-spinner fa-spin mr-1"></i>
+                                                    <i v-else class="fa fa-save mr-1"></i>
+                                                    Save Changes
+                                                </button>
                                             </div>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                        <button @click.prevent="logout" type="button" class="btn btn-danger btn-block"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <button @click.prevent="logout" type="button" class="btn btn-danger btn-block"><i
+                                class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </template>
-    
+</template>
+
 
 <style>
 .profile-user-img:hover {

@@ -1,22 +1,23 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useAuthUserStore } from './stores/AuthUserStore';
 import { useSettingStore } from './stores/SettingStore';
 import AdminLayout from './LayoutAdmin.vue';
 import GuestLayout from './LayoutGuest.vue';
+import BaseLoading from './components/BaseLoading.vue'; // pastikan file ini ada
 
 const route = useRoute();
 const router = useRouter();
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
 
-// Mode tema (gelap / terang)
+// Tema (dark / light)
 const currentThemeMode = computed(() =>
   settingStore.theme === 'dark' ? 'dark-mode' : ''
 );
 
-// Cek layout aktif berdasarkan store
+// Cek layout
 const showAdminLayout = computed(() =>
   authUserStore.activeLayout === 'admin' && authUserStore.isAdminRole
 );
@@ -24,28 +25,40 @@ const showAdminLayout = computed(() =>
 const showUserLayout = computed(() =>
   authUserStore.activeLayout === 'user'
 );
+
+// Cek apakah data masih loading
+const isAppLoading = computed(() =>
+  authUserStore.isLoading || authUserStore.isLoggingOut
+);
+
+// Load data awal user saat login
+onMounted(async () => {
+  if (authUserStore.isAuthenticated) {
+    await authUserStore.getAuthUser();
+    await authUserStore.getMyDocuments();
+  }
+});
 </script>
 
 <template>
-  <!-- Jika sudah login -->
-  <div v-if="authUserStore.isAuthenticated" class="wrapper" :class="currentThemeMode" id="app">
-    <v-app app>
-    
-      authUserStore.isAdminRole : {{ authUserStore.isAdminRole }} <br>
-      authUserStore.activeLayout : {{ authUserStore.activeLayout }} <br>
-      showAdminLayout : {{ showAdminLayout }} <br>
-      showUserLayout : {{ showUserLayout }} <br>
-     
-      <AdminLayout v-if="showAdminLayout" />
-      <GuestLayout v-else-if="showUserLayout" />
-      <div v-else class="p-4 text-center text-danger">
-        <p>Layout tidak tersedia untuk role ini.</p>
-      </div>
-    </v-app>
-  </div>
+  <div :class="currentThemeMode">
+    <!-- Loading spinner saat login atau logout -->
+    <BaseLoading v-if="isAppLoading" />
 
-  <!-- Jika belum login -->
-  <div v-else class="login-page" :class="currentThemeMode">
-    <router-view></router-view>
+    <!-- Jika sudah login -->
+    <div v-else-if="authUserStore.isAuthenticated" class="wrapper" id="app">
+      <v-app app>
+        <GuestLayout v-if="showUserLayout" />
+        <AdminLayout v-else-if="showAdminLayout" />
+        <div v-else class="p-4 text-center text-danger">
+          <p>Layout tidak tersedia untuk role ini.</p>
+        </div>
+      </v-app>
+    </div>
+
+    <!-- Jika belum login -->
+    <div v-else class="login-page">
+      <router-view></router-view>
+    </div>
   </div>
 </template>

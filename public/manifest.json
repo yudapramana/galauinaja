@@ -1,9 +1,9 @@
 {
-    "name": "EKIN KEMENAG",
-    "short_name": "EKIN KEMENAG",
+    "name": "SI-GARDA",
+    "short_name": "SI-GARDA",
     "start_url": "/",
     "background_color": "#29741D",
-    "description": "Laporan Kinerja Kementerian Agama Kabupaten Pesisir Selatan",
+    "description": "Gerbang Cerdas Menuju Arsip Pegawai Digital",
     "display": "fullscreen",
     "theme_color": "#29741D",
     "icons": [

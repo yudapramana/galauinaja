@@ -1,26 +1,9 @@
-import Dashboard from './components/Dashboard.vue';
-import UserDashboard from './components/UserDashboard.vue';
-import ListReports from './pages/reports/ListReports.vue';
-import ReportForm from './pages/reports/ReportForm.vue';
-import UserList from './pages/users/UserList.vue';
-import UpdateSetting from './pages/settings/UpdateSetting.vue';
-import UpdateProfile from './pages/profile/UpdateProfile.vue';
-import UserProfile from './pages/profile/UserProfile.vue';
-import Login from './pages/auth/Login.vue';
-import OrganizationList from './pages/orgs/OrgList.vue';
-import OrgReports from './pages/org_reports/OrgReports.vue';
-import MyDocs from './pages/docs/MyDocs.vue';
-import UserUploadDoc from './pages/docs/UserUploadDoc.vue';
-import WorkUnitList from './pages/workunits/WorkUnitList.vue';
-import VervalList from './pages/vervals/VervalList.vue';
-import UserDocList from './pages/users/UserDocList.vue';
-import UserDocs from './pages/docs/UserDocs.vue';
 
 export default [
   {
     path: '/login',
     name: 'app.login',
-    component: Login,
+    component: () => import('./pages/auth/Login.vue'),
   },
   {
     path: '/admin',
@@ -29,67 +12,54 @@ export default [
       {
         path: 'dashboard',
         name: 'admin.dashboard',
-        component: Dashboard,
+        component: () => import('./components/Dashboard.vue'),
       },
       {
         path: 'vervals',
         name: 'admin.vervals',
-        component: VervalList,
+        component: () => import('./pages/vervals/VervalList.vue'),
+
       },
       {
         path: 'workunits',
         name: 'admin.workunits',
-        component: WorkUnitList,
+        component: () => import('./pages/workunits/WorkUnitList.vue'),
       },
       {
         path: 'reports',
         name: 'admin.reports',
-        component: ListReports,
+        component: () => import('./pages/reports/ListReports.vue'),
       },
       {
         path: 'org-reports',
         name: 'admin.orgreports',
-        component: OrgReports,
-      },
-      {
-        path: 'reports/create',
-        name: 'admin.reports.create',
-        component: ReportForm,
-      },
-      {
-        path: 'reports/:id/edit',
-        name: 'admin.reports.edit',
-        component: ReportForm,
-      },
-      {
-        path: 'organizations',
-        name: 'admin.organizations',
-        component: OrganizationList,
+        component: () => import('./pages/org_reports/OrgReports.vue'),
+
       },
       {
         path: 'users',
         name: 'admin.users',
-        component: UserList,
+        component: () => import('./pages/users/UserList.vue'),
       },
       {
         path: 'users/:id/documents',
         name: 'admin.user.documents',
-        component: UserDocs,
+        component: () => import('./pages/docs/UserDocs.vue'),
       },
       {
         path: 'docusers',
         name: 'admin.docusers',
-        component: UserDocList,
+        component: () => import('./pages/users/UserDocList.vue'),
       },
       {
         path: 'settings',
         name: 'admin.settings',
-        component: UpdateSetting,
+        component: () => import('./pages/settings/UpdateSetting.vue'),
       },
       {
         path: 'profile',
         name: 'admin.profile',
-        component: UpdateProfile,
+        component: () => import('./pages/profile/UpdateProfile.vue'),
       },
     ],
   },
@@ -99,22 +69,22 @@ export default [
       {
         path: 'dashboard',
         name: 'user.dashboard',
-        component: UserDashboard,
+        component: () => import('./components/UserDashboard.vue'),
       },
       {
         path: 'profile',
         name: 'user.profile',
-        component: UserProfile,
+        component: () => import('./pages/profile/UserProfile.vue'),
       },
       {
         path: 'docs',
         name: 'user.docs',
-        component: MyDocs,
+        component: () => import('./pages/docs/MyDocs.vue'),
       },
       {
         path: 'upload',
         name: 'user.upload',
-        component: UserUploadDoc,
+        component: () => import('./pages/docs/UserUploadDoc.vue'),
       },
     ],
   },

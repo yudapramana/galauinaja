@@ -88,7 +88,7 @@ const logout = () => {
                     </li> -->
 
 
-                    <li v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'" class="nav-header">SATUAN KERJA</li>
+                    <!-- <li v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'" class="nav-header">SATUAN KERJA</li>
                     <li v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'" class="nav-item">
                         <router-link to="/admin/org-reports" :class="$route.path.startsWith('/admin/org-reports') ? 'active' : ''"
                             active-class="active" class="nav-link">
@@ -97,7 +97,7 @@ const logout = () => {
                                 Laporan Kerja
                             </p>
                         </router-link>
-                    </li>
+                    </li> -->
 
 
                     <li class="nav-header">KELOLA</li>

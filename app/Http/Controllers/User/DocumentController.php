@@ -140,7 +140,7 @@ class DocumentController extends Controller
         // Simpan ke verval_logs
         $vervalLog = new VervalLog();
         $vervalLog->id_document = $document->id;
-        $vervalLog->verval_status = isset($request->user_id) ? 'Approved' : 'Uploaded';
+        $vervalLog->verval_status = isset($request->user_id) ? 'Uploaded by Admin' : 'Uploaded';
         $vervalLog->verified_by = Auth::id(); // Admin yang melakukan upload atau user itu sendiri
         $vervalLog->verif_notes = null; // Tidak ada catatan saat upload
         $vervalLog->save();
@@ -272,7 +272,8 @@ class DocumentController extends Controller
         $document->parameter  = $request->parameter;
 
         // Reset status dan catatan verifikasi karena ini reupload
-        $document->status = 'Pending';
+        // $document->status = 'Pending';
+        $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
         $document->verif_notes = null;
 
         $document->save();
@@ -280,7 +281,7 @@ class DocumentController extends Controller
          // Simpan ke verval_logs
          $vervalLog = new VervalLog();
          $vervalLog->id_document = $document->id;
-         $vervalLog->verval_status = isset($request->user_id) ? 'Approved' : 'Reuploaded';
+         $vervalLog->verval_status = isset($request->user_id) ? 'Reuploaded by Admin' : 'Reuploaded';
          $vervalLog->verified_by = Auth::id(); // Admin yang melakukan upload atau user itu sendiri
          $vervalLog->verif_notes = null; // Tidak ada catatan saat upload
          $vervalLog->save();

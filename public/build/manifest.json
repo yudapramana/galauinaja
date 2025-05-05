@@ -1,19 +1,40 @@
 {
-  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
-    "file": "assets/materialdesignicons-webfont-TEmAk13K.eot",
-    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  "_DashboardStore-Cz5qE8oj.js": {
+    "file": "assets/DashboardStore-Cz5qE8oj.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
   },
-  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
-    "file": "assets/materialdesignicons-webfont-BpRar1d5.ttf",
-    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  "_helper-CsXp_ZZG.js": {
+    "file": "assets/helper-CsXp_ZZG.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
   },
-  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
-    "file": "assets/materialdesignicons-webfont-Bvl3VxMs.woff",
-    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  "_laravel-vue-pagination.es-DmF9HU-8.js": {
+    "file": "assets/laravel-vue-pagination.es-DmF9HU-8.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
   },
-  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
-    "file": "assets/materialdesignicons-webfont-B6OSyW2I.woff2",
-    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  "_sweetalert2.all-6Ntn0CAY.js": {
+    "file": "assets/sweetalert2.all-6Ntn0CAY.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "_toastr-!~{00m}~.js": {
+    "file": "assets/toastr-T0Y5PVxv.css",
+    "src": "_toastr-!~{00m}~.js"
+  },
+  "_toastr-B4tBCprd.js": {
+    "css": [
+      "assets/toastr-T0Y5PVxv.css"
+    ],
+    "file": "assets/toastr-B4tBCprd.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
   },
   "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-brands-400.eot": {
     "file": "assets/fa-brands-400-DnkPfk3o.eot",
@@ -75,22 +96,6 @@
     "file": "assets/fa-solid-900-BUswJgRo.woff2",
     "src": "node_modules/admin-lte/plugins/fontawesome-free/webfonts/fa-solid-900.woff2"
   },
-  "node_modules/admin-lte/plugins/summernote/font/summernote.eot": {
-    "file": "assets/summernote-CIJFJttR.eot",
-    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.eot"
-  },
-  "node_modules/admin-lte/plugins/summernote/font/summernote.ttf": {
-    "file": "assets/summernote-BFwDdmZ-.ttf",
-    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.ttf"
-  },
-  "node_modules/admin-lte/plugins/summernote/font/summernote.woff": {
-    "file": "assets/summernote-BpukxMI1.woff",
-    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.woff"
-  },
-  "node_modules/admin-lte/plugins/summernote/font/summernote.woff2": {
-    "file": "assets/summernote-CG9AQWUQ.woff2",
-    "src": "node_modules/admin-lte/plugins/summernote/font/summernote.woff2"
-  },
   "node_modules/jstree/dist/themes/default/32px.png": {
     "file": "assets/32px-CHwblES-.png",
     "src": "node_modules/jstree/dist/themes/default/32px.png"
@@ -103,38 +108,203 @@
     "file": "assets/throbber-DhAvNIJO.gif",
     "src": "node_modules/jstree/dist/themes/default/throbber.gif"
   },
-  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.eot": {
-    "file": "assets/MaterialIcons-Regular-BjXOXp5c.eot",
-    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.eot"
-  },
-  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.ttf": {
-    "file": "assets/MaterialIcons-Regular-DEUTIz1o.ttf",
-    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.ttf"
-  },
-  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff": {
-    "file": "assets/MaterialIcons-Regular-FsbMSDLx.woff",
-    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff"
-  },
-  "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff2": {
-    "file": "assets/MaterialIcons-Regular-DOtZ65Va.woff2",
-    "src": "node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff2"
-  },
   "resources/css/app.css": {
-    "file": "assets/app-3ScMaSVA.css",
+    "file": "assets/app-Wvpan4cs.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/app.js": {
+    "css": [
+      "assets/app-Ck3n40Oe.css"
+    ],
+    "dynamicImports": [
+      "resources/js/pages/auth/Login.vue",
+      "resources/js/components/Dashboard.vue",
+      "resources/js/pages/vervals/VervalList.vue",
+      "resources/js/pages/workunits/WorkUnitList.vue",
+      "resources/js/pages/reports/ListReports.vue",
+      "resources/js/pages/org_reports/Orgreports.vue",
+      "resources/js/pages/users/UserList.vue",
+      "resources/js/pages/docs/UserDocs.vue",
+      "resources/js/pages/users/UserDocList.vue",
+      "resources/js/pages/settings/UpdateSetting.vue",
+      "resources/js/pages/profile/UpdateProfile.vue",
+      "resources/js/components/UserDashboard.vue",
+      "resources/js/pages/profile/UserProfile.vue",
+      "resources/js/pages/docs/MyDocs.vue",
+      "resources/js/pages/docs/UserUploadDoc.vue"
+    ],
+    "file": "assets/app-CZjyxVNa.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/components/Dashboard.vue": {
+    "file": "assets/Dashboard-CagWcq77.js",
+    "imports": [
+      "_helper-CsXp_ZZG.js",
+      "_sweetalert2.all-6Ntn0CAY.js",
+      "resources/js/app.js",
+      "_DashboardStore-Cz5qE8oj.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/components/Dashboard.vue"
+  },
+  "resources/js/components/UserDashboard.vue": {
+    "file": "assets/UserDashboard-D_EJXJD1.js",
+    "imports": [
+      "_helper-CsXp_ZZG.js",
+      "_sweetalert2.all-6Ntn0CAY.js",
+      "resources/js/app.js",
+      "_DashboardStore-Cz5qE8oj.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/components/UserDashboard.vue"
+  },
+  "resources/js/pages/auth/Login.vue": {
+    "css": [
+      "assets/Login-D685Khif.css"
+    ],
+    "file": "assets/Login-BCuu8T1q.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/auth/Login.vue"
+  },
+  "resources/js/pages/docs/MyDocs.vue": {
+    "css": [
+      "assets/MyDocs-79D-lcWj.css"
+    ],
+    "file": "assets/MyDocs-Cr9HIhrm.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/docs/MyDocs.vue"
+  },
+  "resources/js/pages/docs/UserDocs.vue": {
+    "css": [
+      "assets/UserDocs-CnQ5yggf.css"
+    ],
+    "file": "assets/UserDocs-CkvQdvij.js",
+    "imports": [
+      "resources/js/app.js",
+      "_sweetalert2.all-6Ntn0CAY.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/docs/UserDocs.vue"
+  },
+  "resources/js/pages/docs/UserUploadDoc.vue": {
+    "css": [
+      "assets/UserUploadDoc-B5VrNCyy.css"
+    ],
+    "file": "assets/UserUploadDoc-DJSRKwmT.js",
+    "imports": [
+      "resources/js/app.js",
+      "_sweetalert2.all-6Ntn0CAY.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/docs/UserUploadDoc.vue"
+  },
+  "resources/js/pages/org_reports/Orgreports.vue": {
+    "css": [
+      "assets/Orgreports-D63t65XM.css"
+    ],
+    "file": "assets/Orgreports-BC8VnbA9.js",
+    "imports": [
+      "resources/js/app.js",
+      "_helper-CsXp_ZZG.js",
+      "_laravel-vue-pagination.es-DmF9HU-8.js",
+      "_sweetalert2.all-6Ntn0CAY.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/org_reports/Orgreports.vue"
+  },
+  "resources/js/pages/profile/UpdateProfile.vue": {
+    "css": [
+      "assets/UpdateProfile-CW3-_OFv.css"
+    ],
+    "file": "assets/UpdateProfile-CnwLe9lO.js",
+    "imports": [
+      "resources/js/app.js",
+      "_toastr-B4tBCprd.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/profile/UpdateProfile.vue"
+  },
+  "resources/js/pages/profile/UserProfile.vue": {
+    "css": [
+      "assets/UpdateProfile-CW3-_OFv.css"
+    ],
+    "file": "assets/UserProfile-BqFPtak1.js",
+    "imports": [
+      "resources/js/app.js",
+      "_toastr-B4tBCprd.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/profile/UserProfile.vue"
+  },
+  "resources/js/pages/reports/ListReports.vue": {
+    "css": [
+      "assets/ListReports-BLphY1sg.css"
+    ],
+    "file": "assets/ListReports-CVe8bZbX.js",
+    "imports": [
+      "resources/js/app.js",
+      "_helper-CsXp_ZZG.js",
+      "_laravel-vue-pagination.es-DmF9HU-8.js",
+      "_sweetalert2.all-6Ntn0CAY.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/reports/ListReports.vue"
+  },
+  "resources/js/pages/settings/UpdateSetting.vue": {
+    "file": "assets/UpdateSetting-DF79_tvj.js",
+    "imports": [
+      "resources/js/app.js",
+      "_toastr-B4tBCprd.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/settings/UpdateSetting.vue"
+  },
+  "resources/js/pages/users/UserDocList.vue": {
+    "file": "assets/UserDocList-CJ0BIPdM.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/users/UserDocList.vue"
+  },
+  "resources/js/pages/users/UserList.vue": {
+    "file": "assets/UserList-CeV71LU0.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/users/UserList.vue"
+  },
+  "resources/js/pages/vervals/VervalList.vue": {
+    "file": "assets/VervalList-D-0VrSga.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/vervals/VervalList.vue"
+  },
+  "resources/js/pages/workunits/WorkUnitList.vue": {
     "assets": [
       "assets/32px-CHwblES-.png",
       "assets/throbber-DhAvNIJO.gif",
       "assets/40px-fA5gcXpO.png"
     ],
     "css": [
-      "assets/app-BJ8FDcJ1.css"
+      "assets/WorkUnitList-B9UFXBxI.css"
     ],
-    "file": "assets/app-GHXrXQlN.js",
-    "isEntry": true,
-    "src": "resources/js/app.js"
+    "file": "assets/WorkUnitList-DirAeIQg.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/workunits/WorkUnitList.vue"
   }
 }

@@ -47,7 +47,7 @@ const logout = () => {
             <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
                 <li v-if="authUserStore.user.can_multiple_role" class="nav-item">
                     <button @click="authUserStore.switchLayout" class="btn btn-sm btn-primary mt-2 mr-2">
-                        Switch to {{ authUserStore.activeLayout === 'admin' ? 'User' : 'Admin' }}
+                        Admin
                     </button>
                 </li>
 

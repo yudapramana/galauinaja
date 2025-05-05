@@ -12,7 +12,14 @@ class CreateVervalLogsTable extends Migration {
 			$table->timestamps();
 			$table->integer('id_document')->unsigned();
 			$table->integer('verified_by')->unsigned();
-			$table->enum('verval_status', array('Uploaded', 'Reuploaded', 'Approved', 'Rejected'));
+			$table->enum('verval_status', array(
+				'Uploaded', 
+				'Reuploaded', 
+				'Approved', 
+				'Rejected',
+				'Uploaded by Admin',
+				'Reuploaded by Admin'
+			));
 			$table->text('verif_notes')->nullable();
 		});
 	}

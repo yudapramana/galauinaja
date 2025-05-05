@@ -53,7 +53,7 @@ const handleSwitchLayout = () => {
           class="btn btn-sm btn-primary mt-1 mr-2"
           @click="handleSwitchLayout"
         >
-          Switch to User
+          Pegawai
         </button>
       </li>
 

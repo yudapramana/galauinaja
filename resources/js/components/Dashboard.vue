@@ -72,8 +72,8 @@ onMounted(() => {
                         </div>
                         <div class="card-footer b-0 p-0">
                             <div class="btn-group" style="width: 100% !important;">
-                                <router-link to="/admin/reports/create" class="btn btn-sm btn-success" style="display: block; font-size: small;">
-                                    Input Kegiatan <i class="fas fa-arrow-circle-right"></i>
+                                <router-link to="/admin/vervals/" class="btn btn-sm btn-success" style="display: block; font-size: small;">
+                                    Verval Dokumen <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>

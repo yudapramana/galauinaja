@@ -13,7 +13,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const firstLoadState = useStorage('AuthUserStore:firstLoadState', ref(true));
     const isAuthenticated = useStorage('AuthUserStore:isAuthenticated', ref(false));
     const activeLayout = useStorage('AuthUserStore:activeLayout', ref('user'));
-    const isLoading = useStorage('AuthUserStore:activeLayout', ref(false));
+    const isLoading = useStorage('AuthUserStore:isLoading', ref(false));
+    const isLoggingOut = useStorage('AuthUserStore:isLoggingOut', ref(false)); // 👈 optional, jika butuh pisah loading logout
 
     const user = useStorage('AuthUserStore:user', ref({
         name: '',
@@ -41,11 +42,11 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         doctypes: [],
         can_multiple_role: null,
         roles: [],
-        rolenames: [] // ← nama field sudah benar
+        rolenames: []
     }));
 
     const myDocuments = useStorage('AuthUserStore:myDocuments', ref([]));
-    const userDocuments = ref([]); // Untuk tampilan dokumen milik user lain (admin)
+    const userDocuments = ref([]);
     const isAdminRole = useStorage('AuthUserStore:isAdminRole', ref(false));
 
     const switchLayout = () => {
@@ -54,34 +55,43 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     };
 
     const getMyDocuments = async () => {
-        if (firstLoadState.value || docsUpdateState.value) {
-            try {
+        try {
+            // isLoading.value = true;
+            if (firstLoadState.value || docsUpdateState.value) {
                 const response = await axios.get('/api/my-documents');
                 myDocuments.value = response.data.data;
                 firstLoadState.value = false;
                 docsUpdateState.value = false;
-            } catch (error) {
-                handleAuthError(error);
             }
+        } catch (error) {
+            handleAuthError(error);
+        } finally {
+            isLoading.value = false;
         }
     };
 
     const getDocumentsByUserId = async (userId) => {
         try {
+            // isLoading.value = true;
             const response = await axios.get(`/api/user-documents/${userId}`);
             userDocuments.value = response.data.data;
         } catch (error) {
             handleAuthError(error);
+        } finally {
+            isLoading.value = false;
         }
     };
 
     const getDocsUpdateState = async () => {
         try {
+            // isLoading.value = true;
             const response = await axios.get('/api/docs-update-state');
             docsUpdateState.value = response.data.docs_update_state;
         } catch (error) {
             handleAuthError(error);
             docsUpdateState.value = false;
+        } finally {
+            isLoading.value = false;
         }
     };
 
@@ -90,19 +100,14 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             isLoading.value = true;
             const response = await axios.get('/api/profile');
             user.value = response.data;
-            console.log('user.value: ');
-            console.log(user.value);
             docsUpdateState.value = response.data.docs_update_state;
 
-            // Cek apakah user memiliki peran admin
             const roles = response.data.role_names || [];
             isAdminRole.value = roles.includes('SUPERADMIN') ||
-                roles.includes('ADMIN') ||
-                roles.includes('REVIEWER');
+                                roles.includes('ADMIN') ||
+                                roles.includes('REVIEWER');
 
-            console.log('isAdminRole.value');
-            console.log(isAdminRole.value);
-
+            isAuthenticated.value = true;
         } catch (error) {
             handleAuthError(error);
         } finally {
@@ -112,9 +117,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const logout = async () => {
         try {
+            isLoggingOut.value = true;
             await axios.post('/logout');
 
-            // Bersihkan data lokal
+            // Bersihkan data
             localStorage.clear();
             sessionStorage.clear();
             document.cookie.split(";").forEach(cookie => {
@@ -129,16 +135,18 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             }
 
             isAuthenticated.value = false;
+            isAdminRole.value = false;
+            user.value = {};
+            myDocuments.value = [];
 
-            // Refresh CSRF token agar tidak error saat login ulang
             await axios.get('/sanctum/csrf-cookie');
-
             router.push('/login');
         } catch (error) {
             console.error("Logout gagal:", error);
+        } finally {
+            isLoggingOut.value = false;
         }
     };
-
 
     const handleAuthError = (error) => {
         if (error.response && error.response.status === 401) {
@@ -158,6 +166,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         isAdminRole,
         activeLayout,
         isLoading,
+        isLoggingOut,
         getAuthUser,
         getDocsUpdateState,
         getMyDocuments,

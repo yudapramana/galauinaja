@@ -1,36 +1,25 @@
 import './bootstrap';
 
-
 import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js';
 
 import 'admin-lte/dist/js/adminlte.min.js';
-
-import 'admin-lte/plugins/summernote/summernote-bs4.min.js';
 
 import { createApp } from 'vue/dist/vue.esm-bundler.js';
 
 import { createPinia } from 'pinia';
 
-import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
 import Routes from './routes.js';
-
-import Login from './pages/auth/Login.vue';
 
 import App from './App.vue';
 
 import { useAuthUserStore } from './stores/AuthUserStore.js';
-import { useSettingStore } from './stores/SettingStore.js';
-import { useMonthYearStore } from './stores/MonthYearStore.js';
-import PrimeVue from 'primevue/config';
-import { useDashboardStore } from './stores/DashboardStore.js';
-import { useMasterDataStore } from './stores/MasterDataStore.js';
 import Select2 from 'vue3-select2-component';
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
-import SummernoteEditor from 'vue3-summernote-editor';
 
 
 const vuetify = createVuetify({
@@ -96,31 +85,8 @@ router.beforeEach(async (to, from) => {
 });
 
 
-// console.log('Navigating to:', to.path);
-
-    // to.matched.forEach(record => {
-    //     if (record.children) {
-    //         console.log('Children of', record.path, ':');
-    //         record.children.forEach(child => {
-    //             console.log('  -', child.path);
-    //         });
-    //     }
-    // });
-
 app.use(pinia);
 app.use(router);
-app.use(PrimeVue);
 app.use(vuetify);
 app.component('Select2', Select2);
-app.component('SummernoteEditor', SummernoteEditor);
-
-
-// if(window.location.pathname === '/login') {
-//     const currentApp = createApp({});
-//     currentApp.component('Login', Login);
-//     currentApp.mount('#login');
-// } else {
-//     app.mount('#app');
-// }
-
 app.mount('#app');
