@@ -56,6 +56,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const getMyDocuments = async () => {
         try {
+            console.log('getMyDocuments Running');
             // isLoading.value = true;
             if (firstLoadState.value || docsUpdateState.value) {
                 const response = await axios.get('/api/my-documents');
@@ -84,6 +85,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const getDocsUpdateState = async () => {
         try {
+            console.log('getDocsUpdateState Running');
+
             // isLoading.value = true;
             const response = await axios.get('/api/docs-update-state');
             docsUpdateState.value = response.data.docs_update_state;
@@ -97,6 +100,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const getAuthUser = async () => {
         try {
+            console.log('getAuthUser Running');
             isLoading.value = true;
             const response = await axios.get('/api/profile');
             user.value = response.data;

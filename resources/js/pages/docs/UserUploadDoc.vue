@@ -1,13 +1,13 @@
 <template>
   <!-- <div class="content-wrapper p-3"> -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <h3 class="text-primary">📂 Upload Dokumen</h3>
-      </div>
-    </section>
+  <section class="content-header">
+    <div class="container-fluid">
+      <h3 class="text-primary">📂 Upload Dokumen</h3>
+    </div>
+  </section>
 
-    <section class="content">
-      <div class="container-fluid">
+  <section class="content">
+    <div class="container-fluid">
 
       <div class="card shadow-sm rounded-lg">
         <div class="card-body p-3">
@@ -83,168 +83,162 @@
         </div>
       </div>
     </div>
-    </section>
+  </section>
 
-    <!-- Preview Modal -->
-    <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header p-2">
-            <h5 class="modal-title">📄 Preview Dokumen</h5>
-            <button type="button" class="close" @click="previewUrl = null; selectedPreviewFile = null"><span>&times;</span></button>
-          </div>
-          <div class="modal-body p-3">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <table class="table table-sm table-bordered">
-                  <tbody>
-                    <tr>
-                      <th style="width: 40%">Tipe Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Nomor Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Tanggal Dokumen</th>
-                      <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Parameter</th>
-                      <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Status</th>
-                      <td>
-                        <span class="badge" :class="badgeClass(selectedPreviewFile?.status)">
-                          {{ selectedPreviewFile?.status || 'Pending' }}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr v-if="selectedPreviewFile?.verif_notes">
-                      <th>Catatan Verifikator</th>
-                      <td class="text-danger">{{ selectedPreviewFile.verif_notes }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <!-- <div class="col-md-12 mt-4"> -->
-                  <h6 class="text-secondary mb-2">
-  <i class="fas fa-clipboard-check mr-1"></i> Riwayat Verifikasi
-</h6>
-
-<div v-if="isLoadingVerval" class="text-muted small d-flex align-items-center">
-  <i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...
-</div>
-
-<ul v-else-if="vervalLogs.length" class="list-group list-group-unbordered small mb-2">
-  <li
-    v-for="(log, idx) in vervalLogs"
-    :key="idx"
-    class="list-group-item py-2 px-2"
-    style="line-height: 1.4;"
-  >
-    <div>
-      <span class="font-weight-bold text-sm">{{ log.status }}</span>
-      <span class="text-muted mx-1">oleh</span>
-      <span class="font-italic text-sm">{{ log.verifier_name }}</span>
-      <small class="text-muted"> pada {{ log.verified_at }}</small>
-    </div>
-    <div v-if="log.notes" class="text-danger mt-1 small">
-      <i class="fas fa-comment-dots mr-1"></i>{{ log.notes }}
-    </div>
-  </li>
-</ul>
-
-<div v-else class="text-muted small">Tidak ada log verifikasi.</div>
-                </div>
-              <!-- </div> -->
-              <div class="col-md-6">
-                  <iframe
-                  :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`"
-                  class="w-100"
-                  style="height: 70vh; border: 1px solid #ccc;"
-                ></iframe>
-              </div>
-
-              
-
-
-            </div>
-          </div>
+  <!-- Preview Modal -->
+  <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header p-2">
+          <h5 class="modal-title">📄 Preview Dokumen</h5>
+          <button type="button" class="close"
+            @click="previewUrl = null; selectedPreviewFile = null"><span>&times;</span></button>
         </div>
-      </div>
-    </div>
+        <div class="modal-body p-3">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <table class="table table-sm table-bordered">
+                <tbody>
+                  <tr>
+                    <th style="width: 40%">Tipe Dokumen</th>
+                    <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Nomor Dokumen</th>
+                    <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Tanggal Dokumen</th>
+                    <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Parameter</th>
+                    <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Status</th>
+                    <td>
+                      <span class="badge" :class="badgeClass(selectedPreviewFile?.status)">
+                        {{ selectedPreviewFile?.status || 'Pending' }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr v-if="selectedPreviewFile?.verif_notes">
+                    <th>Catatan Verifikator</th>
+                    <td class="text-danger">{{ selectedPreviewFile.verif_notes }}</td>
+                  </tr>
+                </tbody>
+              </table>
 
+              <!-- <div class="col-md-12 mt-4"> -->
+              <h6 class="text-secondary mb-2">
+                <i class="fas fa-clipboard-check mr-1"></i> Riwayat Verifikasi
+              </h6>
 
-    <!-- Upload Modal -->
-    <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Upload Dokumen: {{ selectedDoctype?.text }}</h5>
-            <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="submitUpload">
-              <!-- Hidden ID_DOC_TYPE -->
-              <input type="hidden" :value="selectedDoctype?.id" />
-
-              <div class="form-group">
-                <label>Tipe Dokumen</label>
-                <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
+              <div v-if="isLoadingVerval" class="text-muted small d-flex align-items-center">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...
               </div>
 
-              <div class="form-group">
-                <label>Nomor Dokumen</label>
-                <input v-model="uploadForm.doc_number" type="text" class="form-control" required>
-              </div>
-
-              <div class="form-group">
-                <label>Tanggal Dokumen</label>
-                <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-              </div>
-
-              <div class="form-group">
-                <label>Parameter (Opsional)</label>
-                <input v-model="uploadForm.parameter" type="text" class="form-control">
-              </div>
-
-              <div class="form-group">
-                <label>Pilih File (PDF)</label>
-                <input @change="handleFileChange" type="file" class="form-control" accept="application/pdf" required>
-              </div>
-
-
-              <div v-if="loadingUpload" class="mb-3">
-                <div class="progress" style="height: 20px;">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" :class="progressBarColor"
-                    role="progressbar" :style="{ width: uploadProgress + '%' }" :aria-valuenow="uploadProgress"
-                    aria-valuemin="0" aria-valuemax="100">
-                    {{ uploadProgress }}%
+              <ul v-else-if="vervalLogs.length" class="list-group list-group-unbordered small mb-2">
+                <li v-for="(log, idx) in vervalLogs" :key="idx" class="list-group-item py-2 px-2"
+                  style="line-height: 1.4;">
+                  <div>
+                    <span class="font-weight-bold text-sm">{{ log.status }}</span>
+                    <span class="text-muted mx-1">oleh</span>
+                    <span class="font-italic text-sm">{{ log.verifier_name }}</span>
+                    <small class="text-muted"> pada {{ log.verified_at }}</small>
                   </div>
-                </div>
-              </div>
+                  <div v-if="log.notes" class="text-danger mt-1 small">
+                    <i class="fas fa-comment-dots mr-1"></i>{{ log.notes }}
+                  </div>
+                </li>
+              </ul>
+
+              <div v-else class="text-muted small">Tidak ada log verifikasi.</div>
+            </div>
+            <!-- </div> -->
+            <div class="col-md-6">
+              <iframe :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100"
+                style="height: 70vh; border: 1px solid #ccc;"></iframe>
+            </div>
 
 
-              <div class="text-right">
 
-                <button type="submit" class="btn btn-primary" :disabled="loadingUpload">
-                  <span v-if="loadingUpload">
-                    <i class="fas fa-spinner fa-spin"></i> Uploading...
-                  </span>
-                  <span v-else>
-                    Upload
-                  </span>
-                </button>
-              </div>
 
-            </form>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+
+  <!-- Upload Modal -->
+  <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Dokumen: {{ selectedDoctype?.text }}</h5>
+          <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="submitUpload">
+            <!-- Hidden ID_DOC_TYPE -->
+            <input type="hidden" :value="selectedDoctype?.id" />
+
+            <div class="form-group">
+              <label>Tipe Dokumen</label>
+              <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Nomor Dokumen</label>
+              <input v-model="uploadForm.doc_number" type="text" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Tanggal Dokumen</label>
+              <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Parameter (Opsional)</label>
+              <input v-model="uploadForm.parameter" type="text" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label>Pilih File (PDF)</label>
+              <input @change="handleFileChange" type="file" class="form-control" accept="application/pdf" required>
+            </div>
+
+
+            <div v-if="loadingUpload" class="mb-3">
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" :class="progressBarColor"
+                  role="progressbar" :style="{ width: uploadProgress + '%' }" :aria-valuenow="uploadProgress"
+                  aria-valuemin="0" aria-valuemax="100">
+                  {{ uploadProgress }}%
+                </div>
+              </div>
+            </div>
+
+
+            <div class="text-right">
+
+              <button type="submit" class="btn btn-primary" :disabled="loadingUpload">
+                <span v-if="loadingUpload">
+                  <i class="fas fa-spinner fa-spin"></i> Uploading...
+                </span>
+                <span v-else>
+                  Upload
+                </span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- </div> -->
 </template>

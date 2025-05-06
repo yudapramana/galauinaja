@@ -5,6 +5,7 @@ import { useAuthUserStore } from './stores/AuthUserStore';
 import { useSettingStore } from './stores/SettingStore';
 import AdminLayout from './LayoutAdmin.vue';
 import GuestLayout from './LayoutGuest.vue';
+import Landing from './pages/Landing.vue';
 import BaseLoading from './components/BaseLoading.vue'; // pastikan file ini ada
 
 const route = useRoute();
@@ -57,7 +58,7 @@ onMounted(async () => {
     </div>
 
     <!-- Jika belum login -->
-    <div v-else class="login-page">
+    <div v-else >
       <router-view></router-view>
     </div>
   </div>

@@ -67,7 +67,7 @@
 
     <!-- Preview Modal -->
     <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-fullscreen">
+      <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header p-2">
             <h5 class="modal-title">Preview Dokumen</h5>
@@ -76,7 +76,7 @@
             </button>
           </div>
           <div class="modal-body p-2">
-            <iframe :src="previewUrl" class="w-100" style="height: 90vh; border: none;"></iframe>
+            <iframe :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100" style="height: 90vh; border: none;"></iframe>
           </div>
         </div>
       </div>

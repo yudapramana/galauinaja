@@ -125,12 +125,18 @@ Route::get('/logout_all', function () {
     });
 });
 
+Route::get('/landing', function () {
+    return view('landing');
+});
+
 Route::get('/', function () {
-    return redirect('/login');
+    // return 'jancok';
+    return redirect('/landing');
 });
 
 Route::get('/get-password', function () {
-    return bcrypt('12345678');
+    return 'apasih';
+    // bcrypt('12345678');
 });
 
 Route::get('/all-users', function () {

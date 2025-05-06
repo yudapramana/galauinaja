@@ -1,6 +1,11 @@
 
 export default [
   {
+    path: '/landing',
+    name: 'app.landing',
+    component: () => import('./pages/Landing.vue'),
+  },
+  {
     path: '/login',
     name: 'app.login',
     component: () => import('./pages/auth/Login.vue'),
