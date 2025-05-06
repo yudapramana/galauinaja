@@ -20,6 +20,7 @@ import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import { useSettingStore } from './stores/SettingStore.js';
 
 
 const vuetify = createVuetify({
@@ -39,21 +40,25 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
     console.log('App.js Duluan bagian router.beforeEach');
     const authUserStore = useAuthUserStore();
-
+    const settingStore = useSettingStore();
+    
     // Refresh docs update state jika perlu
     if (authUserStore.docsUpdateState) {
         await authUserStore.getDocsUpdateState();
     }
+    if (authUserStore.isAuthenticated) {
+        await settingStore.getSetting();
+    }
 
     // Layout untuk route user
-    if (to.name?.startsWith('user.')) {
-        authUserStore.activeLayout = 'user';
-        document.body.classList.add('layout-top-nav');
-        document.body.classList.remove('sidebar-mini');
-    } else {
+    if (to.name?.startsWith('admin.')) {
         authUserStore.activeLayout = 'admin';
         document.body.classList.add('sidebar-mini');
         document.body.classList.remove('layout-top-nav');
+    } else {
+        authUserStore.activeLayout = 'user';
+        document.body.classList.add('layout-top-nav');
+        document.body.classList.remove('sidebar-mini');
     }
 
     const roleNames = authUserStore.user?.role_names || [];

@@ -1,13 +1,11 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useStorage } from '@vueuse/core';
 import { useRouter } from 'vue-router';
-import { useMasterDataStore } from './MasterDataStore';
 
 export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const router = useRouter();
-    const masterDataStore = useMasterDataStore();
 
     const docsUpdateState = useStorage('AuthUserStore:docsUpdateState', ref(true));
     const firstLoadState = useStorage('AuthUserStore:firstLoadState', ref(true));
@@ -57,6 +55,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const getMyDocuments = async () => {
         try {
             console.log('getMyDocuments Running');
+            console.log('getMyDocuments docsUpdate State: ' + docsUpdateState.value);
             // isLoading.value = true;
             if (firstLoadState.value || docsUpdateState.value) {
                 const response = await axios.get('/api/my-documents');
@@ -66,9 +65,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             }
         } catch (error) {
             handleAuthError(error);
-        } finally {
-            isLoading.value = false;
-        }
+        } 
+        // finally {
+        //     isLoading.value = false;
+        // }
     };
 
     const getDocumentsByUserId = async (userId) => {
@@ -78,9 +78,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             userDocuments.value = response.data.data;
         } catch (error) {
             handleAuthError(error);
-        } finally {
-            isLoading.value = false;
-        }
+        } 
+        // finally {
+        //     isLoading.value = false;
+        // }
     };
 
     const getDocsUpdateState = async () => {
@@ -93,9 +94,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         } catch (error) {
             handleAuthError(error);
             docsUpdateState.value = false;
-        } finally {
-            isLoading.value = false;
-        }
+        } 
+        // finally {
+        //     isLoading.value = false;
+        // }
     };
 
     const getAuthUser = async () => {
@@ -115,12 +117,15 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         } catch (error) {
             handleAuthError(error);
         } finally {
-            isLoading.value = false;
+            setTimeout(() => {
+                isLoading.value = false;
+            }, 900);
         }
     };
 
     const logout = async () => {
         try {
+            docsUpdateState.value = true;
             isLoggingOut.value = true;
             await axios.post('/logout');
 
@@ -176,6 +181,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         getMyDocuments,
         getDocumentsByUserId,
         logout,
-        switchLayout
+        switchLayout,
+        handleAuthError
     };
 });

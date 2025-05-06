@@ -1,32 +1,11 @@
 <script setup>
-import axios from "axios";
-import { ref, onMounted, reactive, watch, toDisplayString } from "vue";
-import { formatDate, formatDateString } from '../helper.js';
-import { Bootstrap4Pagination } from 'laravel-vue-pagination';
-import Swal from 'sweetalert2';
-import moment from 'moment';
-import { useStorage } from '@vueuse/core';
 import { useAuthUserStore } from "../stores/AuthUserStore.js";
-import { useLoadingStore } from "../stores/LoadingStore.js";
-import { useDashboardStore } from "../stores/DashboardStore";
-import { useMonthYearStore } from "../stores/MonthYearStore.js";
 import { useScreenDisplayStore } from '../stores/ScreenDisplayStore.js';
 
 const screenDisplayStore = useScreenDisplayStore();
-const dashboardStore = useDashboardStore();
-const loadingStore = useLoadingStore();
-const monthYearStore = useMonthYearStore();
 const authUserStore = useAuthUserStore();
 
 
-const getSummary = () => {
-    dashboardStore.getReportsCount();
-    dashboardStore.getStatsCount();
-}
-
-onMounted(() => {
-    // console.log(dashboardStore.reportCompletion.value);
-});
 
 
 </script>

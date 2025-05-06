@@ -2,9 +2,7 @@ import axios from 'axios';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useLoadingStore } from "./LoadingStore";
-import { useMonthYearStore } from "./MonthYearStore.js";
 import { useStorage } from '@vueuse/core';
-import { useRouter, useRoute } from 'vue-router';
 import { useAuthUserStore } from "./AuthUserStore.js";
 
 export const useMasterDataStore = defineStore('MasterDataStore', () => {
@@ -18,7 +16,6 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
 
 
     const loadingStore = useLoadingStore();
-    const router = useRouter();
     const authUserStore = useAuthUserStore();
 
     const getWorkunitList = async () => {
@@ -37,57 +34,10 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
                     console.log('workunitList hasbeenfetched');
                 }).catch((error) => {
                     loadingStore.toggleLoading();
-                    console.log('workunitList hasbeenerrored');
-
-                    console.log(error.response.data)
-                    if (error.response && error.response.status === 401) {
-                        // Redirect langsung ke login page
-                        window.location.href = '/login';
-                    } else {
-                        console.error('Terjadi kesalahan:', error);
-                    }
+                    authUserStore.handleAuthError(error);
                 });
         }
-
-
     };
-
-    // const getDoctypeList = async () => {
-
-    //     console.log('doctypeList.value.lengths');
-    //     console.log(doctypeList.value.length);
-    //     console.log('doctypeList.value');
-    //     console.log(doctypeList.value);
-
-
-    //     if (doctypeList.value.length == 0) {
-
-    //         loadingStore.toggleLoading();
-    //         await axios.get('/api/master', {
-    //             params: {
-    //                 type: 'doctypes',
-    //             }
-    //         })
-    //             .then((response) => {
-    //                 doctypeList.value = response.data.data;
-    //                 loadingStore.toggleLoading();
-    //                 console.log('doctypeList hasbeenfetched');
-    //             }).catch((error) => {
-    //                 loadingStore.toggleLoading();
-    //                 console.log('doctypeList hasbeenerrored');
-
-    //                 console.log(error.response.data)
-    //                 if (error.response && error.response.status === 401) {
-    //                     // Redirect langsung ke login page
-    //                     window.location.href = '/login';
-    //                 } else {
-    //                     console.error('Terjadi kesalahan:', error);
-    //                 }
-    //             });
-    //     }
-
-
-    // };
 
     const getDoctypeList = async (userId = null) => {
         console.log('doctypeList.value.length:', doctypeList.value.length);
@@ -108,47 +58,11 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
                 // console.log('doctypeList has been fetched:', doctypeList.value);
             } catch (error) {
                 console.error('doctypeList fetch error:', error);
-                if (error.response?.status === 401) {
-                    window.location.href = '/login';
-                } else {
-                    console.error('Terjadi kesalahan:', error);
-                }
+                authUserStore.handleAuthError(error);
             } finally {
                 loadingStore.toggleLoading();
             }
         }
-    };
-    
-
-    const getOrgList = async () => {
-
-        // console.log('orgList.value.length');
-        // console.log(orgList.value.length);
-
-        if (orgList.value.length == 0) {
-            loadingStore.toggleLoading();
-            await axios.get('/api/master', {
-                params: {
-                    type: 'orgs',
-                }
-            })
-                .then((response) => {
-                    orgList.value = response.data.data;
-                    loadingStore.toggleLoading();
-                }).catch((error) => {
-                    loadingStore.toggleLoading();
-
-                    // console.log(error.response.data)
-                    if (error.response && error.response.status === 401) {
-                        // Redirect langsung ke login page
-                        window.location.href = '/login';
-                    } else {
-                        console.error('Terjadi kesalahan:', error);
-                    }
-                });
-        }
-
-
     };
 
     const getUserList = async (org) => {
@@ -167,38 +81,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
                 loadingStore.toggleLoading();
             }).catch((error) => {
                 loadingStore.toggleLoading();
-                // console.log(error.response.data)
-                if (error.response && error.response.status === 401) {
-                    // Redirect langsung ke login page
-                    window.location.href = '/login';
-                } else {
-                    console.error('Terjadi kesalahan:', error);
-                }
-            });
-    };
-
-    const getUserListbyOrgID = async (orgId) => {
-        // console.log('orgId');
-
-        loadingStore.toggleLoading();
-        await axios.get('/api/master', {
-            params: {
-                type: 'users',
-                id: orgId
-            }
-        })
-            .then((response) => {
-                userList.value = response.data.data;
-                loadingStore.toggleLoading();
-            }).catch((error) => {
-                loadingStore.toggleLoading();
-                // console.log(error.response.data)
-                if (error.response && error.response.status === 401) {
-                    // Redirect langsung ke login page
-                    window.location.href = '/login';
-                } else {
-                    console.error('Terjadi kesalahan:', error);
-                }
+                authUserStore.handleAuthError(error);
             });
     };
 
@@ -209,9 +92,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         userList,
         doctypeList,
         workunitList,
-        getOrgList,
         getUserList,
-        getUserListbyOrgID,
         getDoctypeList,
         getWorkunitList
     };

@@ -1,24 +1,25 @@
 {
-  "_DashboardStore-SSTTKxjs.js": {
-    "file": "assets/DashboardStore-SSTTKxjs.js",
+  "_LoadingStore-BQPl8X7A.js": {
+    "file": "assets/LoadingStore-BQPl8X7A.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_helper-BuG6Si5x.js": {
-    "file": "assets/helper-BuG6Si5x.js",
+  "_MasterDataStore-B9FbAySm.js": {
+    "file": "assets/MasterDataStore-B9FbAySm.js",
+    "imports": [
+      "resources/js/app.js",
+      "_LoadingStore-BQPl8X7A.js"
+    ]
+  },
+  "_laravel-vue-pagination.es-Ch5JEwxc.js": {
+    "file": "assets/laravel-vue-pagination.es-Ch5JEwxc.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_laravel-vue-pagination.es-BLTnNx7Q.js": {
-    "file": "assets/laravel-vue-pagination.es-BLTnNx7Q.js",
-    "imports": [
-      "resources/js/app.js"
-    ]
-  },
-  "_sweetalert2.all-CGkhAqbs.js": {
-    "file": "assets/sweetalert2.all-CGkhAqbs.js",
+  "_sweetalert2.all-B-44TrQ9.js": {
+    "file": "assets/sweetalert2.all-B-44TrQ9.js",
     "imports": [
       "resources/js/app.js"
     ]
@@ -27,11 +28,11 @@
     "file": "assets/toastr-T0Y5PVxv.css",
     "src": "_toastr-!~{00n}~.js"
   },
-  "_toastr-DAbITiye.js": {
+  "_toastr-BQ_FeOor.js": {
     "css": [
       "assets/toastr-T0Y5PVxv.css"
     ],
-    "file": "assets/toastr-DAbITiye.js",
+    "file": "assets/toastr-BQ_FeOor.js",
     "imports": [
       "resources/js/app.js"
     ]
@@ -135,34 +136,28 @@
       "resources/js/pages/docs/MyDocs.vue",
       "resources/js/pages/docs/UserUploadDoc.vue"
     ],
-    "file": "assets/app-BWyiWbCj.js",
+    "file": "assets/app-DKYEko9h.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
   "resources/js/components/Dashboard.vue": {
-    "file": "assets/Dashboard-CQ20FgAj.js",
+    "file": "assets/Dashboard-DZl8vCYj.js",
     "imports": [
-      "_helper-BuG6Si5x.js",
-      "_sweetalert2.all-CGkhAqbs.js",
-      "resources/js/app.js",
-      "_DashboardStore-SSTTKxjs.js"
+      "resources/js/app.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/components/Dashboard.vue"
   },
   "resources/js/components/UserDashboard.vue": {
-    "file": "assets/UserDashboard-B7LIxFH6.js",
+    "file": "assets/UserDashboard-DP-u5688.js",
     "imports": [
-      "_helper-BuG6Si5x.js",
-      "_sweetalert2.all-CGkhAqbs.js",
-      "resources/js/app.js",
-      "_DashboardStore-SSTTKxjs.js"
+      "resources/js/app.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/components/UserDashboard.vue"
   },
   "resources/js/pages/Landing.vue": {
-    "file": "assets/Landing-DfW5Mf0h.js",
+    "file": "assets/Landing-GUBVORjk.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -171,11 +166,13 @@
   },
   "resources/js/pages/auth/Login.vue": {
     "css": [
-      "assets/Login-Dp9NzVYq.css"
+      "assets/Login-cnTzkEfz.css"
     ],
-    "file": "assets/Login-BwW4b9SU.js",
+    "file": "assets/Login-D9kNPtmv.js",
     "imports": [
-      "resources/js/app.js"
+      "resources/js/app.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/auth/Login.vue"
@@ -184,9 +181,11 @@
     "css": [
       "assets/MyDocs-DIJ1ZSbs.css"
     ],
-    "file": "assets/MyDocs-CDl6Bm6Q.js",
+    "file": "assets/MyDocs-1lnVVM2-.js",
     "imports": [
-      "resources/js/app.js"
+      "resources/js/app.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/MyDocs.vue"
@@ -195,10 +194,12 @@
     "css": [
       "assets/UserDocs-CnQ5yggf.css"
     ],
-    "file": "assets/UserDocs-SxPkwmHV.js",
+    "file": "assets/UserDocs-OxosRqe7.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-CGkhAqbs.js"
+      "_sweetalert2.all-B-44TrQ9.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/UserDocs.vue"
@@ -207,10 +208,12 @@
     "css": [
       "assets/UserUploadDoc-B6YOmJ7B.css"
     ],
-    "file": "assets/UserUploadDoc-DclAKNYE.js",
+    "file": "assets/UserUploadDoc-DtOPvXSl.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-CGkhAqbs.js"
+      "_sweetalert2.all-B-44TrQ9.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/UserUploadDoc.vue"
@@ -219,12 +222,13 @@
     "css": [
       "assets/Orgreports-D63t65XM.css"
     ],
-    "file": "assets/Orgreports-BABhs7f8.js",
+    "file": "assets/Orgreports-BgUVHJGn.js",
     "imports": [
       "resources/js/app.js",
-      "_helper-BuG6Si5x.js",
-      "_laravel-vue-pagination.es-BLTnNx7Q.js",
-      "_sweetalert2.all-CGkhAqbs.js"
+      "_laravel-vue-pagination.es-Ch5JEwxc.js",
+      "_sweetalert2.all-B-44TrQ9.js",
+      "_LoadingStore-BQPl8X7A.js",
+      "_MasterDataStore-B9FbAySm.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/org_reports/Orgreports.vue"
@@ -233,10 +237,10 @@
     "css": [
       "assets/UpdateProfile-CW3-_OFv.css"
     ],
-    "file": "assets/UpdateProfile-Di6eKYHL.js",
+    "file": "assets/UpdateProfile-T2GX4Q8b.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-DAbITiye.js"
+      "_toastr-BQ_FeOor.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/profile/UpdateProfile.vue"
@@ -245,10 +249,12 @@
     "css": [
       "assets/UpdateProfile-CW3-_OFv.css"
     ],
-    "file": "assets/UserProfile-B0R5BcRE.js",
+    "file": "assets/UserProfile-BMTa9RK2.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-DAbITiye.js"
+      "_toastr-BQ_FeOor.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/profile/UserProfile.vue"
@@ -257,27 +263,27 @@
     "css": [
       "assets/ListReports-BLphY1sg.css"
     ],
-    "file": "assets/ListReports-Cutsvdkk.js",
+    "file": "assets/ListReports-DQYv0LVJ.js",
     "imports": [
       "resources/js/app.js",
-      "_helper-BuG6Si5x.js",
-      "_laravel-vue-pagination.es-BLTnNx7Q.js",
-      "_sweetalert2.all-CGkhAqbs.js"
+      "_laravel-vue-pagination.es-Ch5JEwxc.js",
+      "_sweetalert2.all-B-44TrQ9.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/reports/ListReports.vue"
   },
   "resources/js/pages/settings/UpdateSetting.vue": {
-    "file": "assets/UpdateSetting-CUrOQr4c.js",
+    "file": "assets/UpdateSetting-D9Cd0lxD.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-DAbITiye.js"
+      "_toastr-BQ_FeOor.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/settings/UpdateSetting.vue"
   },
   "resources/js/pages/users/UserDocList.vue": {
-    "file": "assets/UserDocList-BaIGFExn.js",
+    "file": "assets/UserDocList-CV1Fu3BJ.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -285,18 +291,20 @@
     "src": "resources/js/pages/users/UserDocList.vue"
   },
   "resources/js/pages/users/UserList.vue": {
-    "file": "assets/UserList-BkykzzuA.js",
+    "file": "assets/UserList-uy6CI28a.js",
     "imports": [
-      "resources/js/app.js"
+      "resources/js/app.js",
+      "_MasterDataStore-B9FbAySm.js",
+      "_LoadingStore-BQPl8X7A.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/users/UserList.vue"
   },
   "resources/js/pages/vervals/VervalList.vue": {
-    "file": "assets/VervalList-Bb0qsHlw.js",
+    "file": "assets/VervalList-CoBOsDlP.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-CGkhAqbs.js"
+      "_sweetalert2.all-B-44TrQ9.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/vervals/VervalList.vue"
@@ -310,7 +318,7 @@
     "css": [
       "assets/WorkUnitList-B9UFXBxI.css"
     ],
-    "file": "assets/WorkUnitList-CrvNhzJ2.js",
+    "file": "assets/WorkUnitList-CZ2Vo1Kv.js",
     "imports": [
       "resources/js/app.js"
     ],

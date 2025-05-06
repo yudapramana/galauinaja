@@ -24,19 +24,19 @@ const handleSubmit = async () => {
 
     try {
         // Pastikan CSRF cookie diambil dulu
-        await axios.get('/sanctum/csrf-cookie');
+        // await axios.get('/sanctum/csrf-cookie');
 
         // Kirim form login
         await axios.post('/login', form);
 
         // Ambil data user dan dokumen
         await authUserStore.getAuthUser();
-        await authUserStore.getMyDocuments();
         await masterDataStore.getDoctypeList();
+        await authUserStore.getMyDocuments();
         authUserStore.isAuthenticated = true;
         authUserStore.activeLayout = 'user';
         // Redirect
-        router.push({ name: 'user.dashboard' });
+        router.push('/user/dashboard');
 
     } catch (error) {
         console.error('Login error:', error);

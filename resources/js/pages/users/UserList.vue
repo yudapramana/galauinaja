@@ -177,10 +177,12 @@
 import { ref, watch, onMounted } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import axios from 'axios'
-import { useMasterDataStore } from '../../stores/MasterDataStore'
+import { useMasterDataStore } from '../../stores/MasterDataStore.js';
+import { useAuthUserStore } from '../../stores/AuthUserStore.js';
 
 const isSubmitting = ref(false)
 const masterDataStore = useMasterDataStore();
+const authUserStore = useAuthUserStore();
 
 const users = ref([])
 const meta = ref({
@@ -213,7 +215,12 @@ const fetchUsers = async (page = 1) => {
             ...response.data,
         }
     } catch (error) {
-        console.error('Gagal memuat data pengguna:', error)
+        if (error.response && error.response.status === 401) {
+            console.warn('Unauthorized. Logging out...');
+            authUserStore.logout();
+        } else {
+            console.error('Gagal memuat data pengguna:', error);
+        }
     } finally {
         isLoading.value = false
     }
