@@ -48,6 +48,37 @@ class EmpDocumentController extends Controller
     //     ]);
     // }
 
+    // public function verify(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'status' => 'required|in:Approved,Rejected',
+    //         'verif_notes' => 'nullable|string',
+    //     ]);
+
+    //     $doc = EmpDocument::findOrFail($id);
+    //     $doc->status = $request->status;
+    //     $doc->verif_notes = $request->verif_notes;
+    //     $doc->save();
+
+    //     // Simpan ke tabel verval_logs
+    //     $vervalLog = new VervalLog();
+    //     $vervalLog->id_document = $doc->id;
+    //     $vervalLog->verval_status = $request->status;
+    //     $vervalLog->verified_by = Auth::id(); // ID admin yang melakukan verifikasi
+    //     $vervalLog->verif_notes = $request->verif_notes;
+    //     $vervalLog->created_at = now();
+    //     $vervalLog->save();
+
+    //     // Update state user
+    //     $user = $doc->employee->user;
+    //     $user->update(['docs_update_state' => true]);
+
+    //     return response()->json([
+    //         'message' => 'Dokumen berhasil diverifikasi.',
+    //         'data' => $doc,
+    //     ]);
+    // }
+
     public function verify(Request $request, $id)
     {
         $request->validate([
@@ -56,18 +87,27 @@ class EmpDocumentController extends Controller
         ]);
 
         $doc = EmpDocument::findOrFail($id);
+
+       // Cek apakah dokumen sudah diverifikasi sebelumnya
+        if (in_array($doc->status, ['Approved', 'Rejected'])) {
+            return response()->json([
+                'message' => 'Dokumen sudah diverifikasi sebelumnya dan tidak dapat diverifikasi ulang.',
+                'code' => 'DOCUMENT_ALREADY_VERIFIED'
+            ], 409); // 409 Conflict
+        }
+
         $doc->status = $request->status;
         $doc->verif_notes = $request->verif_notes;
         $doc->save();
 
         // Simpan ke tabel verval_logs
-        $vervalLog = new VervalLog();
-        $vervalLog->id_document = $doc->id;
-        $vervalLog->verval_status = $request->status;
-        $vervalLog->verified_by = Auth::id(); // ID admin yang melakukan verifikasi
-        $vervalLog->verif_notes = $request->verif_notes;
-        $vervalLog->created_at = now();
-        $vervalLog->save();
+        VervalLog::create([
+            'id_document' => $doc->id,
+            'verval_status' => $request->status,
+            'verified_by' => Auth::id(),
+            'verif_notes' => $request->verif_notes,
+            'created_at' => now(),
+        ]);
 
         // Update state user
         $user = $doc->employee->user;

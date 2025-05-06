@@ -9,6 +9,8 @@ class VervalLog extends Model
 
     protected $table = 'verval_logs';
     public $timestamps = true;
+    protected $guarded = [];
+
 
     public function document()
     {

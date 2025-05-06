@@ -160,9 +160,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import axios from 'axios'
+import { ref, onMounted, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const search = ref('')
 const documents = ref([])
@@ -231,15 +232,51 @@ const openVerifModal = (doc) => {
     $('#verifModal').modal('show')
 }
 
+// const submitVerif = async () => {
+//     isSubmitting.value = true
+//     try {
+//         await axios.put(`/api/emp-documents/${selectedDoc.value.id}/verify`, verifForm.value)
+//         $('#verifModal').modal('hide')
+//         fetchDocuments(meta.value.current_page)
+//     } catch (error) {
+//         alert('Gagal memverifikasi dokumen.')
+//     } finally {
+//         isSubmitting.value = false
+//     }
+// }
+
 const submitVerif = async () => {
     isSubmitting.value = true
     try {
-        await axios.put(`/api/emp-documents/${selectedDoc.value.id}/verify`, verifForm.value)
+        const response = await axios.put(`/api/emp-documents/${selectedDoc.value.id}/verify`, verifForm.value)
         $('#verifModal').modal('hide')
         fetchDocuments(meta.value.current_page)
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: response.data.message || 'Dokumen berhasil diverifikasi.',
+            timer: 2000,
+            showConfirmButton: false,
+        })
     } catch (error) {
-        alert('Gagal memverifikasi dokumen.')
-    } finally {
+    let message = 'Gagal memverifikasi dokumen.'
+    if (error.response) {
+        if (error.response.status === 409 && error.response.data.code === 'DOCUMENT_ALREADY_VERIFIED') {
+            message = error.response.data.message
+        } else if (error.response.data.message) {
+            message = error.response.data.message
+        }
+    }
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Verifikasi Gagal',
+        text: message,
+    });
+    $('#verifModal').modal('hide');
+    fetchDocuments(meta.value.current_page);
+} finally {
         isSubmitting.value = false
     }
 }
