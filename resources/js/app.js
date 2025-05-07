@@ -1,5 +1,6 @@
 import './bootstrap';
 import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js';
+import 'admin-lte/plugins/bs-custom-file-input/bs-custom-file-input.min.js'
 import 'admin-lte/dist/js/adminlte.min.js';
 import { createApp } from 'vue/dist/vue.esm-bundler.js';
 import { createPinia } from 'pinia';

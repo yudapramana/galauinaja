@@ -127,7 +127,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         } finally {
             setTimeout(() => {
                 isLoading.value = false;
-            }, 900);
+            }, 2000);
         }
     };
 

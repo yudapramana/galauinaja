@@ -44,7 +44,7 @@
                                         :to="`/admin/users/${user.id}/documents`"
                                         class="btn btn-sm btn-info mr-1"
                                     >
-                                        Lihat/Upload Dokumen
+                                        Dokumen
                                     </router-link>
                                 </td>
                             </tr>

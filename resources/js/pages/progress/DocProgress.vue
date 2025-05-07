@@ -51,7 +51,7 @@
                                 <td>{{ user.employee?.nip || '-' }}</td>
                                 <!-- <td>{{ user.employee?.work_unit?.unit_name || '-' }}</td> -->
                                 <td>{{ user.employee?.employment_status || '-' }}</td>
-                                <td>
+                                <td width="25%">
                                     <div class="progress progress-xs">
                                         <div class="progress-bar bg-success" role="progressbar"
                                             :style="{ width: `${user.employee?.progress_dokumen || 0}%` }"
@@ -63,7 +63,7 @@
                                 <td>
                                     <router-link :to="`/admin/users/${user.id}/documents`"
                                         class="btn btn-sm btn-info mr-1">
-                                        Lihat/Upload Dokumen
+                                        Dokumen
                                     </router-link>
                                 </td>
                             </tr>
