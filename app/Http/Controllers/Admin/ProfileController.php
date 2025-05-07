@@ -22,7 +22,14 @@ class ProfileController extends Controller
 
     public function docsUpdateState(Request $request)
     {
-        return $request->user()->only(['docs_update_state']);
+        // return $request->user()->only(['docs_update_state']);
+        $user = $request->user();
+        return [
+            'docs_update_state' => $user->docs_update_state,
+            'docs_progress_state' => $user->employee->docs_progress_state,
+            'progress_dokumen' => $user->employee->progress_dokumen
+        ];
+
     }
 
     public function update(Request $request)

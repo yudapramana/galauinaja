@@ -8,11 +8,13 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const router = useRouter();
 
     const docsUpdateState = useStorage('AuthUserStore:docsUpdateState', ref(true));
+    const docsProgressState = useStorage('AuthUserStore:docsProgressState', ref(false));
     const firstLoadState = useStorage('AuthUserStore:firstLoadState', ref(true));
     const isAuthenticated = useStorage('AuthUserStore:isAuthenticated', ref(false));
     const activeLayout = useStorage('AuthUserStore:activeLayout', ref('user'));
     const isLoading = useStorage('AuthUserStore:isLoading', ref(false));
     const isLoggingOut = useStorage('AuthUserStore:isLoggingOut', ref(false)); // 👈 optional, jika butuh pisah loading logout
+    const progressDokumen = useStorage('AuthUserStore:progressDokumen', ref(0));
 
     const user = useStorage('AuthUserStore:user', ref({
         name: '',
@@ -90,7 +92,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
             // isLoading.value = true;
             const response = await axios.get('/api/docs-update-state');
+            console.log(response.data);
             docsUpdateState.value = response.data.docs_update_state;
+            docsProgressState.value = response.data.docs_progress_state;
+            user.employee.progress_dokumen = res.data.progress_dokumen;
         } catch (error) {
             handleAuthError(error);
             docsUpdateState.value = false;
@@ -114,6 +119,9 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
                                 roles.includes('REVIEWER');
 
             isAuthenticated.value = true;
+            docsProgressState.value = response.data.employee?.docs_progress_state;
+            console.log('response.data.employee?.progress_dokumen:' + response.data.employee?.progress_dokumen);
+            progressDokumen.value = response.data.employee?.progress_dokumen;
         } catch (error) {
             handleAuthError(error);
         } finally {
@@ -125,6 +133,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const logout = async () => {
         try {
+            docsProgressState.value = false;
             docsUpdateState.value = true;
             isLoggingOut.value = true;
             await axios.post('/logout');
@@ -169,6 +178,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         user,
         isAuthenticated,
         docsUpdateState,
+        docsProgressState,
         firstLoadState,
         myDocuments,
         userDocuments,

@@ -31,6 +31,10 @@ router.beforeEach(async (to, from) => {
     const settingStore = useSettingStore();
     
     // Refresh docs update state jika perlu
+    // if (authUserStore.docsProgressState) {
+    //     await authUserStore.getAuthUser();
+    // }
+    // Refresh docs update state jika perlu
     if (authUserStore.docsUpdateState) {
         await authUserStore.getDocsUpdateState();
     }

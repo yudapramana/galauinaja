@@ -149,6 +149,7 @@ class DocumentController extends Controller
         if (isset($request->user_id)) {
             $user->docs_update_state = true;
             $user->save();
+            $employee->update(['docs_progress_state' => true]);
         }
 
         return response()->json([
@@ -285,6 +286,15 @@ class DocumentController extends Controller
          $vervalLog->verified_by = Auth::id(); // Admin yang melakukan upload atau user itu sendiri
          $vervalLog->verif_notes = null; // Tidak ada catatan saat upload
          $vervalLog->save();
+
+
+         // Update state jika oleh admin
+        if (isset($request->user_id)) {
+            $employee->update(['docs_progress_state' => true]);
+            $user = $employee->user;
+            $user->docs_update_state = true;
+            $user->save();
+        }
 
         return response()->json([
             'message' => 'Reupload berhasil.',

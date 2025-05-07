@@ -153,18 +153,20 @@
                   </div>
                 </li>
               </ul>
-
               <div v-else class="text-muted small">Tidak ada log verifikasi.</div>
             </div>
             <!-- </div> -->
             <div class="col-md-6">
-              <iframe :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100"
-                style="height: 70vh; border: 1px solid #ccc;"></iframe>
+              <iframe v-if="previewUrl && !pdfError" ref="pdfFrame"
+                :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100" frameborder="0"
+                style="height: 70vh; border: 1px solid #ccc;" @load="onIframeLoad" @error="onIframeError"></iframe>
+
+              <div v-else class="text-muted text-center py-5">
+                <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
+                </p>
+                <p v-else>File tidak tersedia.</p>
+              </div>
             </div>
-
-
-
-
           </div>
         </div>
       </div>
@@ -192,7 +194,7 @@
 
             <div class="form-group">
               <label>Nomor Dokumen</label>
-              <input v-model="uploadForm.doc_number" type="text" class="form-control" required>
+              <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
             </div>
 
             <div class="form-group">
@@ -273,6 +275,17 @@ const progressBarColor = computed(() => {
     return 'bg-success'; // Hijau 70%-100%
   }
 });
+const pdfFrame = ref(null);
+const pdfError = ref(false);
+const onIframeLoad = () => {
+  // Iframe load berhasil
+  pdfError.value = false;
+};
+
+const onIframeError = () => {
+  // Jika iframe gagal load
+  pdfError.value = true;
+};
 
 const badgeClass = (status) => {
   switch (status) {
@@ -342,8 +355,31 @@ const toggleExpand = (doctype) => {
 };
 
 const previewFile = async (file) => {
+  console.log('file');
+  console.log(file);
+
+  pdfError.value = false;
   selectedPreviewFile.value = file;
   previewUrl.value = file.file_url;
+  try {
+    const res = await fetch(file.file_url, { method: 'HEAD' });
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        pdfError.value = 'not_found';
+      } else {
+        pdfError.value = true;
+      }
+      return;
+    }
+
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('pdf')) {
+      pdfError.value = true;
+    }
+  } catch (err) {
+    pdfError.value = true;
+  }
   await fetchVervalLog(file.id);
 };
 

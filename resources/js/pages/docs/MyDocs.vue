@@ -11,12 +11,12 @@
       <!-- Progress Bar -->
       <div class="mb-3">
         <label class="d-block mb-1 text-muted font-weight-bold">
-          Progress Dokumen: {{ progressDokumen }}%
+          Progress Dokumen: {{ progressDokumen || 0 }}%
         </label>
         <div class="progress" style="height: 20px;">
           <div class="progress-bar bg-success" :style="{ width: progressDokumen + '%' }" role="progressbar"
             :aria-valuenow="progressDokumen" aria-valuemin="0" aria-valuemax="100">
-            {{ progressDokumen }}%
+            {{ progressDokumen || 0 }}%
           </div>
         </div>
       </div>
@@ -86,31 +86,50 @@
           </button>
         </div>
         <div class="modal-body p-2">
-          <iframe :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100"
-            style="height: 90vh; border: none;"></iframe>
+          <iframe v-if="previewUrl && !pdfError" ref="pdfFrame" :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`"
+            class="w-100" frameborder="0" style="height: 90vh; border: 1px solid #ccc;" @load="onIframeLoad"
+            @error="onIframeError"></iframe>
+
+          <div v-else class="text-muted text-center py-5">
+            <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
+            </p>
+            <p v-else>File tidak tersedia.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup>
 import axios from 'axios';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 
+const pdfFrame = ref(null);
+const pdfError = ref(false);
 const treeData = ref([]);
 const previewUrl = ref(null);
 const searchQuery = ref('');
 const isLoading = ref(false);
+const onIframeLoad = () => {
+  // Iframe load berhasil
+  pdfError.value = false;
+};
+
+const onIframeError = () => {
+  // Jika iframe gagal load
+  pdfError.value = true;
+};
 
 const masterDataStore = useMasterDataStore();
 const authUserStore = useAuthUserStore();
 
 // Computed: progress dokumen dari authUserStore.user.employee.progress_dokumen
 const progressDokumen = computed(() => {
-  return authUserStore.user?.employee?.progress_dokumen || 0;
+  return authUserStore.user?.employee?.progress_dokumen ?? 0;
 });
 
 const fetchData = async () => {
@@ -142,8 +161,19 @@ const toggleExpand = (doctype) => {
   doctype.expanded = !doctype.expanded;
 };
 
-const previewFile = (url) => {
-  previewUrl.value = url;
+const previewFile = async (url) => {
+  pdfError.value = false;
+  previewUrl.value = url; // Tampilkan modal terlebih dahulu
+
+  try {
+    const res = await fetch(url, { method: 'HEAD' });
+
+    if (!res.ok || !res.headers.get('content-type')?.includes('pdf')) {
+      pdfError.value = true;
+    }
+  } catch (err) {
+    pdfError.value = true;
+  }
 };
 
 const clearSearch = () => {
@@ -163,9 +193,25 @@ const filteredTree = computed(() => {
 onMounted(async () => {
   isLoading.value = true;
   await authUserStore.getDocsUpdateState();
+  console.log('Progress Dokumen:', authUserStore.user?.employee?.progress_dokumen);
   console.log('eh kepanggil fetchdata didalam onMounted Doclist');
   await fetchData();
   isLoading.value = false;
+});
+
+watch(() => previewUrl, async (newUrl) => {
+  pdfError.value = false;
+
+  if (!newUrl) return;
+
+  try {
+    const res = await fetch(newUrl, { method: 'HEAD' }); // hanya cek status tanpa ambil isi
+    if (!res.ok || !res.headers.get('content-type')?.includes('pdf')) {
+      pdfError.value = true;
+    }
+  } catch (err) {
+    pdfError.value = true;
+  }
 });
 </script>
 
