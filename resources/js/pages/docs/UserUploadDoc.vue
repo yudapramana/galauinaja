@@ -207,7 +207,7 @@
               
               <label>Pilih Parameter (Opsional)</label><br>
               <div class="btn-group mb-2 flex-wrap">
-                <button v-for="item in [1, 2, 3, 4, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3']" :key="item"
+                <button v-for="item in [1, 2, 3, 4, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3']" :key="item"
                   type="button" class="btn btn-xs btn-outline-secondary mb-1"
                   :class="{ active: uploadForm.parameter === item }" @click="uploadForm.parameter = item">
                   {{ item }}
