@@ -22,7 +22,6 @@ class EmpDocumentController extends Controller
             })
             ->orderByDesc('created_at');
         $documents = $query->paginate(10);
-        // $documents = EmpDocument::paginate(10);
 
         return response()->json($documents);
     }
@@ -110,8 +109,13 @@ class EmpDocumentController extends Controller
         ]);
 
         // Update state user
-        $user = $doc->employee->user;
+        $employee = $doc->employee;
+        if($request->status == 'Approved') {
+            $employee->update(['docs_progress_state' => true]);
+        }
+        $user = $employee->user;
         $user->update(['docs_update_state' => true]);
+        
 
         return response()->json([
             'message' => 'Dokumen berhasil diverifikasi.',

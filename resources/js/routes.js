@@ -53,7 +53,7 @@ export default [
       },
       {
         path: 'docusers',
-        name: 'admin.docusers',
+        name: 'admin.doc.users',
         component: () => import('./pages/users/UserDocList.vue'),
       },
       {
@@ -65,6 +65,11 @@ export default [
         path: 'profile',
         name: 'admin.profile',
         component: () => import('./pages/profile/UpdateProfile.vue'),
+      },
+      {
+        path: 'docprogress',
+        name: 'admin.doc.progress',
+        component: () => import('./pages/progress/DocProgress.vue'),
       },
     ],
   },

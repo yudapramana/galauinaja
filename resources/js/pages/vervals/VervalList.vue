@@ -98,11 +98,23 @@
 
                     <div class="modal-body row">
                         <div class="col-md-7">
-                            <div class="border rounded p-2" style="height: 500px; overflow: hidden;">
+                            <!-- <div class="border rounded p-2" style="height: 500px; overflow: hidden;">
                                 <iframe v-if="selectedDoc?.file_url" :src="selectedDoc.file_url" width="100%"
                                     height="100%" frameborder="0" style="border: 1px solid #ccc;"></iframe>
                                 <div v-else class="text-muted text-center py-5">
                                     <p>File tidak tersedia.</p>
+                                </div>
+                            </div> -->
+                            <div class="border rounded p-2" style="height: 500px; overflow: hidden;">
+                                <iframe v-if="selectedDoc?.file_url && !pdfError" ref="pdfFrame"
+                                    :src="selectedDoc.file_url" width="100%" height="100%" frameborder="0"
+                                    style="border: 1px solid #ccc;" @load="onIframeLoad"
+                                    @error="onIframeError"></iframe>
+
+                                <div v-else class="text-muted text-center py-5">
+                                    <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
+                                    </p>
+                                    <p v-else>File tidak tersedia.</p>
                                 </div>
                             </div>
                         </div>
@@ -160,17 +172,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const search = ref('')
-const documents = ref([])
-const isLoading = ref(false)
-const isSubmitting = ref(false)
-const selectedDoc = ref(null)
-const verifForm = ref({ status: '', verif_notes: '' })
+const search = ref('');
+const documents = ref([]);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+const pdfFrame = ref(null);
+const pdfError = ref(false);
+const selectedDoc = ref(null);
+const verifForm = ref({ status: '', verif_notes: '' });
 
 const meta = ref({
     current_page: 1,
@@ -260,23 +274,23 @@ const submitVerif = async () => {
             showConfirmButton: false,
         })
     } catch (error) {
-    let message = 'Gagal memverifikasi dokumen.'
-    if (error.response) {
-        if (error.response.status === 409 && error.response.data.code === 'DOCUMENT_ALREADY_VERIFIED') {
-            message = error.response.data.message
-        } else if (error.response.data.message) {
-            message = error.response.data.message
+        let message = 'Gagal memverifikasi dokumen.'
+        if (error.response) {
+            if (error.response.status === 409 && error.response.data.code === 'DOCUMENT_ALREADY_VERIFIED') {
+                message = error.response.data.message
+            } else if (error.response.data.message) {
+                message = error.response.data.message
+            }
         }
-    }
 
-    Swal.fire({
-        icon: 'error',
-        title: 'Verifikasi Gagal',
-        text: message,
-    });
-    $('#verifModal').modal('hide');
-    fetchDocuments(meta.value.current_page);
-} finally {
+        Swal.fire({
+            icon: 'error',
+            title: 'Verifikasi Gagal',
+            text: message,
+        });
+        $('#verifModal').modal('hide');
+        fetchDocuments(meta.value.current_page);
+    } finally {
         isSubmitting.value = false
     }
 }
@@ -288,6 +302,53 @@ const onRejectionNoteSelect = (event) => {
     }
 }
 
+
+const checkPdfLoad = () => {
+    try {
+        const iframe = pdfFrame.value;
+
+        // Jika iframe belum siap, skip
+        if (!iframe || !iframe.contentDocument) return;
+
+        const content = iframe.contentDocument.body.innerText || '';
+
+        // Deteksi error umum dari PDF.js atau viewer
+        if (content.toLowerCase().includes('error') || content.toLowerCase().includes('not found')) {
+            pdfError.value = true;
+        }
+    } catch (e) {
+        pdfError.value = true;
+    }
+};
+
+const onIframeLoad = () => {
+    // Iframe load berhasil
+    pdfError.value = false;
+};
+
+const onIframeError = () => {
+    // Jika iframe gagal load
+    pdfError.value = true;
+};
+
+
 watch(search, useDebounceFn(() => fetchDocuments(1), 300))
+// Trigger pengecekan setelah dokumen berubah dan iframe selesai render
+// Alternatif: cek apakah file tersedia dulu
+watch(() => selectedDoc.value?.file_url, async (newUrl) => {
+    pdfError.value = false;
+
+    if (!newUrl) return;
+
+    try {
+        const res = await fetch(newUrl, { method: 'HEAD' }); // hanya cek status tanpa ambil isi
+        if (!res.ok || !res.headers.get('content-type')?.includes('pdf')) {
+            pdfError.value = true;
+        }
+    } catch (err) {
+        pdfError.value = true;
+    }
+});
+
 onMounted(() => fetchDocuments())
 </script>

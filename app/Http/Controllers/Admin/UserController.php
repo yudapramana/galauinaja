@@ -10,27 +10,56 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::withAggregate('employee','id_work_unit')->with([
-            'employee.workUnit'
-        ])
-        ->when($request->search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhereHas('employee', function ($q) use ($search) {
-                    $q->where('full_name', 'like', "%{$search}%")
-                        ->orWhere('nip', 'like', "%{$search}%")
-                        ->orWhereHas('workUnit', function ($q) use ($search) {
-                            $q->where('unit_name', 'like', "%{$search}%");
+        $users = User::withAggregate('employee', 'id_work_unit')
+            ->with(['employee.workUnit'])
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhereHas('employee', function ($q) use ($search) {
+                            $q->where('full_name', 'like', "%{$search}%")
+                                ->orWhere('nip', 'like', "%{$search}%")
+                                ->orWhereHas('workUnit', function ($q) use ($search) {
+                                    $q->where('unit_name', 'like', "%{$search}%");
+                                });
                         });
                 });
-            });
-        })
-        ->orderBy('employee_id_work_unit', 'asc')
-        ->paginate(10);
+            })
+            ->when($request->work_unit_id, function ($query, $workUnitId) {
+                $query->whereHas('employee', function ($q) use ($workUnitId) {
+                    $q->where('id_work_unit', $workUnitId);
+                });
+            })
+            // ->orderBy('employee_id_work_unit', 'asc')
+            ->orderBy('username', 'asc') // sort by tanggal lahir
+            ->paginate(10);
 
         return response()->json($users);
     }
+
+    // public function index(Request $request)
+    // {
+    //     $users = User::withAggregate('employee','id_work_unit')->with([
+    //         'employee.workUnit'
+    //     ])
+    //     ->when($request->search, function ($query, $search) {
+    //         $query->where(function ($q) use ($search) {
+    //             $q->where('name', 'like', "%{$search}%")
+    //             ->orWhere('email', 'like', "%{$search}%")
+    //             ->orWhereHas('employee', function ($q) use ($search) {
+    //                 $q->where('full_name', 'like', "%{$search}%")
+    //                     ->orWhere('nip', 'like', "%{$search}%")
+    //                     ->orWhereHas('workUnit', function ($q) use ($search) {
+    //                         $q->where('unit_name', 'like', "%{$search}%");
+    //                     });
+    //             });
+    //         });
+    //     })
+    //     ->orderBy('employee_id_work_unit', 'asc')
+    //     ->paginate(10);
+
+    //     return response()->json($users);
+    // }
 
     public function store(Request $request)
     {

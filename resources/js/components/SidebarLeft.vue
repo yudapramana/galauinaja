@@ -61,6 +61,15 @@ const logout = () => {
                         </router-link>
                     </li>
                     <li class="nav-item">
+                        <router-link to="/admin/docprogress" :class="$route.path.startsWith('/admin/docprogress') ? 'active' : ''"
+                            active-class="active" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>
+                                Progress
+                            </p>
+                        </router-link>
+                    </li>
+                    <li class="nav-item">
                         <router-link to="/admin/vervals" :class="$route.path.startsWith('/admin/vervals') ? 'active' : ''"
                             active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-calendar-alt"></i>

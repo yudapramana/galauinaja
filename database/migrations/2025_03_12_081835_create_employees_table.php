@@ -22,6 +22,8 @@ class CreateEmployeesTable extends Migration {
 			$table->enum('employment_status', array('PNS', 'PPPK'));
 			$table->date('tmt_pangkat')->nullable();
 			$table->date('tmt_jabatan')->nullable();
+			$table->boolean('docs_progress_state')->default(false);
+			$table->decimal('progress_dokumen', 5, 2)->default(0.00);
 		});
 	}
 
