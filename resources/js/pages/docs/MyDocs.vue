@@ -67,6 +67,10 @@
             </ul>
           </div>
 
+          <div v-else class="text-center p-5">
+            <span class="text-muted">Data tidak ditemukan.</span>
+          </div>
+
           <!-- Preview Modal -->
           <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
             <div class="modal-dialog modal-xl">
@@ -92,9 +96,7 @@
             </div>
           </div>
 
-          <div v-else class="text-center p-5">
-            <span class="text-muted">Data tidak ditemukan.</span>
-          </div>
+          
         </div>
       </div>
     </div>
