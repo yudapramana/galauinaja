@@ -40,7 +40,7 @@
                                         <span class="ml-2 font-weight-bold">
                                             {{ index + 1 }}. {{ doctype.text }}
                                             <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length
-                                                }}</span>
+                                            }}</span>
                                         </span>
                                     </div>
                                     <button class="btn btn-sm btn-success ml-2" @click="openUploadModal(doctype)">+
@@ -202,8 +202,8 @@
 
                             <label>Pilih Parameter (Opsional)</label><br>
                             <div class="btn-group mb-2 flex-wrap">
-                                <button v-for="item in [1, 2, 3, 4, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3']"
-                                    :key="item" type="button" class="btn btn-xs btn-outline-secondary mb-1"
+                                <button v-for="item in masterDataStore.docParameters" :key="item" type="button"
+                                    class="btn btn-xs btn-outline-secondary mb-1"
                                     :class="{ active: uploadForm.parameter === item }"
                                     @click="uploadForm.parameter = item">
                                     {{ item }}

@@ -13,7 +13,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
     const userList = useStorage('MasterDataStore:userList', ref({}));
     const doctypeList = useStorage('MasterDataStore:doctypeList', ref([]));
     const workunitList = useStorage('MasterDataStore:workunitList', ref([]));
-
+    const docParameters = useStorage('MasterDataStore:docParameters', ref([1, 2, 3, 4, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3', 'IIa', 'IIb', 'IIc', 'IId', 'IIIa', 'IIIb', 'IIIc', 'IIId', 'IVa', 'IVb']));
 
     const loadingStore = useLoadingStore();
     const authUserStore = useAuthUserStore();
@@ -92,6 +92,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         userList,
         doctypeList,
         workunitList,
+        docParameters,
         getUserList,
         getDoctypeList,
         getWorkunitList

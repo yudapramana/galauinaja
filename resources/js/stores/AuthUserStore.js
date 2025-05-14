@@ -67,7 +67,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             }
         } catch (error) {
             handleAuthError(error);
-        } 
+        }
         // finally {
         //     isLoading.value = false;
         // }
@@ -80,7 +80,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             userDocuments.value = response.data.data;
         } catch (error) {
             handleAuthError(error);
-        } 
+        }
         // finally {
         //     isLoading.value = false;
         // }
@@ -95,11 +95,11 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             console.log(response.data);
             docsUpdateState.value = response.data.docs_update_state;
             docsProgressState.value = response.data.docs_progress_state;
-            user.employee.progress_dokumen = res.data.progress_dokumen;
+            user.value.employee.progress_dokumen = response.data.progress_dokumen;
         } catch (error) {
             handleAuthError(error);
             docsUpdateState.value = false;
-        } 
+        }
         // finally {
         //     isLoading.value = false;
         // }
@@ -115,8 +115,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
             const roles = response.data.role_names || [];
             isAdminRole.value = roles.includes('SUPERADMIN') ||
-                                roles.includes('ADMIN') ||
-                                roles.includes('REVIEWER');
+                roles.includes('ADMIN') ||
+                roles.includes('REVIEWER');
 
             isAuthenticated.value = true;
             docsProgressState.value = response.data.employee?.docs_progress_state;

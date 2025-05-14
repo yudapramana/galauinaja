@@ -96,6 +96,11 @@ export default [
         name: 'user.upload',
         component: () => import('./pages/docs/UserUploadDoc.vue'),
       },
+      // {
+      //   path: 'flipbook',
+      //   name: 'user.flipbook',
+      //   component: () => import('./pages/flipbook/FlipBookViewer.vue'),
+      // },
     ],
   },
 ];

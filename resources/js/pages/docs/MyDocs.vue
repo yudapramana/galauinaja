@@ -67,6 +67,31 @@
             </ul>
           </div>
 
+          <!-- Preview Modal -->
+          <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content">
+                <div class="modal-header p-2">
+                  <h5 class="modal-title">Preview Dokumen</h5>
+                  <button type="button" class="close" @click="previewUrl = null">
+                    <span>&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body p-2">
+                  <iframe v-if="previewUrl && !pdfError" ref="pdfFrame"
+                    :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100" frameborder="0"
+                    style="height: 90vh; border: 1px solid #ccc;" @load="onIframeLoad" @error="onIframeError"></iframe>
+
+                  <div v-else class="text-muted text-center py-5">
+                    <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
+                    </p>
+                    <p v-else>File tidak tersedia.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div v-else class="text-center p-5">
             <span class="text-muted">Data tidak ditemukan.</span>
           </div>
@@ -75,30 +100,7 @@
     </div>
   </section>
 
-  <!-- Preview Modal -->
-  <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header p-2">
-          <h5 class="modal-title">Preview Dokumen</h5>
-          <button type="button" class="close" @click="previewUrl = null">
-            <span>&times;</span>
-          </button>
-        </div>
-        <div class="modal-body p-2">
-          <iframe v-if="previewUrl && !pdfError" ref="pdfFrame" :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`"
-            class="w-100" frameborder="0" style="height: 90vh; border: 1px solid #ccc;" @load="onIframeLoad"
-            @error="onIframeError"></iframe>
 
-          <div v-else class="text-muted text-center py-5">
-            <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
-            </p>
-            <p v-else>File tidak tersedia.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </template>
 

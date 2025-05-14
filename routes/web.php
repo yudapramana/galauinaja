@@ -31,6 +31,12 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 |
 */
 
+Route::get('/checkfiles', function() {
+    $directory = 'documents/197903062014122002';
+    $files = Storage::disk('public')->allFiles($directory);
+    return $files;
+});
+
 Route::get('/set-admin', function() {
 
     // $nipadmin = '199407292022031002';

@@ -13,22 +13,14 @@
         <div class="card-body p-3">
 
           <!-- Search Box -->
-          <div class="input-group mb-3">
-            <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
-            </div>
-          </div>
+          <SearchBox :search-query="searchQuery" />
 
           <!-- Loading State -->
-          <div v-if="isLoading" class="text-center p-5">
-            <div class="spinner-border text-primary mb-2" role="status">
-              <span class="sr-only">Loading...</span>
-            </div>
-            <div class="text-muted">Memuat daftar dokumen...</div>
-          </div>
+          <LoadingState v-if="isLoading" />
 
           <!-- Tree List -->
+          <!-- <TreeList v-else-if="filteredTree.length" :filtered-tree="filteredTree" /> -->
+
           <div v-else-if="filteredTree.length" class="tree">
             <ul class="list-unstyled mb-0">
               <li v-for="(doctype, index) in filteredTree" :key="doctype.id" class="mb-2">
@@ -58,7 +50,7 @@
                       </div>
                       <button v-if="file.status === 'Rejected'" class="btn btn-sm btn-outline-danger ml-2"
                         @click="reuploadFile(file, doctype)">
-                        Reupload
+                        Perbarui
                       </button>
                     </div>
 
@@ -75,7 +67,6 @@
               </li>
             </ul>
           </div>
-
           <div v-else class="text-center p-5">
             <span class="text-muted">Data tidak ditemukan.</span>
           </div>
@@ -85,101 +76,20 @@
     </div>
   </section>
 
+
   <!-- Preview Modal -->
-  <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header p-2">
-          <h5 class="modal-title">📄 Preview Dokumen</h5>
-          <button type="button" class="close"
-            @click="previewUrl = null; selectedPreviewFile = null"><span>&times;</span></button>
-        </div>
-        <div class="modal-body p-3">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <table class="table table-sm table-bordered">
-                <tbody>
-                  <tr>
-                    <th style="width: 40%">Tipe Dokumen</th>
-                    <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Nomor Dokumen</th>
-                    <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Tanggal Dokumen</th>
-                    <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Parameter</th>
-                    <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Status</th>
-                    <td>
-                      <span class="badge" :class="badgeClass(selectedPreviewFile?.status)">
-                        {{ selectedPreviewFile?.status || 'Pending' }}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr v-if="selectedPreviewFile?.verif_notes">
-                    <th>Catatan Verifikator</th>
-                    <td class="text-danger">{{ selectedPreviewFile.verif_notes }}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <!-- <div class="col-md-12 mt-4"> -->
-              <h6 class="text-secondary mb-2">
-                <i class="fas fa-clipboard-check mr-1"></i> Riwayat Verifikasi
-              </h6>
-
-              <div v-if="isLoadingVerval" class="text-muted small d-flex align-items-center">
-                <i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...
-              </div>
-
-              <ul v-else-if="vervalLogs.length" class="list-group list-group-unbordered small mb-2">
-                <li v-for="(log, idx) in vervalLogs" :key="idx" class="list-group-item py-2 px-2"
-                  style="line-height: 1.4;">
-                  <div>
-                    <span class="font-weight-bold text-sm">{{ log.status }}</span>
-                    <span class="text-muted mx-1">oleh</span>
-                    <span class="font-italic text-sm">{{ log.verifier_name }}</span>
-                    <small class="text-muted"> pada {{ log.verified_at }}</small>
-                  </div>
-                  <div v-if="log.notes" class="text-danger mt-1 small">
-                    <i class="fas fa-comment-dots mr-1"></i>{{ log.notes }}
-                  </div>
-                </li>
-              </ul>
-              <div v-else class="text-muted small">Tidak ada log verifikasi.</div>
-            </div>
-            <!-- </div> -->
-            <div class="col-md-6">
-              <iframe v-if="previewUrl && !pdfError" ref="pdfFrame"
-                :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100" frameborder="0"
-                style="height: 70vh; border: 1px solid #ccc;" @load="onIframeLoad" @error="onIframeError"></iframe>
-
-              <div v-else class="text-muted text-center py-5">
-                <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
-                </p>
-                <p v-else>File tidak tersedia.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <PreviewModal v-if="previewUrl" :preview-url="previewUrl" :selected-preview-file="selectedPreviewFile"
+    :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError"
+    @close="previewUrl = null; selectedPreviewFile = null; vervalLogs = [];" />
 
   <!-- Upload Modal -->
   <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header">
-          <h5 class="modal-title">Upload Dokumen Pegawai: {{ selectedDoctype?.text }}</h5>
+          <h5 class="modal-title">
+             {{ isEditMode ? 'Edit Dokumen Pegawai' : 'Upload Dokumen Pegawai' }}  <!--: {{ selectedDoctype?.text }} -->
+          </h5>
           <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
         </div>
 
@@ -204,12 +114,11 @@
             </div>
 
             <div class="form-group">
-              
               <label>Pilih Parameter (Opsional)</label><br>
               <div class="btn-group mb-2 flex-wrap">
-                <button v-for="item in [1, 2, 3, 4, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3']" :key="item"
-                  type="button" class="btn btn-xs btn-outline-secondary mb-1"
-                  :class="{ active: uploadForm.parameter === item }" @click="uploadForm.parameter = item">
+                <button v-for="item in masterDataStore.docParameters" :key="item" type="button"
+                  class="btn btn-xs btn-outline-secondary mb-1" :class="{ active: uploadForm.parameter === item }"
+                  @click="uploadForm.parameter = item">
                   {{ item }}
                 </button>
               </div>
@@ -220,31 +129,33 @@
                   <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
                 </div>
               </div>
+
               <small class="form-text text-muted mb-2">
-                <strong>Info:</strong> Gunakan parameter diatas jika dokumen pada tipe ini bersifat multiple atau lebih dari
-                satu,
-                seperti <em>Akte Kelahiran Anak</em>, <em>SKP 2 Tahun Terakhir</em>, <em>SK Jabatan</em>, dan
-                sejenisnya.
+                <strong>Info:</strong> Gunakan parameter jika dokumen ini bisa lebih dari satu, seperti
+                <em>Akte Anak</em>, <em>SK Jabatan</em>, dst.
               </small>
             </div>
-            <!-- <input v-model="uploadForm.parameter" type="text" class="form-control" readonly> -->
 
-
-
-            <!-- <input @change="handleFileChange" type="file" class="form-control"
-                accept="application/pdf" required> -->
             <div class="form-group">
-              <label>Pilih File (PDF)</label>
+              <label>File Dokumen (PDF)</label>
+
+              <!-- Tampilkan file lama jika sedang edit -->
+              <div v-if="isEditMode && existingFileUrl" class="mb-2">
+                <a :href="existingFileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-file-pdf"></i> Lihat Dokumen Lama
+                </a>
+                <br />
+                <small class="text-muted">Jika tidak ingin mengganti file, biarkan kosong.</small>
+              </div>
+
               <div class="custom-file">
-                <input type="file" class="custom-file-input" id="exampleInputFile" accept="application/pdf"
-                  @change="handleFileChange" required>
-                <label class="custom-file-label" for="exampleInputFile">
+                <input type="file" class="custom-file-input" id="fileInput" accept="application/pdf"
+                  @change="handleFileChange" :required="!isEditMode">
+                <label class="custom-file-label" for="fileInput">
                   {{ uploadForm.fileName || 'Pilih file' }}
                 </label>
               </div>
             </div>
-
-
 
             <div v-if="loadingUpload" class="mb-3">
               <div class="progress" style="height: 20px;">
@@ -264,7 +175,7 @@
               <i class="fas fa-spinner fa-spin"></i> Uploading...
             </span>
             <span v-else>
-              Upload
+              {{ isEditMode ? 'Simpan Perubahan' : 'Upload' }}
             </span>
           </button>
         </div>
@@ -273,73 +184,6 @@
   </div>
 
 
-  <!-- <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Upload Dokumen: {{ selectedDoctype?.text }}</h5>
-          <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitUpload">
-            <input type="hidden" :value="selectedDoctype?.id" />
-
-            <div class="form-group">
-              <label>Tipe Dokumen</label>
-              <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
-            </div>
-
-            <div class="form-group">
-              <label>Nomor Dokumen</label>
-              <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
-            </div>
-
-            <div class="form-group">
-              <label>Tanggal Dokumen</label>
-              <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-              <label>Parameter (Opsional)</label>
-              <input v-model="uploadForm.parameter" type="text" class="form-control">
-            </div>
-
-            <div class="form-group">
-              <label>Pilih File (PDF)</label>
-              <input @change="handleFileChange" type="file" class="form-control" accept="application/pdf" required>
-            </div>
-
-
-            <div v-if="loadingUpload" class="mb-3">
-              <div class="progress" style="height: 20px;">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" :class="progressBarColor"
-                  role="progressbar" :style="{ width: uploadProgress + '%' }" :aria-valuenow="uploadProgress"
-                  aria-valuemin="0" aria-valuemax="100">
-                  {{ uploadProgress }}%
-                </div>
-              </div>
-            </div>
-
-
-            <div class="text-right">
-
-              <button type="submit" class="btn btn-primary" :disabled="loadingUpload">
-                <span v-if="loadingUpload">
-                  <i class="fas fa-spinner fa-spin"></i> Uploading...
-                </span>
-                <span v-else>
-                  Upload
-                </span>
-              </button>
-            </div>
-
-          </form>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
-  <!-- </div> -->
 </template>
 
 <script setup>
@@ -348,6 +192,10 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
+import LoadingState from './LoadingState.vue';
+import SearchBox from './SearchBox.vue';
+import TreeList from './TreeList.vue';
+import PreviewModal from './PreviewModal.vue';
 
 
 const treeData = ref([]);
@@ -357,6 +205,8 @@ const isLoading = ref(false);
 const selectedPreviewFile = ref(null);
 const vervalLogs = ref([]);
 const isLoadingVerval = ref(false);
+const isEditMode = ref(false); // true = edit, false = upload baru
+const existingFileUrl = ref(''); // e.g. '/storage/docs/123456.pdf'
 
 
 const showUploadModal = ref(false);
@@ -497,6 +347,8 @@ const filteredTree = computed(() => {
 
 const openUploadModal = (doctype) => {
   selectedDoctype.value = doctype;
+  isEditMode.value = false; // matikan mode edit
+  existingFileUrl.value = '';
   showUploadModal.value = true;
   uploadForm.value = {
     doc_number: '',
@@ -508,6 +360,7 @@ const openUploadModal = (doctype) => {
 
 const closeUploadModal = () => {
   showUploadModal.value = false;
+  isEditMode.value = false;
   uploadForm.value = {
     doc_number: '',
     doc_date: '',
@@ -515,11 +368,17 @@ const closeUploadModal = () => {
     file: null,
     file_id: null
   };
+  existingFileUrl.value = '';
 };
 
 
 const handleFileChange = (e) => {
   const file = e.target.files[0];
+
+  if (file) {
+    uploadForm.value.file = file;
+    uploadForm.value.fileName = file.name;
+  }
 
   if (!file) {
     uploadForm.value.file = null;
@@ -557,12 +416,16 @@ const handleFileChange = (e) => {
 const reuploadFile = (file, doctype) => {
   selectedDoctype.value = doctype;
   showUploadModal.value = true;
+  isEditMode.value = true; // aktifkan mode edit
+
+  // Set file yang sedang diedit
+  existingFileUrl.value = file.file_url || ''; // gunakan URL file lama untuk preview
   uploadForm.value = {
     doc_number: file.doc_number || '',
     doc_date: file.doc_date || '',
     parameter: file.parameter || '',
-    file: null,
-    file_id: file.id  // Tambahkan ID file untuk PATCH
+    file: null,               // file baru, jika ada
+    file_id: file.id          // ID file lama untuk keperluan update (PATCH)
   };
 };
 

@@ -41,6 +41,9 @@ const logout = () => {
                     <li class="nav-item">
                         <router-link to="/user/upload" active-class="active" class="nav-link">Upload</router-link>
                     </li>
+                    <!-- <li class="nav-item">
+                        <router-link to="/user/flipbook" active-class="active" class="nav-link">Flipbook</router-link>
+                    </li> -->
                 </ul>
             </div>
 

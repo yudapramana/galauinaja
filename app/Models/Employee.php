@@ -50,11 +50,12 @@ class Employee extends Model
         $total = $mandatoryDocTypes->count();
 
         $uploaded = EmpDocument::where([
-                                'id_employee' => $this->id,
-                                'status' => 'Approved'
-                            ])
-                            ->whereIn('id_doc_type', $mandatoryDocTypes)
-                            ->count();
+                        'id_employee' => $this->id,
+                        'status' => 'Approved'
+                    ])
+                    ->whereIn('id_doc_type', $mandatoryDocTypes)
+                    ->distinct()
+                    ->count('id_doc_type');
 
         $progress = $total > 0 ? round(($uploaded / $total) * 100, 2) : 0;
 

@@ -1,34 +1,26 @@
 <template>
   <!-- <div class="content-wrapper p-3"> -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <h3 class="text-primary">📂 Upload Dokumen</h3>
-      </div>
-    </section>
+  <section class="content-header">
+    <div class="container-fluid">
+      <h3 class="text-primary">📂 Upload Dokumen</h3>
+    </div>
+  </section>
 
-    <section class="content">
-      <div class="container-fluid">
+  <section class="content">
+    <div class="container-fluid">
 
       <div class="card shadow-sm rounded-lg">
         <div class="card-body p-3">
 
           <!-- Search Box -->
-          <div class="input-group mb-3">
-            <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
-            </div>
-          </div>
+          <SearchBox :search-query="searchQuery" />
 
           <!-- Loading State -->
-          <div v-if="isLoading" class="text-center p-5">
-            <div class="spinner-border text-primary mb-2" role="status">
-              <span class="sr-only">Loading...</span>
-            </div>
-            <div class="text-muted">Memuat daftar dokumen...</div>
-          </div>
+          <LoadingState v-if="isLoading" />
 
           <!-- Tree List -->
+          <!-- <TreeList v-else-if="filteredTree.length" :filtered-tree="filteredTree" /> -->
+
           <div v-else-if="filteredTree.length" class="tree">
             <ul class="list-unstyled mb-0">
               <li v-for="(doctype, index) in filteredTree" :key="doctype.id" class="mb-2">
@@ -46,21 +38,10 @@
 
                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
 
-                  <!-- <li v-for="file in doctype.files" :key="file.id"
-                    class="cursor-pointer p-1 rounded hover-bg-light small">
-                    <div @click="previewFile(file.file_url)" class="d-flex align-items-center">
-                      <i class="fas fa-file-pdf text-danger mr-2"></i>
-                      <span>{{ file.file_name }}</span>
-                      <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
-                        {{ file.status || 'Pending' }}
-                      </span>
-                    </div>
-                  </li> -->
-
                   <li v-for="file in doctype.files" :key="file.id"
                     class="cursor-pointer p-1 rounded hover-bg-light small">
                     <div class="d-flex align-items-center justify-content-between w-100">
-                      <div @click="previewFile(file.file_url)" class="d-flex align-items-center">
+                      <div @click="previewFile(file)" class="d-flex align-items-center">
                         <i class="fas fa-file-pdf text-danger mr-2"></i>
                         <span>{{ file.file_name }}</span>
                         <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
@@ -86,7 +67,6 @@
               </li>
             </ul>
           </div>
-
           <div v-else class="text-center p-5">
             <span class="text-muted">Data tidak ditemukan.</span>
           </div>
@@ -94,92 +74,108 @@
         </div>
       </div>
     </div>
-    </section>
+  </section>
 
-    <!-- Preview Modal -->
-    <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-          <div class="modal-header p-2">
-            <h5 class="modal-title">Preview Dokumen</h5>
-            <button type="button" class="close" @click="previewUrl = null"><span>&times;</span></button>
-          </div>
-          <div class="modal-body p-2">
-            <iframe :src="previewUrl" class="w-100" style="height: 90vh; border: none;"></iframe>
-          </div>
+
+  <!-- Preview Modal -->
+  <PreviewModal v-if="previewUrl" :preview-url="previewUrl" :selected-preview-file="selectedPreviewFile"
+    :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError"
+    @close="previewUrl = null; selectedPreviewFile = null; vervalLogs = [];" />
+
+  <!-- Upload Modal -->
+  <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Dokumen Pegawai: {{ selectedDoctype?.text }}</h5>
+          <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
         </div>
-      </div>
-    </div>
 
-    <!-- Upload Modal -->
-    <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Upload Dokumen: {{ selectedDoctype?.text }}</h5>
-            <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="submitUpload">
-              <!-- Hidden ID_DOC_TYPE -->
-              <input type="hidden" :value="selectedDoctype?.id" />
+        <div class="modal-body overflow-auto" style="flex: 1 1 auto;">
+          <form @submit.prevent="submitUpload" id="uploadForm">
+            <!-- Hidden ID_DOC_TYPE -->
+            <input type="hidden" :value="selectedDoctype?.id" />
 
-              <div class="form-group">
-                <label>Tipe Dokumen</label>
-                <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
-              </div>
+            <div class="form-group">
+              <label>Tipe Dokumen</label>
+              <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
+            </div>
 
-              <div class="form-group">
-                <label>Nomor Dokumen</label>
-                <input v-model="uploadForm.doc_number" type="text" class="form-control" required>
-              </div>
+            <div class="form-group">
+              <label>Nomor Dokumen</label>
+              <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
+            </div>
 
-              <div class="form-group">
-                <label>Tanggal Dokumen</label>
-                <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-              </div>
+            <div class="form-group">
+              <label>Tanggal Dokumen</label>
+              <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
+            </div>
 
-              <div class="form-group">
-                <label>Parameter (Opsional)</label>
-                <input v-model="uploadForm.parameter" type="text" class="form-control">
-              </div>
+            <div class="form-group">
 
-              <div class="form-group">
-                <label>Pilih File (PDF)</label>
-                <input @change="handleFileChange" type="file" class="form-control" accept="application/pdf" required>
-              </div>
-
-
-              <div v-if="loadingUpload" class="mb-3">
-                <div class="progress" style="height: 20px;">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" :class="progressBarColor"
-                    role="progressbar" :style="{ width: uploadProgress + '%' }" :aria-valuenow="uploadProgress"
-                    aria-valuemin="0" aria-valuemax="100">
-                    {{ uploadProgress }}%
-                  </div>
-                </div>
-              </div>
-
-
-              <div class="text-right">
-
-                <button type="submit" class="btn btn-primary" :disabled="loadingUpload">
-                  <span v-if="loadingUpload">
-                    <i class="fas fa-spinner fa-spin"></i> Uploading...
-                  </span>
-                  <span v-else>
-                    Upload
-                  </span>
+              <label>Pilih Parameter (Opsional)</label><br>
+              <div class="btn-group mb-2 flex-wrap">
+                <button v-for="item in masterDataStore.docParameters" :key="item" type="button"
+                  class="btn btn-xs btn-outline-secondary mb-1" :class="{ active: uploadForm.parameter === item }"
+                  @click="uploadForm.parameter = item">
+                  {{ item }}
                 </button>
               </div>
 
-            </form>
-          </div>
+              <div class="input-group mb-3">
+                <input v-model="uploadForm.parameter" type="text" class="form-control" readonly>
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
+                </div>
+              </div>
+              <small class="form-text text-muted mb-2">
+                <strong>Info:</strong> Gunakan parameter diatas jika dokumen pada tipe ini bersifat multiple atau lebih
+                dari
+                satu,
+                seperti <em>Akte Kelahiran Anak</em>, <em>SKP 2 Tahun Terakhir</em>, <em>SK Jabatan</em>, dan
+                sejenisnya.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label>Pilih File (PDF)</label>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="exampleInputFile" accept="application/pdf"
+                  @change="handleFileChange" required>
+                <label class="custom-file-label" for="exampleInputFile">
+                  {{ uploadForm.fileName || 'Pilih file' }}
+                </label>
+              </div>
+            </div>
+
+
+
+            <div v-if="loadingUpload" class="mb-3">
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" :class="progressBarColor"
+                  role="progressbar" :style="{ width: uploadProgress + '%' }" :aria-valuenow="uploadProgress"
+                  aria-valuemin="0" aria-valuemax="100">
+                  {{ uploadProgress }}%
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" :disabled="loadingUpload" form="uploadForm">
+            <span v-if="loadingUpload">
+              <i class="fas fa-spinner fa-spin"></i> Uploading...
+            </span>
+            <span v-else>
+              Upload
+            </span>
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-  <!-- </div> -->
 </template>
 
 <script setup>
@@ -188,12 +184,19 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
+import LoadingState from './LoadingState.vue';
+import SearchBox from './SearchBox.vue';
+import TreeList from './TreeList.vue';
+import PreviewModal from './PreviewModal.vue';
 
 
 const treeData = ref([]);
 const previewUrl = ref(null);
 const searchQuery = ref('');
-const isLoading = ref(false)
+const isLoading = ref(false);
+const selectedPreviewFile = ref(null);
+const vervalLogs = ref([]);
+const isLoadingVerval = ref(false);
 
 
 const showUploadModal = ref(false);
@@ -209,6 +212,17 @@ const progressBarColor = computed(() => {
     return 'bg-success'; // Hijau 70%-100%
   }
 });
+const pdfFrame = ref(null);
+const pdfError = ref(false);
+const onIframeLoad = () => {
+  // Iframe load berhasil
+  pdfError.value = false;
+};
+
+const onIframeError = () => {
+  // Jika iframe gagal load
+  pdfError.value = true;
+};
 
 const badgeClass = (status) => {
   switch (status) {
@@ -229,8 +243,22 @@ const uploadForm = ref({
   doc_date: '',
   parameter: '',
   file: null,
+  fileName: '',
   file_id: null
 });
+
+const fetchVervalLog = async (fileId) => {
+  isLoadingVerval.value = true;
+  try {
+    const res = await axios.get(`/api/document-log/${fileId}`);
+    vervalLogs.value = res.data.data || [];
+  } catch (error) {
+    console.error('Gagal mengambil log verval:', error);
+    vervalLogs.value = [];
+  } finally {
+    isLoadingVerval.value = false;
+  }
+};
 
 const fetchData = async () => {
   console.log('eh kepanggil fetchdata didalam');
@@ -252,7 +280,10 @@ const fetchData = async () => {
       id: doctype.id,
       text: doctype.text,
       expanded: true,
-      files: relatedFiles
+      files: relatedFiles.map(file => ({
+        ...file,
+        doc_type_text: doctype.text
+      }))
     };
   });
 };
@@ -261,8 +292,33 @@ const toggleExpand = (doctype) => {
   doctype.expanded = !doctype.expanded;
 };
 
-const previewFile = (url) => {
-  previewUrl.value = url;
+const previewFile = async (file) => {
+  console.log('file');
+  console.log(file);
+
+  pdfError.value = false;
+  selectedPreviewFile.value = file;
+  previewUrl.value = file.file_url;
+  try {
+    const res = await fetch(file.file_url, { method: 'HEAD' });
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        pdfError.value = 'not_found';
+      } else {
+        pdfError.value = true;
+      }
+      return;
+    }
+
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('pdf')) {
+      pdfError.value = true;
+    }
+  } catch (err) {
+    pdfError.value = true;
+  }
+  await fetchVervalLog(file.id);
 };
 
 const clearSearch = () => {
@@ -307,6 +363,7 @@ const handleFileChange = (e) => {
 
   if (!file) {
     uploadForm.value.file = null;
+    uploadForm.value.fileName = '';
     return;
   }
 
@@ -334,6 +391,7 @@ const handleFileChange = (e) => {
   }
 
   uploadForm.value.file = file;
+  uploadForm.value.fileName = file.name;
 };
 
 const reuploadFile = (file, doctype) => {
@@ -347,66 +405,6 @@ const reuploadFile = (file, doctype) => {
     file_id: file.id  // Tambahkan ID file untuk PATCH
   };
 };
-
-// const submitUpload = async () => {
-//   if (!uploadForm.value.file) {
-//     Swal.fire({
-//       icon: 'warning',
-//       title: 'File Belum Dipilih',
-//       text: 'Silakan pilih file terlebih dahulu.'
-//     });
-//     return;
-//   }
-
-//   loadingUpload.value = true;
-
-//   const formData = new FormData();
-//   formData.append('doc_number', uploadForm.value.doc_number);
-//   formData.append('doc_date', uploadForm.value.doc_date);
-//   formData.append('parameter', uploadForm.value.parameter);
-//   formData.append('file', uploadForm.value.file);
-//   formData.append('id_doc_type', selectedDoctype.value.id);
-
-//   try {
-//     await axios.post('/api/upload-document', formData, {
-//       headers: { 'Content-Type': 'multipart/form-data' },
-//       onUploadProgress: (progressEvent) => {
-//         if (progressEvent.total) {
-//           uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-//         }
-//       }
-//     });
-
-//     Swal.fire({
-//       icon: 'success',
-//       title: 'Upload Berhasil!',
-//       showConfirmButton: false,
-//       timer: 1500
-//     });
-
-//     await refreshSingleFolder(selectedDoctype.value.id);
-//     closeUploadModal();
-//   } catch (error) {
-//     console.error(error);
-
-//     let message = 'Terjadi kesalahan saat mengupload file.';
-
-//     // Tampilkan pesan error validasi dari backend jika ada
-//     if (error.response && error.response.status === 422 && error.response.data.errors) {
-//       const errors = error.response.data.errors;
-//       message = Object.values(errors).flat().join('\n');
-//     }
-
-//     Swal.fire({
-//       icon: 'error',
-//       title: 'Upload Gagal',
-//       text: message
-//     });
-//   } finally {
-//     loadingUpload.value = false; // Pastikan loading mati di akhir
-//     uploadProgress.value = 0;
-//   }
-// };
 
 const submitUpload = async () => {
   if (!uploadForm.value.file && !uploadForm.value.file_id) {
