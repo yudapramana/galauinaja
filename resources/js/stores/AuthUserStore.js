@@ -170,6 +170,10 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const handleAuthError = async (error) => {
         if (error.response && error.response.status === 401) {
             // window.location.href = '/login';
+
+            docsProgressState.value = false;
+            docsUpdateState.value = true;
+
             // Bersihkan data
             localStorage.clear();
             sessionStorage.clear();
@@ -191,6 +195,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
             await axios.get('/sanctum/csrf-cookie');
             router.push('/login');
+
+            
         } else {
             console.error('Terjadi kesalahan:', error);
         }

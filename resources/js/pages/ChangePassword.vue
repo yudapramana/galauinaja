@@ -1,7 +1,7 @@
 <!-- views/ChangePassword.vue -->
 <template>
     <div class="max-w-md mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">Change Your Password</h1>
+      <h1 class="text-2xl font-bold mb-4">Change Your Passwordaaa</h1>
       <form @submit.prevent="submit">
         <div class="mb-4">
           <label class="block text-gray-700">New Password</label>

@@ -129,6 +129,8 @@ Route::get('/logout_all', function () {
         Auth::login($u);
         Auth::logout();
     });
+
+    return 'done';
 });
 
 Route::get('/landing', function () {

@@ -4,12 +4,14 @@ import { useToastr } from '@/toastr';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useScreenDisplayStore } from '../../stores/ScreenDisplayStore.js';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const authUserStore = useAuthUserStore();
 const screenDisplayStore = useScreenDisplayStore();
 const toastr = useToastr();
 const isChangingPassword = ref(false);
 const errors = ref({});
+const router = useRouter();
 
 const changePasswordForm = reactive({
     currentPassword: authUserStore.user.username,
@@ -21,26 +23,32 @@ const showCurrentPassword = ref(false);
 const showNewPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const handleChangePassword = () => {
+const handleChangePassword = async () => {
     isChangingPassword.value = true;
     errors.value = {};
-    axios
-        .post('/api/change-user-password', changePasswordForm)
-        .then((response) => {
-            toastr.success(response.data.message);
-            for (const field in changePasswordForm) {
-                changePasswordForm[field] = '';
-            }
-        })
-        .catch((error) => {
-            if (error.response && error.response.status === 422) {
-                errors.value = error.response.data.errors;
-            }
-        })
-        .finally(() => {
-            isChangingPassword.value = false;
-        });
+    try {
+        const response = await axios.post('/api/change-user-password', changePasswordForm);
+        toastr.success(response.data.message);
+
+        for (const field in changePasswordForm) {
+            changePasswordForm[field] = '';
+        }
+
+        authUserStore.user.must_change_password = false;
+        console.log('authUserStore.user.must_change_password');
+        console.log(authUserStore.user.must_change_password);
+
+        // Ensure the route exists and is correctly spelled
+        router.push('/user/dashboard');
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            errors.value = error.response.data.errors;
+        }
+    } finally {
+        isChangingPassword.value = false;
+    }
 };
+
 </script>
 
 <template>
@@ -49,11 +57,11 @@ const handleChangePassword = () => {
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Ubah Password</h1>
+                    <h1 class="m-0">Ubah Password aaa</h1>
                 </div>
                 <div class="col-sm-6" v-if="!screenDisplayStore.isMobile">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Home aaa</a></li>
                         <li class="breadcrumb-item active">Ubah Password</li>
                     </ol>
                 </div>

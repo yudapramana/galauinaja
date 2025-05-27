@@ -547,7 +547,7 @@ const submitUpload = async () => {
     }
 };
 
-onMounted(fetchData);
+// onMounted(fetchData);
 watch(() => props.userId, fetchData);
 </script>
 

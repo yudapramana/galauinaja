@@ -19,19 +19,26 @@ export const useSettingStore = defineStore('SettingStore', () => {
     };
 
     const getSetting = async () => {
-        await axios.get('/api/settings')
-            .then((response) => {
-                setting.value = response.data;
-            }).catch((error) => {
-                // Bersihkan data
-                localStorage.clear();
-                sessionStorage.clear();
-                document.cookie.split(";").forEach(cookie => {
-                    const eqPos = cookie.indexOf("=");
-                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        // console.log('setting.value.app_name');
+        // console.log(setting.value.app_name);
+        if (!setting.value.app_name) {
+            console.log('tidak masuk sini kan ya');
+            await axios.get('/api/settings')
+                .then((response) => {
+                    setting.value = response.data;
+                }).catch((error) => {
+                    // Bersihkan data
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    document.cookie.split(";").forEach(cookie => {
+                        const eqPos = cookie.indexOf("=");
+                        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                    });
                 });
-            })
+        } else {
+            // do nothing;
+        }
     };
 
     return { setting, getSetting, theme, changeTheme, toggleMenuIcon };
