@@ -113,4 +113,8 @@ export default [
       // },
     ],
   },
+  { path: '/:pathMatch(.*)*', 
+    name: 'not-found', 
+    component: () => import('./components/NotFound.vue'), 
+  },
 ];
