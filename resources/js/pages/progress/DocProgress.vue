@@ -99,12 +99,14 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useMasterDataStore } from '../../stores/MasterDataStore.js';
 import Select2 from 'vue3-select2-component'
+import { useAuthUserStore } from '../../stores/AuthUserStore.js';
 
 const users = ref([]);
 const workUnits = ref([]);
 const selectedWorkUnit = ref('');
 const isLoading = ref(false);
 const masterDataStore = useMasterDataStore();
+const authUserStore = useAuthUserStore();
 
 const meta = ref({
     current_page: 1,
@@ -122,7 +124,7 @@ const fetchWorkUnits = async () => {
         //   const res = await axios.get('/api/work-units')
         //   workUnits.value = res.data
     } catch (error) {
-        console.error('Gagal memuat unit kerja:', error)
+        authUserStore.handleAuthError(error);
     }
 }
 
@@ -143,7 +145,7 @@ const fetchUsers = async (page = 1) => {
             ...res.data,
         }
     } catch (error) {
-        console.error('Gagal memuat data pengguna:', error)
+        authUserStore.handleAuthError(error);
     } finally {
         isLoading.value = false
     }

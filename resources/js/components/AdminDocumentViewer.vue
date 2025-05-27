@@ -337,6 +337,9 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useMasterDataStore } from '../stores/MasterDataStore';
 import { useRouter } from 'vue-router';
+import { useAuthUserStore } from '../stores/AuthUserStore';
+
+const authUserStore = useAuthUserStore();
 
 const router = useRouter();
 
@@ -444,7 +447,7 @@ const fetchVervalLog = async (fileId) => {
         const res = await axios.get(`/api/document-log/${fileId}`);
         vervalLogs.value = res.data.data || [];
     } catch (error) {
-        console.error('Gagal mengambil log verval:', error);
+        authUserStore.handleAuthError(error);
         vervalLogs.value = [];
     } finally {
         isLoadingVerval.value = false;

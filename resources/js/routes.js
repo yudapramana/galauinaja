@@ -11,6 +11,11 @@ export default [
     component: () => import('./pages/auth/Login.vue'),
   },
   {
+    path: '/change-password',
+    name: 'app.change-password',
+    component: () => import('./pages/ChangePassword.vue'),
+  },
+  {
     path: '/admin',
     meta: { requiresAdmin: true },
     children: [
@@ -85,6 +90,11 @@ export default [
         path: 'profile',
         name: 'user.profile',
         component: () => import('./pages/profile/UserProfile.vue'),
+      },
+      {
+        path: 'change-password',
+        name: 'user.change-password',
+        component: () => import('./pages/profile/ChangePassword.vue'),
       },
       {
         path: 'docs',

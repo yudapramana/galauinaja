@@ -171,7 +171,7 @@ onMounted(() => {
                                             <label class="col-sm-2 col-form-label">NIP</label>
                                             <div class="col-sm-10">
                                                 <input v-model="authUserStore.user.employee.nip" type="text"
-                                                    class="form-control" placeholder="NIP">
+                                                    class="form-control" placeholder="NIP" readonly>
                                                 <span class="text-danger text-sm" v-if="errors && errors.nip">{{
                                                     errors.nip[0] }}</span>
                                             </div>
@@ -181,7 +181,7 @@ onMounted(() => {
                                             <label class="col-sm-2 col-form-label">Full Name</label>
                                             <div class="col-sm-10">
                                                 <input v-model="authUserStore.user.employee.full_name" type="text"
-                                                    class="form-control" placeholder="Full Name">
+                                                    class="form-control" placeholder="Full Name" readonly>
                                                 <span class="text-danger text-sm" v-if="errors && errors.full_name">{{
                                                     errors.full_name[0] }}</span>
                                             </div>
@@ -191,7 +191,7 @@ onMounted(() => {
                                             <label class="col-sm-2 col-form-label">Date of Birth</label>
                                             <div class="col-sm-10">
                                                 <input v-model="authUserStore.user.employee.date_of_birth" type="date"
-                                                    class="form-control">
+                                                    class="form-control" readonly>
                                                 <span class="text-danger text-sm"
                                                     v-if="errors && errors.date_of_birth">{{ errors.date_of_birth[0]
                                                     }}</span>
@@ -201,7 +201,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Gender</label>
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.gender"
+                                                <select v-model="authUserStore.user.employee.gender" readonly
                                                     class="form-control">
                                                     <option value="">Select</option>
                                                     <option value="M">Male</option>
@@ -226,7 +226,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Email</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.email" type="email"
+                                                <input v-model="authUserStore.user.employee.email" type="email" readonly
                                                     class="form-control" placeholder="Email">
                                                 <span class="text-danger text-sm" v-if="errors && errors.email">{{
                                                     errors.email[0] }}</span>
@@ -236,7 +236,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Job Title</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.job_title" type="text"
+                                                <input v-model="authUserStore.user.employee.job_title" type="text" readonly
                                                     class="form-control" placeholder="Job Title">
                                                 <span class="text-danger text-sm" v-if="errors && errors.job_title">{{
                                                     errors.job_title[0] }}</span>
@@ -254,7 +254,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Work Unit</label>
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.id_work_unit"
+                                                <select v-model="authUserStore.user.employee.id_work_unit" readonly
                                                     class="form-control">
                                                     <option value="">Select Work Unit</option>
                                                     <option v-for="unit in masterDataStore.workunitList" :key="unit.id"
@@ -270,9 +270,9 @@ onMounted(() => {
 
 
                                         <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Status</label>
+                                            <label class="col-sm-2 col-form-label">Status</label> 
                                             <div class="col-sm-10">
-                                                <select v-model="authUserStore.user.employee.employment_status"
+                                                <select v-model="authUserStore.user.employee.employment_status" readonly
                                                     class="form-control">
                                                     <option value="">Select</option>
                                                     <option value="PNS">PNS</option>
@@ -287,7 +287,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">TMT Pangkat</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.tmt_pangkat" type="date"
+                                                <input v-model="authUserStore.user.employee.tmt_pangkat" type="date" readonly
                                                     class="form-control">
                                                 <span class="text-danger text-sm" v-if="errors && errors.tmt_pangkat">{{
                                                     errors.tmt_pangkat[0] }}</span>
@@ -297,7 +297,7 @@ onMounted(() => {
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">TMT Jabatan</label>
                                             <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.tmt_jabatan" type="date"
+                                                <input v-model="authUserStore.user.employee.tmt_jabatan" type="date" readonly
                                                     class="form-control">
                                                 <span class="text-danger text-sm" v-if="errors && errors.tmt_jabatan">{{
                                                     errors.tmt_jabatan[0] }}</span>

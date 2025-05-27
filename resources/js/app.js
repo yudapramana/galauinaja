@@ -30,12 +30,27 @@ router.beforeEach(async (to, from) => {
     console.log('App.js Duluan bagian router.beforeEach');
     const authUserStore = useAuthUserStore();
     const settingStore = useSettingStore();
+
+    console.log('authUserStore.isAuthenticated');
+    console.log(authUserStore.isAuthenticated);
+    if (authUserStore.isAuthenticated) {
+        const mustChangePassword = authUserStore.user.must_change_password;
+
+        // Jika user harus ganti password dan bukan di halaman ganti password, arahkan
+        if (mustChangePassword && to.name !== 'user.change-password') {
+            return { name: 'user.change-password' };
+        }
+
+        // Jika user TIDAK perlu ganti password tapi mencoba akses halaman ganti password, tolak
+        if (!mustChangePassword && to.name === 'user.change-password') {
+            return { name: 'user.dashboard' }; // atau arahkan ke halaman lain seperti dashboard
+        }
+    }
+
+
+    // Refresh docs update state jika perlu
     
-    // Refresh docs update state jika perlu
-    // if (authUserStore.docsProgressState) {
-    //     await authUserStore.getAuthUser();
-    // }
-    // Refresh docs update state jika perlu
+
     if (authUserStore.docsUpdateState) {
         await authUserStore.getDocsUpdateState();
     }

@@ -263,7 +263,7 @@ const fetchVervalLog = async (fileId) => {
     const res = await axios.get(`/api/document-log/${fileId}`);
     vervalLogs.value = res.data.data || [];
   } catch (error) {
-    console.error('Gagal mengambil log verval:', error);
+    authUserStore.handleAuthError(error);
     vervalLogs.value = [];
   } finally {
     isLoadingVerval.value = false;
@@ -285,6 +285,10 @@ const fetchData = async () => {
       doc.doc_type_id === doctype.id ||
       doc.doc_type === doctype.id
     ).sort((a, b) => a.file_name.localeCompare(b.file_name)); // Urutkan berdasarkan nama
+
+
+    console.log('doctype.text');
+    console.log(doctype.text);
 
     return {
       id: doctype.id,

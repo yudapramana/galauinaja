@@ -1,38 +1,38 @@
 {
-  "_LoadingStore-MLXh2Fg5.js": {
-    "file": "assets/LoadingStore-MLXh2Fg5.js",
+  "_LoadingStore-pSFzAoZq.js": {
+    "file": "assets/LoadingStore-pSFzAoZq.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_MasterDataStore-D7ZYSZ7N.js": {
-    "file": "assets/MasterDataStore-D7ZYSZ7N.js",
+  "_MasterDataStore-tlWQTJoC.js": {
+    "file": "assets/MasterDataStore-tlWQTJoC.js",
     "imports": [
       "resources/js/app.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_LoadingStore-pSFzAoZq.js"
     ]
   },
-  "_laravel-vue-pagination.es-CwZk_h-V.js": {
-    "file": "assets/laravel-vue-pagination.es-CwZk_h-V.js",
+  "_laravel-vue-pagination.es-ConSnFIF.js": {
+    "file": "assets/laravel-vue-pagination.es-ConSnFIF.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_sweetalert2.all-BRdHEIfG.js": {
-    "file": "assets/sweetalert2.all-BRdHEIfG.js",
+  "_sweetalert2.all-tzBngFiR.js": {
+    "file": "assets/sweetalert2.all-tzBngFiR.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_toastr-!~{00o}~.js": {
+  "_toastr-!~{00q}~.js": {
     "file": "assets/toastr-T0Y5PVxv.css",
-    "src": "_toastr-!~{00o}~.js"
+    "src": "_toastr-!~{00q}~.js"
   },
-  "_toastr-C7wCpAOY.js": {
+  "_toastr-DFBXLYzF.js": {
     "css": [
       "assets/toastr-T0Y5PVxv.css"
     ],
-    "file": "assets/toastr-C7wCpAOY.js",
+    "file": "assets/toastr-DFBXLYzF.js",
     "imports": [
       "resources/js/app.js"
     ]
@@ -121,6 +121,7 @@
     "dynamicImports": [
       "resources/js/pages/Landing.vue",
       "resources/js/pages/auth/Login.vue",
+      "resources/js/pages/ChangePassword.vue",
       "resources/js/components/Dashboard.vue",
       "resources/js/pages/vervals/VervalList.vue",
       "resources/js/pages/workunits/WorkUnitList.vue",
@@ -134,15 +135,16 @@
       "resources/js/pages/progress/DocProgress.vue",
       "resources/js/components/UserDashboard.vue",
       "resources/js/pages/profile/UserProfile.vue",
+      "resources/js/pages/profile/ChangePassword.vue",
       "resources/js/pages/docs/MyDocs.vue",
       "resources/js/pages/docs/UserUploadDoc.vue"
     ],
-    "file": "assets/app-2_S5e6I1.js",
+    "file": "assets/app-BpeXRWRP.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
   "resources/js/components/Dashboard.vue": {
-    "file": "assets/Dashboard-ZsmwjHK2.js",
+    "file": "assets/Dashboard-Cm2SnSQN.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -150,15 +152,23 @@
     "src": "resources/js/components/Dashboard.vue"
   },
   "resources/js/components/UserDashboard.vue": {
-    "file": "assets/UserDashboard-Bn9wCqu4.js",
+    "file": "assets/UserDashboard-CFSyf06x.js",
     "imports": [
       "resources/js/app.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/components/UserDashboard.vue"
   },
+  "resources/js/pages/ChangePassword.vue": {
+    "file": "assets/ChangePassword-DE5omO7e.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/ChangePassword.vue"
+  },
   "resources/js/pages/Landing.vue": {
-    "file": "assets/Landing-BObicofr.js",
+    "file": "assets/Landing-D0DZjt0z.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -169,11 +179,11 @@
     "css": [
       "assets/Login-CInCVwTU.css"
     ],
-    "file": "assets/Login-BDoYOmTn.js",
+    "file": "assets/Login-lSgos-8t.js",
     "imports": [
       "resources/js/app.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/auth/Login.vue"
@@ -182,39 +192,39 @@
     "css": [
       "assets/MyDocs-BKH5tNh1.css"
     ],
-    "file": "assets/MyDocs-BRbSIMZG.js",
+    "file": "assets/MyDocs-CSbmGz6O.js",
     "imports": [
       "resources/js/app.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/MyDocs.vue"
   },
   "resources/js/pages/docs/UserDocs.vue": {
     "css": [
-      "assets/UserDocs-0LEGofFE.css"
+      "assets/UserDocs-DthSdRre.css"
     ],
-    "file": "assets/UserDocs-B2P8Ixqr.js",
+    "file": "assets/UserDocs-oF2UI5q5.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-BRdHEIfG.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_sweetalert2.all-tzBngFiR.js",
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/UserDocs.vue"
   },
   "resources/js/pages/docs/UserUploadDoc.vue": {
     "css": [
-      "assets/UserUploadDoc-CWBvCv_9.css"
+      "assets/UserUploadDoc-CB8ENmov.css"
     ],
-    "file": "assets/UserUploadDoc-C_4FlcBQ.js",
+    "file": "assets/UserUploadDoc-BwwvYbVL.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-BRdHEIfG.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_sweetalert2.all-tzBngFiR.js",
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/docs/UserUploadDoc.vue"
@@ -223,25 +233,37 @@
     "css": [
       "assets/Orgreports-D63t65XM.css"
     ],
-    "file": "assets/Orgreports-A9TMceGS.js",
+    "file": "assets/Orgreports-8DjO4gNJ.js",
     "imports": [
       "resources/js/app.js",
-      "_laravel-vue-pagination.es-CwZk_h-V.js",
-      "_sweetalert2.all-BRdHEIfG.js",
-      "_LoadingStore-MLXh2Fg5.js",
-      "_MasterDataStore-D7ZYSZ7N.js"
+      "_laravel-vue-pagination.es-ConSnFIF.js",
+      "_sweetalert2.all-tzBngFiR.js",
+      "_LoadingStore-pSFzAoZq.js",
+      "_MasterDataStore-tlWQTJoC.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/org_reports/Orgreports.vue"
+  },
+  "resources/js/pages/profile/ChangePassword.vue": {
+    "css": [
+      "assets/ChangePassword-A2VmTjbJ.css"
+    ],
+    "file": "assets/ChangePassword-Be45O1WV.js",
+    "imports": [
+      "resources/js/app.js",
+      "_toastr-DFBXLYzF.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/pages/profile/ChangePassword.vue"
   },
   "resources/js/pages/profile/UpdateProfile.vue": {
     "css": [
       "assets/UpdateProfile-CW3-_OFv.css"
     ],
-    "file": "assets/UpdateProfile-CdvC9bN0.js",
+    "file": "assets/UpdateProfile-Cl4vGz8w.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-C7wCpAOY.js"
+      "_toastr-DFBXLYzF.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/profile/UpdateProfile.vue"
@@ -250,25 +272,25 @@
     "css": [
       "assets/UpdateProfile-CW3-_OFv.css"
     ],
-    "file": "assets/UserProfile-8v6L30nl.js",
+    "file": "assets/UserProfile-CXPBCEAi.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-C7wCpAOY.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_toastr-DFBXLYzF.js",
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/profile/UserProfile.vue"
   },
   "resources/js/pages/progress/DocProgress.vue": {
     "css": [
-      "assets/DocProgress-DgSp92X2.css"
+      "assets/DocProgress-DsPucRLw.css"
     ],
-    "file": "assets/DocProgress-DW8YfW_A.js",
+    "file": "assets/DocProgress-BWEph-P_.js",
     "imports": [
       "resources/js/app.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/progress/DocProgress.vue"
@@ -277,27 +299,27 @@
     "css": [
       "assets/ListReports-BLphY1sg.css"
     ],
-    "file": "assets/ListReports-CvOFqPjQ.js",
+    "file": "assets/ListReports-hn1MyASi.js",
     "imports": [
       "resources/js/app.js",
-      "_laravel-vue-pagination.es-CwZk_h-V.js",
-      "_sweetalert2.all-BRdHEIfG.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_laravel-vue-pagination.es-ConSnFIF.js",
+      "_sweetalert2.all-tzBngFiR.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/reports/ListReports.vue"
   },
   "resources/js/pages/settings/UpdateSetting.vue": {
-    "file": "assets/UpdateSetting-DRAohfMm.js",
+    "file": "assets/UpdateSetting-DTgX2wEV.js",
     "imports": [
       "resources/js/app.js",
-      "_toastr-C7wCpAOY.js"
+      "_toastr-DFBXLYzF.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/settings/UpdateSetting.vue"
   },
   "resources/js/pages/users/UserDocList.vue": {
-    "file": "assets/UserDocList-BHatcz4a.js",
+    "file": "assets/UserDocList-DDOio71K.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -305,20 +327,20 @@
     "src": "resources/js/pages/users/UserDocList.vue"
   },
   "resources/js/pages/users/UserList.vue": {
-    "file": "assets/UserList-UBF-8K--.js",
+    "file": "assets/UserList-DIrndd6y.js",
     "imports": [
       "resources/js/app.js",
-      "_MasterDataStore-D7ZYSZ7N.js",
-      "_LoadingStore-MLXh2Fg5.js"
+      "_MasterDataStore-tlWQTJoC.js",
+      "_LoadingStore-pSFzAoZq.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/users/UserList.vue"
   },
   "resources/js/pages/vervals/VervalList.vue": {
-    "file": "assets/VervalList-odA6mZ_t.js",
+    "file": "assets/VervalList-Bejyq3Lz.js",
     "imports": [
       "resources/js/app.js",
-      "_sweetalert2.all-BRdHEIfG.js"
+      "_sweetalert2.all-tzBngFiR.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/pages/vervals/VervalList.vue"
@@ -332,7 +354,7 @@
     "css": [
       "assets/WorkUnitList-O_tS2QUe.css"
     ],
-    "file": "assets/WorkUnitList-CK5YVb-h.js",
+    "file": "assets/WorkUnitList-BE816EZk.js",
     "imports": [
       "resources/js/app.js"
     ],

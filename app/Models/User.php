@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
+
 
 class User extends Authenticatable
 {
@@ -58,7 +60,8 @@ class User extends Authenticatable
         'org_id',
         'org_name',
         'nip_name',
-        'role_names'
+        'role_names',
+        'must_change_password'
     ];
 
     public function getFormattedCreatedAtAttribute()
@@ -144,5 +147,10 @@ class User extends Authenticatable
         }
 
         return $roleNames;
+    }
+
+    public function getMustChangePasswordAttribute(): bool
+    {
+        return Hash::check($this->username, $this->password);
     }
 }

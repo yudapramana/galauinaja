@@ -40,6 +40,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         tmt_jabatan: '',
         employee: {},
         doctypes: [],
+        must_change_password: true,
         can_multiple_role: null,
         roles: [],
         rolenames: []
@@ -166,9 +167,30 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         }
     };
 
-    const handleAuthError = (error) => {
+    const handleAuthError = async (error) => {
         if (error.response && error.response.status === 401) {
-            window.location.href = '/login';
+            // window.location.href = '/login';
+            // Bersihkan data
+            localStorage.clear();
+            sessionStorage.clear();
+            document.cookie.split(";").forEach(cookie => {
+                const eqPos = cookie.indexOf("=");
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            });
+
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+
+            isAuthenticated.value = false;
+            isAdminRole.value = false;
+            user.value = {};
+            myDocuments.value = [];
+
+            await axios.get('/sanctum/csrf-cookie');
+            router.push('/login');
         } else {
             console.error('Terjadi kesalahan:', error);
         }
