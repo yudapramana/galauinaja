@@ -54,9 +54,9 @@ const logout = () => {
                     </button>
                 </li>
 
-                <li class="nav-item dropdown">
+                <!-- <li class="nav-item dropdown">
                     <span class="nav-link">{{ authUserStore.user.employee.full_name }}</span>
-                </li>
+                </li> -->
 
                 <li class="nav-item dropdown">
                     <a href="#" @click.prevent="logout" class="nav-link">
