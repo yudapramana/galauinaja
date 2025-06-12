@@ -12,8 +12,8 @@ class CreateEmpDocumentsTable extends Migration {
 			$table->timestamps();
 			$table->softDeletes();
 			$table->integer('id_doc_type')->unsigned();
-			$table->string('doc_number', 50);
-			$table->date('doc_date');
+			$table->string('doc_number', 50)->nullable();
+			$table->date('doc_date')->nullable();
 			$table->string('file_name', 255);
 			$table->string('file_path', 255);
 			$table->string('parameter')->nullable();

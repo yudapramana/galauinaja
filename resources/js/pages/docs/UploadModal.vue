@@ -19,12 +19,12 @@
 
                         <div class="form-group">
                             <label>Nomor Dokumen</label>
-                            <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
+                            <input v-model="uploadForm.doc_number" type="text" class="form-control"  autofocus>
                         </div>
 
                         <div class="form-group">
                             <label>Tanggal Dokumen</label>
-                            <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
+                            <input v-model="uploadForm.doc_date" type="date" class="form-control">
                         </div>
 
                         <div class="form-group">

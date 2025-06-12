@@ -42,7 +42,7 @@ class EmployeeDocumentController extends Controller
        $employee = Auth::user()->employee;
        $employeeId = $employee->id;
        $docType = DocType::find($request->id_doc_type);
-       $fileName = $docType->label . $request->parameter . '_' .$employee->nip . '.'. $extension;
+       $fileName = $docType->label . ($request->parameter ? ('_' . $request->parameter) : '') . '_' .$employee->nip . '.'. $extension;
        $filePath = $file->storeAs(
            'documents/'.$employee->nip,
            $fileName,

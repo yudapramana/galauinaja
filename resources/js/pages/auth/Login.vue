@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import { reactive, ref, nextTick } from 'vue';
+import { reactive, ref, nextTick, onMounted  } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
@@ -17,37 +17,49 @@ const form = reactive({
 
 const loading = ref(false);
 const errorMessage = ref('');
+// const siteKey = '6LcNnV0rAAAAAJUF7R71uk5iJxD8LB-k_EYO1OOH';
+const siteKey = window.RECAPTCHA_SITE_KEY;
+
+// Ensure reCAPTCHA is ready
+onMounted(() => {
+  if (!window.grecaptcha) {
+    console.error('reCAPTCHA not loaded')
+  }
+})
 
 const handleSubmit = async () => {
-    loading.value = true;
-    errorMessage.value = '';
+  loading.value = true
+  errorMessage.value = ''
 
-    try {
-        // Pastikan CSRF cookie diambil dulu
-        // await axios.get('/sanctum/csrf-cookie');
-
-        // Kirim form login
-        await axios.post('/login', form);
-
-        // Ambil data user dan dokumen
-        await authUserStore.getAuthUser();
-        await masterDataStore.getDoctypeList();
-        await authUserStore.getMyDocuments();
-        authUserStore.isAuthenticated = true;
-        authUserStore.activeLayout = 'user';
-        // Redirect
-        router.push('/user/dashboard');
-
-    } catch (error) {
-        console.error('Login error:', error);
-        errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat login.';
-    } finally {
-        // Delay agar loading smooth
-        setTimeout(() => {
-            loading.value = false;
-        }, 400);
+  try {
+    if (!window.grecaptcha) {
+      throw new Error('reCAPTCHA not loaded')
     }
-};
+
+    const token = await window.grecaptcha.execute(siteKey, { action: 'login' })
+
+    // Submit login with token
+    await axios.post('/login', {
+      ...form,
+      recaptcha_token: token,
+    })
+
+    await authUserStore.getAuthUser()
+    await masterDataStore.getDoctypeList()
+    await authUserStore.getMyDocuments()
+    authUserStore.isAuthenticated = true
+    authUserStore.activeLayout = 'user'
+    router.push('/user/dashboard')
+  } catch (error) {
+    console.error('Login error:', error)
+    errorMessage.value =
+      error.response?.data?.message || 'Terjadi kesalahan saat login.'
+  } finally {
+    setTimeout(() => {
+      loading.value = false
+    }, 400)
+  }
+}
 </script>
 
 <template>

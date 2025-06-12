@@ -79,8 +79,8 @@ class DocumentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_doc_type' => 'required|exists:doc_types,id',
-            'doc_number' => 'required|string|max:255',
-            'doc_date' => 'required|date',
+            'doc_number' => 'nullable|string|max:255',
+            'doc_date' => 'nullable|date',
             'parameter' => 'nullable|string|max:255',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -105,7 +105,7 @@ class DocumentController extends Controller
         $employeeId = $employee->id;
         $docType = DocType::find($request->id_doc_type);
 
-        $fileName = $docType->label . ($request->parameter ?? '') . '_' . $employee->nip . '.' . $extension;
+        $fileName = $docType->label . ($request->parameter ? ('_' . $request->parameter) : '') . '_' . $employee->nip . '.' . $extension;
 
         // Cek apakah file_name sudah ada di database
         $fileNameExists = EmpDocument::where('file_name', $fileName)->exists();
@@ -300,6 +300,53 @@ class DocumentController extends Controller
             'message' => 'Reupload berhasil.',
             'data'    => $document
         ]);
+    }
+
+    public function syncFiles()
+    {
+        $userlogin = Auth::user();
+        $user = User::find($userlogin ->id);
+        $employee = $user->employee;
+
+        $directory = 'documents/' . $employee->nip;
+        $files = Storage::disk('public')->allFiles($directory);
+
+        // Remove the directory prefix from each file path
+        $filesWithoutPrefix = array_map(function ($file) use ($directory) {
+            return str_replace($directory . '/', '', $file);
+        }, $files);
+
+        foreach ($filesWithoutPrefix as $key => $fileName) {
+            $exploded = explode('_', $fileName);
+            $length = count($exploded);
+
+            $label = $exploded[0];
+            $param = ($length == 3) ? $exploded[1] : null;
+            $docType = DocType::where('label', $label)->first();
+            if($docType) {
+                $docTypeId = $docType->id;
+            } else {
+                continue;
+                return 'apasih';
+            }
+            
+            EmpDocument::firstOrCreate([
+                'id_employee' => $employee->id,
+                'id_doc_type' => $docTypeId,
+                'parameter' => $param,
+                'file_path' => $directory . '/' . $fileName,
+                'file_name' => $fileName,
+                'status' => 'Approved',
+            ]);
+        }
+
+        $user->update([
+            'docs_update_state' => true,
+        ]);
+        $employee = $user->employee;
+        $employee->update(['docs_progress_state' => true]);
+
+        return response()->json(['success' => true]);
     }
 
 }

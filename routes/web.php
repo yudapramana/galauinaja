@@ -14,6 +14,8 @@ use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
+use App\Models\DocType;
+use App\Models\EmpDocument;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
@@ -31,10 +33,55 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 |
 */
 
-Route::get('/checkfiles', function() {
-    $directory = 'documents/197903062014122002';
+
+Route::get('/getfiles', function(){
+    $nip = '199407292022031002';
+    $user = User::where('username', $nip)->with('employee')->first();
+    $employee = $user->employee;
+
+
+    $empDocs = EmpDocument::where('id_employee', $employee->id)->get();
+
+    return $empDocs;
+});
+
+
+Route::get('/checkfiles', function () {
+
+    $nip = '199407292022031002';
+    $user = User::where('username', $nip)->with('employee')->first();
+    $employee = $user->employee;
+
+    $directory = 'documents/' . $employee->nip;
     $files = Storage::disk('public')->allFiles($directory);
-    return $files;
+
+    // Remove the directory prefix from each file path
+    $filesWithoutPrefix = array_map(function ($file) use ($directory) {
+        return str_replace($directory . '/', '', $file);
+    }, $files);
+
+    foreach ($filesWithoutPrefix as $key => $fileName) {
+        $exploded = explode('_', $fileName);
+        $length = count($exploded);
+
+        $label = $exploded[0];
+        $param = ($length == 3) ? $exploded[1] : null;
+        $docTypeId = DocType::where('label', $label)->first()->id;
+        
+        EmpDocument::firstOrCreate([
+            'id_employee' => $employee->id,
+            'id_doc_type' => $docTypeId,
+            'parameter' => $param,
+            'file_path' => $directory . '/' . $fileName,
+            'file_name' => $fileName,
+            'status' => 'Approved',
+        ]);
+    }
+
+    $user->update(['docs_update_state' => true]);
+
+    return 'done';
+
 });
 
 Route::get('/set-admin', function() {
@@ -227,6 +274,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/upload-document', [DocumentController::class, 'uploadDocument']);
     Route::post('/api/reupload-document/{id}', [DocumentController::class, 'reupload']);
     Route::get('/api/user-documents/{userId}', [DocumentController::class, 'documentsByUserId']);
+    Route::get('/api/sync-files', [DocumentController::class, 'syncFiles']);
 
 
 

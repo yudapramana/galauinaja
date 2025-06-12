@@ -26,6 +26,12 @@
     {{-- <link rel="stylesheet" href="{{ $css }}" id="css">
     <script src="{{ $js }}" id="js"></script> --}}
 
+    <script>
+        window.RECAPTCHA_SITE_KEY = "{{ config('services.recaptcha.key') }}";
+    </script>
+
+
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.key') }}"></script>
 
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>

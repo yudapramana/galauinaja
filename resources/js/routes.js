@@ -11,11 +11,6 @@ export default [
     component: () => import('./pages/auth/Login.vue'),
   },
   {
-    path: '/change-password',
-    name: 'app.change-password',
-    component: () => import('./pages/ChangePassword.vue'),
-  },
-  {
     path: '/admin',
     meta: { requiresAdmin: true },
     children: [

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Illuminate\Support\Facades\Http;
 use Hash;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -40,6 +41,22 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         Fortify::authenticateUsing(function (Request $request) {
+
+            // ✅ Verify reCAPTCHA manually
+            $recaptcha = $request->input('recaptcha_token');
+
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret'   => config('services.recaptcha.secret'),
+                'response' => $recaptcha,
+                'remoteip' => $request->ip(),
+            ]);
+
+            if (!$response->json('success')) {
+                session()->flash('recaptcha', 'Captcha tidak valid.');
+                return null; // Fail login
+            }
+
+            // ✅ Proceed with regular authentication
             $user = \App\Models\User::where('username', $request->username)->first();
      
             if ($user &&

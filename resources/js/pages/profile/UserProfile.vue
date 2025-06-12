@@ -166,7 +166,7 @@ onMounted(() => {
                         <div class="card-body">
                             <div class="tab-content">
                                 <div class="tab-pane active" id="profile">
-                                    <form @submit.prevent="updateProfile()" class="form-horizontal">
+                                    <!-- <form @submit.prevent="updateProfile()" class="form-horizontal">
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">NIP</label>
                                             <div class="col-sm-10">
@@ -234,6 +234,16 @@ onMounted(() => {
                                         </div>
 
                                         <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Job Class</label>
+                                            <div class="col-sm-10">
+                                                <input v-model="authUserStore.user.employee.gol_ruang" type="text" readonly
+                                                    class="form-control" placeholder="Job Title">
+                                                <span class="text-danger text-sm" v-if="errors && errors.gol_ruang">{{
+                                                    errors.gol_ruang[0] }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Job Title</label>
                                             <div class="col-sm-10">
                                                 <input v-model="authUserStore.user.employee.job_title" type="text" readonly
@@ -242,14 +252,6 @@ onMounted(() => {
                                                     errors.job_title[0] }}</span>
                                             </div>
                                         </div>
-
-                                        <!-- <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Work Unit</label>
-                                            <div class="col-sm-10">
-                                                <input v-model="authUserStore.user.employee.id_work_unit" type="number" class="form-control" placeholder="Work Unit ID">
-                                                <span class="text-danger text-sm" v-if="errors && errors.id_work_unit">{{ errors.id_work_unit[0] }}</span>
-                                            </div>
-                                        </div> -->
 
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Work Unit</label>
@@ -304,6 +306,16 @@ onMounted(() => {
                                             </div>
                                         </div>
 
+                                         <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">TMT Pensiun</label>
+                                            <div class="col-sm-10">
+                                                <input v-model="authUserStore.user.employee.tmt_pensiun" type="date" readonly
+                                                    class="form-control">
+                                                <span class="text-danger text-sm" v-if="errors && errors.tmt_pensiun">{{
+                                                    errors.tmt_pensiun[0] }}</span>
+                                            </div>
+                                        </div>
+
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
                                                 <button type="submit" class="btn btn-success" :disabled="isLoading">
@@ -313,7 +325,139 @@ onMounted(() => {
                                                 </button>
                                             </div>
                                         </div>
+                                    </form> -->
+                                    <form @submit.prevent="updateProfile()" class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">NIP (Nomor Induk
+                                                Pegawai)</label>
+                                            <input v-model="authUserStore.user.employee.nip" type="text"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.nip">{{ errors.nip[0]
+                                                }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Nama Lengkap</label>
+                                            <input v-model="authUserStore.user.employee.full_name" type="text"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.full_name">{{
+                                                errors.full_name[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Tanggal Lahir</label>
+                                            <input v-model="authUserStore.user.employee.date_of_birth" type="date"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.date_of_birth">{{
+                                                errors.date_of_birth[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Jenis Kelamin</label>
+                                            <select v-model="authUserStore.user.employee.gender"
+                                                class="form-control form-control-sm" disabled>
+                                                <option value="">Pilih</option>
+                                                <option value="M">Laki-laki</option>
+                                                <option value="F">Perempuan</option>
+                                            </select>
+                                            <span class="text-danger text-sm" v-if="errors?.gender">{{ errors.gender[0]
+                                                }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Nomor HP</label>
+                                            <input v-model="authUserStore.user.employee.phone_number" type="text"
+                                                class="form-control form-control-sm" placeholder="08xxxx">
+                                            <span class="text-danger text-sm" v-if="errors?.phone_number">{{
+                                                errors.phone_number[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Email</label>
+                                            <input v-model="authUserStore.user.employee.email" type="email"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.email">{{ errors.email[0]
+                                                }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Golongan / Ruang</label>
+                                            <input v-model="authUserStore.user.employee.gol_ruang" type="text"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.gol_ruang">{{
+                                                errors.gol_ruang[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Jabatan</label>
+                                            <input v-model="authUserStore.user.employee.job_title" type="text"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.job_title">{{
+                                                errors.job_title[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Unit Kerja</label>
+                                            <select v-model="authUserStore.user.employee.id_work_unit"
+                                                class="form-control form-control-sm" disabled>
+                                                <option value="">Pilih Unit Kerja</option>
+                                                <option v-for="unit in masterDataStore.workunitList" :key="unit.id"
+                                                    :value="unit.id">{{ unit.text }}</option>
+                                            </select>
+                                            <span class="text-danger text-sm" v-if="errors?.id_work_unit">{{
+                                                errors.id_work_unit[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Status Kepegawaian</label>
+                                            <select v-model="authUserStore.user.employee.employment_status"
+                                                class="form-control form-control-sm" disabled>
+                                                <option value="">Pilih</option>
+                                                <option value="PNS">PNS</option>
+                                                <option value="PPPK">PPPK</option>
+                                            </select>
+                                            <span class="text-danger text-sm" v-if="errors?.employment_status">{{
+                                                errors.employment_status[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">TMT Pangkat</label>
+                                            <input v-model="authUserStore.user.employee.tmt_pangkat" type="date"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.tmt_pangkat">{{
+                                                errors.tmt_pangkat[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">TMT Jabatan</label>
+                                            <input v-model="authUserStore.user.employee.tmt_jabatan" type="date"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.tmt_jabatan">{{
+                                                errors.tmt_jabatan[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">TMT Pensiun</label>
+                                            <input v-model="authUserStore.user.employee.tmt_pensiun" type="date"
+                                                class="form-control form-control-sm" readonly>
+                                            <span class="text-danger text-sm" v-if="errors?.tmt_pensiun">{{
+                                                errors.tmt_pensiun[0] }}</span>
+                                        </div>
+
+                                        <hr/>
+
+                                        <div class="col-12">
+                                            <hr />
+                                            <button type="submit" class="btn btn-success btn-sm" :disabled="isLoading">
+                                                <i v-if="isLoading" class="fa fa-spinner fa-spin me-1"></i>
+                                                <i v-else class="fa fa-save me-1"></i>
+                                                Simpan Perubahan
+                                            </button>
+                                        </div>
                                     </form>
+
+
+
                                 </div>
 
                                 <div class="tab-pane" id="changePassword">

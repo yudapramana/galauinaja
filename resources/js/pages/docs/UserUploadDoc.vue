@@ -13,7 +13,19 @@
         <div class="card-body p-3">
 
           <!-- Search Box -->
-          <SearchBox :search-query="searchQuery" />
+          <!-- <SearchBox :search-query="searchQuery" /> -->
+          <div class="input-group mb-3">
+            <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
+            <div class="input-group-append">
+              <button :disabled="isLoading" class="btn btn-outline-secondary" type="button" @click="refreshData">
+                <!-- <i class="fas fa-sync"></i> -->
+                <i v-if="isLoading" class="fa fa-spinner fa-spin mr-1"></i>
+                <i v-else class="fas fa-sync"></i>
+              
+              </button>
+              <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
+            </div>
+          </div>
 
           <!-- Loading State -->
           <LoadingState v-if="isLoading" />
@@ -103,15 +115,15 @@
               <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
             </div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label>Nomor Dokumen</label>
-              <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
+              <input v-model="uploadForm.doc_number" type="text" class="form-control"  autofocus>
             </div>
 
             <div class="form-group">
               <label>Tanggal Dokumen</label>
-              <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-            </div>
+              <input v-model="uploadForm.doc_date" type="date" class="form-control" >
+            </div> -->
 
             <div class="form-group">
               <label>Pilih Parameter (Opsional)</label><br>
@@ -337,6 +349,15 @@ const previewFile = async (file) => {
 
 const clearSearch = () => {
   searchQuery.value = '';
+};
+
+const refreshData = async () => {
+  isLoading.value = true;
+  await authUserStore.syncFiles();
+  await authUserStore.getDocsUpdateState();
+  console.log('eh kepanggil fetchdata didalam onMounted Doclist');
+  await fetchData();
+  isLoading.value = false;
 };
 
 const filteredTree = computed(() => {

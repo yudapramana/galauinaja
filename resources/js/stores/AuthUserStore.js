@@ -55,6 +55,15 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         router.push({ name: activeLayout.value === 'admin' ? 'admin.dashboard' : 'user.dashboard' });
     };
 
+
+    const syncFiles = async () => {
+        try {
+            const response = await axios.get('/api/sync-files');
+        } catch (error) {
+            handleAuthError(error);
+        }
+    };
+
     const getMyDocuments = async () => {
         try {
             console.log('getMyDocuments Running');
@@ -134,7 +143,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
     const logout = async () => {
         try {
-            docsProgressState.value = false;
+            docsProgressState.value = true;
             docsUpdateState.value = true;
             isLoggingOut.value = true;
             await axios.post('/logout');
@@ -171,7 +180,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         if (error.response && error.response.status === 401) {
             // window.location.href = '/login';
 
-            docsProgressState.value = false;
+            docsProgressState.value = true;
             docsUpdateState.value = true;
 
             // Bersihkan data
@@ -196,7 +205,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             await axios.get('/sanctum/csrf-cookie');
             router.push('/login');
 
-            
+
         } else {
             console.error('Terjadi kesalahan:', error);
         }
@@ -217,6 +226,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         getAuthUser,
         getDocsUpdateState,
         getMyDocuments,
+        syncFiles,
         getDocumentsByUserId,
         logout,
         switchLayout,

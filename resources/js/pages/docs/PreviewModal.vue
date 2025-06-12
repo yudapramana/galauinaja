@@ -15,14 +15,14 @@
                                         <th style="width: 40%">Tipe Dokumen</th>
                                         <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
                                     </tr>
-                                    <tr>
+                                    <!-- <tr>
                                         <th>Nomor Dokumen</th>
                                         <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Tanggal Dokumen</th>
                                         <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
-                                    </tr>
+                                    </tr> -->
                                     <tr>
                                         <th>Parameter</th>
                                         <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
