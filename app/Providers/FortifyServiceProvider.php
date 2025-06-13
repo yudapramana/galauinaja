@@ -14,6 +14,9 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
 use Illuminate\Support\Facades\Http;
 use Hash;
+use NjoguAmos\Turnstile\Rules\TurnstileRule;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -41,34 +44,27 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         Fortify::authenticateUsing(function (Request $request) {
+            // ✅ Validasi Turnstile token
+            $validator = Validator::make($request->all(), [
+                'cf-turnstile-response' => ['required', new TurnstileRule()],
+            ]);
 
-            // ✅ Verify reCAPTCHA manually
-            // $recaptcha = $request->input('recaptcha_token');
-
-            // // $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            // //     'secret'   => config('services.recaptcha.secret'),
-            // //     'response' => $recaptcha,
-            // //     'remoteip' => $request->ip(),
-            // // ]);
-
-            // $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            //     'secret'   => config('services.recaptcha.secret'),
-            //     'response' => $recaptcha,
-            //     'remoteip' => $request->ip(),
-            // ]);
-
-            // if (!$response->json('success')) {
-            //     session()->flash('recaptcha', 'Captcha tidak valid.');
-            //     return null; // Fail login
-            // }
-
-            // ✅ Proceed with regular authentication
-            $user = \App\Models\User::where('username', $request->username)->first();
-     
-            if ($user &&
-                Hash::check($request->password, $user->password)) {
-                return $user;
+            if ($validator->fails()) {
+                throw ValidationException::withMessages([
+                    'cf-turnstile-response' => ['Verifikasi captcha gagal. Silakan coba lagi.'],
+                ]);
             }
+
+            // ✅ Autentikasi user
+            $user = \App\Models\User::where('username', $request->username)->first();
+
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'username' => ['NIP atau password salah.'],
+                ]);
+            }
+
+            return $user;
         });
 
         RateLimiter::for('login', function (Request $request) {

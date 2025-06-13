@@ -1,9 +1,11 @@
 <script setup>
 import axios from 'axios';
-import { reactive, ref, nextTick, onMounted  } from 'vue';
+import { reactive, ref, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
+import { TurnstileWidget } from '@delaneydev/laravel-turnstile-vue'
+
 
 const authUserStore = useAuthUserStore();
 const masterDataStore = useMasterDataStore();
@@ -15,49 +17,53 @@ const form = reactive({
     remember: true,
 });
 
+const showPassword = ref(false);
+
 const loading = ref(false);
 const errorMessage = ref('');
-// const siteKey = '6LcNnV0rAAAAAJUF7R71uk5iJxD8LB-k_EYO1OOH';
+const captchaToken = ref('')
+const siteKey = '0x4AAAAAABg5q-5b8cUPKPGt';
 // const siteKey = window.RECAPTCHA_SITE_KEY;
 
 // Ensure reCAPTCHA is ready
 onMounted(() => {
-//   if (!window.grecaptcha) {
-//     console.error('reCAPTCHA not loaded')
-//   }
+    //   if (!window.grecaptcha) {
+    //     console.error('reCAPTCHA not loaded')
+    //   }
 })
 
 const handleSubmit = async () => {
-  loading.value = true
-  errorMessage.value = ''
+    loading.value = true
+    errorMessage.value = ''
 
-  try {
-    // if (!window.grecaptcha) {
-    //   throw new Error('reCAPTCHA not loaded')
-    // }
+    try {
+        // if (!window.grecaptcha) {
+        //   throw new Error('reCAPTCHA not loaded')
+        // }
 
-    // const token = await window.grecaptcha.execute(siteKey, { action: 'login' })
+        // const token = await window.grecaptcha.execute(siteKey, { action: 'login' })
 
-    // Submit login with token
-    await axios.post('/login', {
-      ...form,
-    })
+        // Submit login with token
+        await axios.post('/login', {
+            ...form,
+            'cf-turnstile-response': captchaToken.value,
+        })
 
-    await authUserStore.getAuthUser()
-    await masterDataStore.getDoctypeList()
-    await authUserStore.getMyDocuments()
-    authUserStore.isAuthenticated = true
-    authUserStore.activeLayout = 'user'
-    router.push('/user/dashboard')
-  } catch (error) {
-    console.error('Login error:', error)
-    errorMessage.value =
-      error.response?.data?.message || 'Terjadi kesalahan saat login.'
-  } finally {
-    setTimeout(() => {
-      loading.value = false
-    }, 400)
-  }
+        await authUserStore.getAuthUser()
+        await masterDataStore.getDoctypeList()
+        await authUserStore.getMyDocuments()
+        authUserStore.isAuthenticated = true
+        authUserStore.activeLayout = 'user'
+        router.push('/user/dashboard')
+    } catch (error) {
+        console.error('Login error:', error)
+        errorMessage.value =
+            error.response?.data?.message || 'Terjadi kesalahan saat login.'
+    } finally {
+        setTimeout(() => {
+            loading.value = false
+        }, 400)
+    }
 }
 </script>
 
@@ -98,8 +104,17 @@ const handleSubmit = async () => {
                                 </div>
                             </div>
                         </div>
+                        <!-- <div class="input-group mb-3">
+                            <input v-model="form.username" type="text" class="form-control" placeholder="NIP Anda"
+                                required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" tabindex="-1" disabled>
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            </div>
+                        </div> -->
 
-                        <div class="input-group mb-3">
+                        <!-- <div class="input-group mb-3">
                             <input v-model="form.password" type="password" class="form-control" placeholder="Password"
                                 required>
                             <div class="input-group-append">
@@ -107,9 +122,25 @@ const handleSubmit = async () => {
                                     <span class="fas fa-lock"></span>
                                 </div>
                             </div>
+                        </div> -->
+                        <div class="input-group mb-3">
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                                class="form-control" placeholder="Password" required>
+                            <div class="input-group-append">
+                                <button class="input-group-text" type="button"
+                                    @click="showPassword = !showPassword" tabindex="-1">
+                                    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="row">
+                        <div class="text-center row justify-content-center">
+                            <div class="form-group recaptcha-container mx-auto">
+                                <TurnstileWidget v-model="captchaToken" :sitekey="siteKey" theme="light" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <div class="col-8">
                                 <div class="icheck-primary">
                                     <input type="checkbox" id="remember" v-model="form.remember">
@@ -122,11 +153,16 @@ const handleSubmit = async () => {
                                     <span v-else>Sign In</span>
                                 </button>
                             </div>
+
+
                         </div>
+
+
+
                     </form>
 
                     <p class="mb-1">
-                        <a href="#">Lupa Password? <br> Hubungi Admin Satker</a>
+                        <a href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya" target="_blank">Lupa Password? <br> Hubungi Admin Satker</a>
                     </p>
                 </div>
             </div>
