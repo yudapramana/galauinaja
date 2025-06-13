@@ -54,7 +54,7 @@
     <link href="{{ asset('app_logo.png') }}" rel="icon">
     <link rel="apple-touch-icon" href="{{ asset('app_logo.png') }}">
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
-
+    {{-- Test git pull push --}}
     <style>
         [v-cloak]>* {
             display: none
