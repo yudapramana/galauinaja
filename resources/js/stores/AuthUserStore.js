@@ -168,7 +168,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
             myDocuments.value = [];
 
             await axios.get('/sanctum/csrf-cookie');
-            router.push('/login');
+            // router.push('/login');
+            window.location.href = '/landing';
         } catch (error) {
             console.error("Logout gagal:", error);
         } finally {
