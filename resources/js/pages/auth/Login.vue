@@ -18,13 +18,13 @@ const form = reactive({
 const loading = ref(false);
 const errorMessage = ref('');
 // const siteKey = '6LcNnV0rAAAAAJUF7R71uk5iJxD8LB-k_EYO1OOH';
-const siteKey = window.RECAPTCHA_SITE_KEY;
+// const siteKey = window.RECAPTCHA_SITE_KEY;
 
 // Ensure reCAPTCHA is ready
 onMounted(() => {
-  if (!window.grecaptcha) {
-    console.error('reCAPTCHA not loaded')
-  }
+//   if (!window.grecaptcha) {
+//     console.error('reCAPTCHA not loaded')
+//   }
 })
 
 const handleSubmit = async () => {
@@ -32,16 +32,15 @@ const handleSubmit = async () => {
   errorMessage.value = ''
 
   try {
-    if (!window.grecaptcha) {
-      throw new Error('reCAPTCHA not loaded')
-    }
+    // if (!window.grecaptcha) {
+    //   throw new Error('reCAPTCHA not loaded')
+    // }
 
-    const token = await window.grecaptcha.execute(siteKey, { action: 'login' })
+    // const token = await window.grecaptcha.execute(siteKey, { action: 'login' })
 
     // Submit login with token
     await axios.post('/login', {
       ...form,
-      recaptcha_token: token,
     })
 
     await authUserStore.getAuthUser()

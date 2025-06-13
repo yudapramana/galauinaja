@@ -43,18 +43,24 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
 
             // ✅ Verify reCAPTCHA manually
-            $recaptcha = $request->input('recaptcha_token');
+            // $recaptcha = $request->input('recaptcha_token');
 
-            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret'   => config('services.recaptcha.secret'),
-                'response' => $recaptcha,
-                'remoteip' => $request->ip(),
-            ]);
+            // // $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            // //     'secret'   => config('services.recaptcha.secret'),
+            // //     'response' => $recaptcha,
+            // //     'remoteip' => $request->ip(),
+            // // ]);
 
-            if (!$response->json('success')) {
-                session()->flash('recaptcha', 'Captcha tidak valid.');
-                return null; // Fail login
-            }
+            // $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            //     'secret'   => config('services.recaptcha.secret'),
+            //     'response' => $recaptcha,
+            //     'remoteip' => $request->ip(),
+            // ]);
+
+            // if (!$response->json('success')) {
+            //     session()->flash('recaptcha', 'Captcha tidak valid.');
+            //     return null; // Fail login
+            // }
 
             // ✅ Proceed with regular authentication
             $user = \App\Models\User::where('username', $request->username)->first();
