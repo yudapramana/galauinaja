@@ -77,11 +77,19 @@ const handleSubmit = async () => {
         </transition>
 
         <div class="login-box">
+            <!--
             <div class="login-logo text-center mb-4">
                 <h1 class="mb-1" style="font-size: 1.75rem; font-weight: 700; color: #28a745;">SIGARDA</h1>
                 <p class="mb-0" style="font-size: 0.95rem; font-weight: 500;">Sistem Informasi Gerbang Arsip Digital
                     Pegawai</p>
                 <p style="font-size: 0.85rem; color: #6c757d;">Kementerian Agama Kab. Pesisir Selatan</p>
+            </div> -->
+
+            <div class="login-logo">
+                <!-- <img src="http://res.cloudinary.com/dezj1x6xp/image/upload/v1749880103/PandanViewMandeh/LOGO_APLIKASI_1_uxtwet.png" -->
+                <img src="http://res.cloudinary.com/dezj1x6xp/image/upload/v1749880420/PandanViewMandeh/LOGO_SIGARDA_FIX_rw2u1g.png"
+                    alt="logo Ekin" width="100%">
+                <!-- <a href="../../index2.html"><b>Admin</b>LTE</a> -->
             </div>
 
             <div class="card card-outline card-success">
@@ -127,8 +135,8 @@ const handleSubmit = async () => {
                             <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
                                 class="form-control" placeholder="Password" required>
                             <div class="input-group-append">
-                                <button class="input-group-text" type="button"
-                                    @click="showPassword = !showPassword" tabindex="-1">
+                                <button class="input-group-text" type="button" @click="showPassword = !showPassword"
+                                    tabindex="-1">
                                     <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                                 </button>
                             </div>
@@ -162,7 +170,8 @@ const handleSubmit = async () => {
                     </form>
 
                     <p class="mb-1">
-                        <a href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya" target="_blank">Lupa Password? <br> Hubungi Admin Satker</a>
+                        <a href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya"
+                            target="_blank">Lupa Password? <br> Hubungi Admin Satker</a>
                     </p>
                 </div>
             </div>
@@ -292,5 +301,10 @@ const handleSubmit = async () => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.login-logo {
+    margin-top: -50px !important;
+    margin-bottom: 0px !important;
 }
 </style>
