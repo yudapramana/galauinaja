@@ -16,8 +16,8 @@ const isChangingPassword = ref(false);
 
 const widget = window.cloudinary.createUploadWidget(
     {
-        cloud_name: "kemenagpessel",
-        upload_preset: "profile_picture_pegawai"
+        cloud_name: "pesselkemenag",
+        upload_preset: "profile_picture"
     },
     (error, result) => {
         if (!error && result && result.event === 'success') {
@@ -442,6 +442,20 @@ onMounted(() => {
                                                 class="form-control form-control-sm" readonly>
                                             <span class="text-danger text-sm" v-if="errors?.tmt_pensiun">{{
                                                 errors.tmt_pensiun[0] }}</span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold mb-1">Kategori</label>
+                                            <select v-model="authUserStore.user.employee.employment_category"
+                                                class="form-control form-control-sm" disabled>
+                                                <option value="">Pilih</option>
+                                                <option value="ACTIVE">Aktif</option>
+                                                <option value="RETIRED">Pensiun</option>
+                                                <option value="LEFT">Berhenti</option>
+                                                <option value="DIED">Meninggal Dunia</option>
+                                            </select>
+                                            <span class="text-danger text-sm" v-if="errors?.employment_category">{{ errors.gender[0]
+                                                }}</span>
                                         </div>
 
                                         <hr/>

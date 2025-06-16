@@ -61,7 +61,7 @@ class User extends Authenticatable
         'org_name',
         'nip_name',
         'role_names',
-        'must_change_password'
+        'must_change_password',
     ];
 
     public function getFormattedCreatedAtAttribute()
@@ -76,16 +76,26 @@ class User extends Authenticatable
         );
     }
 
-    public function avatar(): Attribute
-    {
-        // return Attribute::make(
-        //     get: fn($value) => asset(Storage::url($value) ?? 'noimage.png'),
-        // );
+    // public function avatar(): Attribute
+    // {
+    //     // return Attribute::make(
+    //     //     get: fn($value) => asset(Storage::url($value) ?? 'noimage.png'),
+    //     // );
 
-        return Attribute::make(
-            get: fn($value) => $value ?? "http://res.cloudinary.com/kemenagpessel/image/upload/v1709086972/profile_picture_pegawai/ijf9mhs8e1m2mjjgz69l.png",
-        );
-        
+    //     return Attribute::make(
+    //         get: fn($value) => $value ? $this->attribute['profile_picture_square'] : "http://res.cloudinary.com/kemenagpessel/image/upload/v1709086972/profile_picture_pegawai/ijf9mhs8e1m2mjjgz69l.png",
+    //     );
+    // }
+
+
+    public function getAvatarAttribute(){
+        if($this->attributes['avatar']){
+            $separator = '/upload/';
+            $exp = explode($separator, $this->attributes['avatar']);
+            return $exp[0] . '/upload/ar_1.0,c_fill,f_avif,q_5/' . $exp[1];
+        } else {
+            return "http://res.cloudinary.com/kemenagpessel/image/upload/v1709086972/profile_picture_pegawai/ijf9mhs8e1m2mjjgz69l.png";
+        }
     }
 
     public function org()

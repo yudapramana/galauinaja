@@ -90,30 +90,35 @@
                     <div class="modal-body pt-2">
                         <form @submit.prevent="submitForm">
                             <div class="row">
+                                <!-- Kiri -->
                                 <div class="col-md-6">
                                     <div class="form-group mb-2">
-                                        <label class="mb-1">Nama</label>
-                                        <input v-model="form.full_name" class="form-control form-control-sm" required />
+                                        <label class="mb-1">Nama Lengkap</label>
+                                        <input v-model="form.full_name" class="form-control form-control-sm" required readonly />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Email</label>
-                                        <input v-model="form.email" class="form-control form-control-sm" required />
+                                        <input v-model="form.email" type="email" class="form-control form-control-sm" readonly />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">NIP</label>
-                                        <input v-model="form.nip" class="form-control form-control-sm" required />
+                                        <input v-model="form.nip" class="form-control form-control-sm" required readonly />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Tanggal Lahir</label>
                                         <input v-model="form.date_of_birth" type="date"
-                                            class="form-control form-control-sm" />
+                                            class="form-control form-control-sm" readonly />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Jenis Kelamin</label>
-                                        <select v-model="form.gender" class="form-control form-control-sm">
+                                        <select v-model="form.gender" class="form-control form-control-sm" readonly>
                                             <option value="M">Laki-laki</option>
                                             <option value="F">Perempuan</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="mb-1">No. HP</label>
+                                        <input v-model="form.phone_number" class="form-control form-control-sm" />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Password</label>
@@ -122,19 +127,21 @@
                                     </div>
                                 </div>
 
+                                <!-- Kanan -->
                                 <div class="col-md-6">
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Jabatan</label>
-                                        <input v-model="form.job_title" class="form-control form-control-sm" />
+                                        <input v-model="form.job_title" class="form-control form-control-sm" required readonly />
                                     </div>
                                     <div class="form-group mb-2">
-                                        <label class="mb-1">TMT Jabatan</label>
-                                        <input v-model="form.tmt_jabatan" type="date"
-                                            class="form-control form-control-sm" />
+                                        <label class="mb-1">Gol. Ruang</label>
+                                        <input v-model="form.gol_ruang" class="form-control form-control-sm"
+                                            placeholder="Contoh: III/b" required readonly />
                                     </div>
                                     <div class="form-group mb-2">
                                         <label class="mb-1">Unit Kerja</label>
-                                        <select v-model="form.id_work_unit" class="form-control form-control-sm">
+                                        <select v-model="form.id_work_unit" class="form-control form-control-sm" readonly
+                                            required>
                                             <option v-for="unit in masterDataStore.workunitList" :key="unit.id"
                                                 :value="unit.id">
                                                 {{ unit.text }}
@@ -142,8 +149,9 @@
                                         </select>
                                     </div>
                                     <div class="form-group mb-2">
-                                        <label class="mb-1">Status</label>
-                                        <select v-model="form.employment_status" class="form-control form-control-sm">
+                                        <label class="mb-1">Status Kepegawaian</label>
+                                        <select v-model="form.employment_status" class="form-control form-control-sm" readonly
+                                            required>
                                             <option value="PNS">PNS</option>
                                             <option value="PPPK">PPPK</option>
                                         </select>
@@ -151,7 +159,26 @@
                                     <div class="form-group mb-2">
                                         <label class="mb-1">TMT Pangkat</label>
                                         <input v-model="form.tmt_pangkat" type="date"
-                                            class="form-control form-control-sm" />
+                                            class="form-control form-control-sm" readonly />
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="mb-1">TMT Jabatan</label>
+                                        <input v-model="form.tmt_jabatan" type="date"
+                                            class="form-control form-control-sm" readonly />
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="mb-1">TMT Pensiun</label>
+                                        <input v-model="form.tmt_pensiun" type="date"
+                                            class="form-control form-control-sm" readonly />
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="mb-1">Kategori Kepegawaian</label>
+                                        <select v-model="form.employment_category" class="form-control form-control-sm">
+                                            <option value="ACTIVE">Aktif</option>
+                                            <option value="RETIRED">Pensiun</option>
+                                            <option value="LEFT">Berhenti</option>
+                                            <option value="DIED">Meninggal</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -164,6 +191,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
