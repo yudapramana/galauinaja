@@ -156,7 +156,10 @@ const handleSubmit = async () => {
                                 </div>
                             </div>
                             <div class="col-4">
-                                <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+                                <!-- <button type="submit" class="btn btn-primary btn-block" :disabled="loading"> -->
+                                <button type="submit" class="btn btn-primary btn-block"
+                                    :disabled="loading || !captchaToken">
+
                                     <span v-if="loading">Memuat...</span>
                                     <span v-else>Sign In</span>
                                 </button>
