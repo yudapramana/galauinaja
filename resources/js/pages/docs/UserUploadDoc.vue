@@ -21,7 +21,7 @@
                 <!-- <i class="fas fa-sync"></i> -->
                 <i v-if="isLoading" class="fa fa-spinner fa-spin mr-1"></i>
                 <i v-else class="fas fa-sync"></i>
-              
+
               </button>
               <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
             </div>
@@ -42,6 +42,7 @@
                       class="mr-2"></i>
                     <span class="ml-2 font-weight-bold">
                       {{ index + 1 }}. {{ doctype.text }}
+                      <span class="text-warning" v-show="doctype.mandatory == 1">*</span>
                       <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length }}</span>
                     </span>
                   </div>
@@ -100,7 +101,7 @@
       <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header">
           <h5 class="modal-title">
-             {{ isEditMode ? 'Edit Dokumen Pegawai' : 'Upload Dokumen Pegawai' }}  <!--: {{ selectedDoctype?.text }} -->
+            {{ isEditMode ? 'Edit Dokumen Pegawai' : 'Upload Dokumen Pegawai' }} <!--: {{ selectedDoctype?.text }} -->
           </h5>
           <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
         </div>
@@ -115,18 +116,8 @@
               <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
             </div>
 
-            <!-- <div class="form-group">
-              <label>Nomor Dokumen</label>
-              <input v-model="uploadForm.doc_number" type="text" class="form-control"  autofocus>
-            </div>
-
-            <div class="form-group">
-              <label>Tanggal Dokumen</label>
-              <input v-model="uploadForm.doc_date" type="date" class="form-control" >
-            </div> -->
-
-            <div class="form-group">
-              <label>Pilih Parameter (Opsional)</label><br>
+            <div class="form-group" v-if="selectedDoctype.multiple == 1">
+              <label>Pilih Parameter</label><br>
               <div class="btn-group mb-2 flex-wrap">
                 <button v-for="item in masterDataStore.docParameters" :key="item" type="button"
                   class="btn btn-xs btn-outline-secondary mb-1" :class="{ active: uploadForm.parameter === item }"
@@ -135,8 +126,16 @@
                 </button>
               </div>
 
-              <div class="input-group mb-3">
+              <!-- <div class="input-group mb-3">
                 <input v-model="uploadForm.parameter" type="text" class="form-control" readonly>
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
+                </div>
+              </div> -->
+
+              <div class="input-group mb-3">
+                <input v-model="uploadForm.parameter" type="text" class="form-control" required @keydown.prevent
+                  placeholder="Pilih parameter dari tombol di atas">
                 <div class="input-group-append">
                   <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
                 </div>
@@ -305,10 +304,12 @@ const fetchData = async () => {
     return {
       id: doctype.id,
       text: doctype.text,
+      mandatory: doctype.mandatory,
+      multiple: doctype.multiple,
       expanded: true,
       files: relatedFiles.map(file => ({
         ...file,
-        doc_type_text: doctype.text
+        doc_type_text: doctype.text,
       }))
     };
   });

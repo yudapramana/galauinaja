@@ -15,6 +15,8 @@ class CreateDocTypesTable extends Migration {
 			$table->text('type_name');
 			$table->string('label', 20);
 			$table->boolean('mandatory')->default(true);
+			$table->boolean('multiple')->default(false);
+
 		});
 	}
 

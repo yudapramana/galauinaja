@@ -24,8 +24,9 @@
                                 <th>Nama</th>
                                 <th>NIP</th>
                                 <th>Jenis Dokumen</th>
-                                <th>Nomor</th>
-                                <th>Tanggal</th>
+                                <th>Nama File</th>
+                                <!-- <th>Nomor</th>
+                                <th>Tanggal</th> -->
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -42,8 +43,9 @@
                                 <td>{{ doc.employee.full_name }}</td>
                                 <td>{{ doc.employee.nip }}</td>
                                 <td>{{ doc.doc_type.type_name }}</td>
-                                <td>{{ doc.doc_number }}</td>
-                                <td>{{ doc.doc_date }}</td>
+                                <td>{{ doc.file_name }}</td>
+                                <!-- <td>{{ doc.doc_number }}</td>
+                                <td>{{ doc.doc_date }}</td> -->
                                 <td>
                                     <span :class="{
                                         'badge badge-warning': doc.status === 'Pending',
@@ -106,10 +108,14 @@
                                 </div>
                             </div> -->
                             <div class="border rounded p-2" style="height: 500px; overflow: hidden;">
-                                <iframe v-if="selectedDoc?.file_url && !pdfError" ref="pdfFrame"
+                                <!-- <iframe v-if="selectedDoc?.file_url && !pdfError" ref="pdfFrame"
                                     :src="selectedDoc.file_url" width="100%" height="100%" frameborder="0"
                                     style="border: 1px solid #ccc;" @load="onIframeLoad"
-                                    @error="onIframeError"></iframe>
+                                    @error="onIframeError"></iframe> -->
+
+                                <iframe v-if="selectedDoc?.file_url && !pdfError" ref="pdfFrame" :src="iframeSrc"
+                                    width="100%" height="100%" frameborder="0" style="border: 1px solid #ccc;"
+                                    @load="onIframeLoad" @error="onIframeError"></iframe>
 
                                 <div v-else class="text-muted text-center py-5">
                                     <p v-if="pdfError">Gagal memuat dokumen. Pastikan file tersedia dan dapat diakses.
@@ -121,11 +127,30 @@
 
                         <div class="col-md-5">
                             <div class="mb-3">
-                                <p><strong>Nama:</strong> {{ selectedDoc?.employee?.full_name }}</p>
-                                <p><strong>NIP:</strong> {{ selectedDoc?.employee?.nip }}</p>
-                                <p><strong>Jenis Dokumen:</strong> {{ selectedDoc?.doc_type?.type_name }}</p>
-                                <p><strong>Nomor:</strong> {{ selectedDoc?.doc_number }}</p>
-                                <p><strong>Tanggal:</strong> {{ selectedDoc?.doc_date }}</p>
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th>Nama</th>
+                                            <td>{{ selectedDoc?.employee?.full_name || '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>NIP</th>
+                                            <td>{{ selectedDoc?.employee?.nip || '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Jenis Dokumen</th>
+                                            <td>{{ selectedDoc?.doc_type?.type_name || '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <td>{{ selectedDoc?.parameter || '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <td style="font-size: smaller;">{{ selectedDoc?.file_name || '-' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <form @submit.prevent="submitVerif">
@@ -172,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -185,6 +210,18 @@ const pdfFrame = ref(null);
 const pdfError = ref(false);
 const selectedDoc = ref(null);
 const verifForm = ref({ status: '', verif_notes: '' });
+
+
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+const iframeSrc = computed(() => {
+  const url = selectedDoc.value?.file_url
+  if (!url) return ''
+  return isMobile
+    ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`
+    : url
+})
+
 
 const meta = ref({
     current_page: 1,

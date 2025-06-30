@@ -50,7 +50,10 @@ class MasterController extends Controller
                 $data = DocType::where('status', $employmentStatus)->get()->map(function ($item) {
                     return [
                         'id' => $item->id,
-                        'text' => $item->type_name
+                        'text' => $item->type_name,
+                        'label' => $item->label,
+                        'mandatory' => $item->mandatory,
+                        'multiple' => $item->multiple,
                     ];
                 });
                 break;
