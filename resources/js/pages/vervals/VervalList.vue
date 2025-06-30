@@ -218,7 +218,7 @@ const iframeSrc = computed(() => {
   const url = selectedDoc.value?.file_url
   if (!url) return ''
   return isMobile
-    ? `https://docs.google.com/viewer?url=${encodeURIComponent(url)}`
+    ? `https://docs.google.com/gview?url=${encodeURIComponent(url)}`
     : url
 })
 
