@@ -242,8 +242,8 @@ class DocumentController extends Controller
         $document = EmpDocument::findOrFail($id);
         $employee = $document->employee;
         $validator = Validator::make($request->all(), [
-            'doc_number' => 'required|string|max:100',
-            'doc_date'   => 'required|date',
+            'doc_number' => 'nullable|string|max:255',
+            'doc_date' => 'nullable|date',
             'parameter'  => 'nullable|string|max:255',
             'file'       => 'nullable|file|mimes:pdf|max:1024', // max 1MB
         ]);
