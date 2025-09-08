@@ -4,12 +4,12 @@
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="mb-2">Daftar Pengelola</h1>
         <div class="btn-group">
-          <button class="btn btn-outline-secondary btn-sm" @click="toggleSelectAll">
+          <!-- <button class="btn btn-outline-secondary btn-sm" @click="toggleSelectAll">
             <i class="fas fa-check-square mr-1"></i>{{ allSelected ? 'Batal Pilih Semua' : 'Pilih Semua' }}
           </button>
           <button class="btn btn-danger btn-sm" :disabled="selectedIds.length === 0" @click="bulkDelete">
             <i class="fas fa-trash mr-1"></i>Hapus Terpilih ({{ selectedIds.length }})
-          </button>
+          </button> -->
           <button
             class="btn btn-primary btn-sm"
             @click="openCreateModal"
