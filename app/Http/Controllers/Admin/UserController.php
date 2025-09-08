@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Enums\RoleType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -154,15 +157,15 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted']);
     }
 
-    public function changeRole(User $user)
-    {
+    // public function changeRole(User $user)
+    // {
 
-        $user->update([
-            'role' => request('role'),
-        ]);
+    //     $user->update([
+    //         'role' => request('role'),
+    //     ]);
 
-        return response()->json(['success' => true]);
-    }
+    //     return response()->json(['success' => true]);
+    // }
 
     public function bulkDelete()
     {
@@ -176,6 +179,87 @@ class UserController extends Controller
 
         return auth()->user()->id;
 
+    }
+
+    public function changeRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role' => ['required'], // bisa string nama role atau integer value enum
+        ]);
+
+        $targetEnum = $this->resolveRoleEnum($request->input('role'));
+        if (!$targetEnum) {
+            throw ValidationException::withMessages([
+                'role' => ['Role tidak valid. Gunakan USER/ADMIN/REVIEWER/SUPERADMIN atau value enum yang sesuai.']
+            ]);
+        }
+
+        // Ambil id role di tabel roles (pivot) sesuai nama enum
+        $targetRoleId = Role::where('name', $targetEnum->name)->value('id');
+        if (!$targetRoleId) {
+            throw ValidationException::withMessages([
+                'role' => ['Role target tidak ditemukan pada tabel roles. Pastikan seeding roles sudah benar.']
+            ]);
+        }
+
+        $userRoleId = Role::where('name', 'USER')->value('id'); // role dasar
+        if (!$userRoleId) {
+            throw ValidationException::withMessages([
+                'role' => ['Role USER tidak ditemukan pada tabel roles.']
+            ]);
+        }
+
+        DB::transaction(function () use ($user, $targetEnum, $targetRoleId, $userRoleId) {
+            // Update kolom utama di users
+            $user->update([
+                'role' => $targetEnum->value,
+                'can_multiple_role' => $targetEnum !== RoleType::USER,
+            ]);
+
+            if ($targetEnum === RoleType::USER) {
+                // Turun ke USER → hapus semua elevated role, sisakan USER saja
+                $user->roles()->sync([$userRoleId]);
+            } else {
+                // Naik / set ke elevated role → tambahkan role target + pastikan USER ikut
+                $idsToAttach = array_unique([$userRoleId, $targetRoleId]);
+                $user->roles()->syncWithoutDetaching($idsToAttach);
+            }
+        });
+
+        // Kembalikan state terbaru
+        $user->load('roles:id,name');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id'                 => $user->id,
+                'role'               => $targetEnum->name,
+                'role_value'         => $targetEnum->value,
+                'can_multiple_role'  => $user->can_multiple_role,
+                'roles'              => $user->roles->pluck('name'),
+            ],
+        ]);
+    }
+
+    /**
+     * Terima input role berupa string nama atau integer enum value,
+     * kembalikan RoleType|NULL.
+     */
+    private function resolveRoleEnum($input): ?RoleType
+    {
+        // Numeric → langsung ke enum value
+        if (is_numeric($input)) {
+            return RoleType::tryFrom((int) $input);
+        }
+
+        // String → cocokkan ke nama enum (case-insensitive)
+        $name = strtoupper(trim((string) $input));
+        foreach (RoleType::cases() as $case) {
+            if ($case->name === $name) {
+                return $case;
+            }
+        }
+        return null;
     }
 
 }
