@@ -45,7 +45,7 @@
                                 <td>
                                     <button class="btn btn-sm btn-warning mr-1"
                                         @click="openEditModal(user)">Edit</button>
-                                    <button class="btn btn-sm btn-danger" @click="deleteUser(user.id)">Hapus</button>
+                                    <!-- <button class="btn btn-sm btn-danger" @click="deleteUser(user.id)">Hapus</button> -->
                                 </td>
                             </tr>
                         </tbody>
