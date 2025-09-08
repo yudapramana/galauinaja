@@ -284,6 +284,11 @@ class DocumentController extends Controller
                 }
             }
 
+            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+                Storage::delete($document->file_path);
+            }
+
             $file = $request->file('file');
             $filePath = $file->storeAs(
                 'documents/'.$employee->nip,
