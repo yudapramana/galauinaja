@@ -209,20 +209,27 @@ class UserController extends Controller
             ]);
         }
 
+        // return $targetEnum->value;
+
         DB::transaction(function () use ($user, $targetEnum, $targetRoleId, $userRoleId) {
             // Update kolom utama di users
             $user->update([
                 'role' => $targetEnum->value,
-                'can_multiple_role' => $targetEnum !== RoleType::USER,
             ]);
 
             if ($targetEnum === RoleType::USER) {
                 // Turun ke USER → hapus semua elevated role, sisakan USER saja
+                $user->update([
+                    'can_multiple_role' => false,
+                ]);
                 $user->roles()->sync([$userRoleId]);
             } else {
                 // Naik / set ke elevated role → tambahkan role target + pastikan USER ikut
-                $idsToAttach = array_unique([$userRoleId, $targetRoleId]);
-                $user->roles()->syncWithoutDetaching($idsToAttach);
+                 $user->update([
+                    'can_multiple_role' => true,
+                ]);
+                $idsToAttach = array_unique([$targetRoleId, $userRoleId]);
+                $user->roles()->sync($idsToAttach);
             }
         });
 

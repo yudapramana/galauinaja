@@ -358,7 +358,8 @@ const decorateUser = (u) => {
     jabatan: u.employee?.job_title || '-',
     org_name: u.employee?.work_unit?.unit_name || '-',
     formatted_created_at: u.formatted_created_at || formatDate(u.created_at, 'DD/MM/YYYY'),
-    role: u.roles?.[0]?.name || u.role // tampilkan apa adanya
+    role: u.role // tampilkan apa adanya
+    // role: u.roles?.[0]?.name || u.role // tampilkan apa adanya
   }
 }
 
