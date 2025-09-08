@@ -336,10 +336,11 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/api/emp-documents', [EmpDocumentController::class, 'index']);
+    Route::post('api/emp-documents/claim', [EmpDocumentController::class, 'claim']);
     Route::put('/api/emp-documents/{id}/verify', [EmpDocumentController::class, 'verify']);
-
-
+    Route::post('api/emp-documents/{empDocument}/release', [EmpDocumentController::class, 'release']);
     Route::get('/api/document-log/{id}', [DocumentLogController::class, 'show']);
+    Route::get('/api/emp-documents/remaining', [EmpDocumentController::class, 'remaining']);
 
 
 });

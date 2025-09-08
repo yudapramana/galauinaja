@@ -42,4 +42,9 @@ class EmpDocument extends Model
         return $this->file_path ? Storage::url($this->file_path) : null;
     }
 
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
 }
