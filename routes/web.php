@@ -35,6 +35,20 @@ use Illuminate\Support\Facades\Storage;
 |
 */
 
+
+Route::get('/show-duplicates', function(){
+   
+    $dups = DB::table('emp_documents')
+        ->select('file_name')
+        ->whereNull('deleted_at')
+        ->groupBy('file_name')
+        ->havingRaw('COUNT(*) > 1')
+        ->pluck('file_name');
+
+    return $dups;
+});
+
+
 Route::get('/checkfile', function(){
     $nip = '199407292022031002';
     $user = User::where('username', $nip)->with('employee')->first();
