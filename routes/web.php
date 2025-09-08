@@ -34,18 +34,43 @@ use Illuminate\Support\Facades\Storage;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-
 Route::get('/show-duplicates', function(){
    
-    $dups = DB::table('emp_documents')
-        ->select('file_name')
-        ->whereNull('deleted_at')
-        ->groupBy('file_name')
-        ->havingRaw('COUNT(*) > 1')
-        ->pluck('file_name');
+    
+        // Ambil daftar file_name yang duplikat (belum soft-deleted)
+        $dups = DB::table('emp_documents')
+            ->select('file_name')
+            ->whereNull('deleted_at')
+            ->groupBy('file_name')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('file_name');
 
-    return $dups;
+       return $dups;
+});
+
+Route::get('/delete-duplicates', function(){
+   
+    DB::transaction(function () {
+        // Ambil daftar file_name yang duplikat (belum soft-deleted)
+        $dups = DB::table('emp_documents')
+            ->select('file_name')
+            ->whereNull('deleted_at')
+            ->groupBy('file_name')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('file_name');
+
+        foreach ($dups as $name) {
+            // Urutkan terbaru dulu (created_at desc), biarkan yang pertama tetap ada
+            $rows = EmpDocument::where('file_name', $name)
+                ->whereNull('deleted_at')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id') // tie-breaker
+                ->get();
+
+            // Buang elemen pertama (terbaru) → sisanya di-soft delete
+            $rows->skip(1)->each->delete();
+        }
+    });
 });
 
 
