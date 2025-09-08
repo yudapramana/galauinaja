@@ -246,7 +246,7 @@ class DocumentController extends Controller
             'doc_number' => 'nullable|string|max:255',
             'doc_date' => 'nullable|date',
             'parameter'  => 'nullable|string|max:255',
-            'file' => 'required|file|mimes:pdf|max:2048',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -277,19 +277,18 @@ class DocumentController extends Controller
         // Ganti file jika ada file baru
         if ($request->hasFile('file')) {
             // Hapus file lama jika ada
-            if ($document->file_path && Storage::exists($document->file_path)) {
-                Storage::delete($document->file_path);
-                if (Storage::disk('public')->exists($document->file_path)) {
-                    Storage::disk('public')->delete($document->file_path);
-                }
-            }
+            // if ($document->file_path && Storage::exists($document->file_path)) {
+            //     Storage::delete($document->file_path);
+            // }
 
+            // Hapus file lama jika ada
             if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
                 Storage::disk('public')->delete($document->file_path);
-                Storage::delete($document->file_path);
             }
 
             $file = $request->file('file');
+
+            // Simpan file baru
             $filePath = $file->storeAs(
                 'documents/'.$employee->nip,
                 $document->file_name,
@@ -297,11 +296,18 @@ class DocumentController extends Controller
             );
         }
 
+        // $file = $request->file('file');
+        // $filePath = $file->storeAs(
+        //     'documents/'.$employee->nip,
+        //     $document->file_name,
+        //     'public'
+        // );
+
         // Update metadata
         $document->doc_number = $request->doc_number;
         $document->doc_date   = $request->doc_date;
         $document->parameter  = $request->parameter;
-        $document->file_path  = $filePath;
+        // $document->file_path  = $filePath;
         // Reset status dan catatan verifikasi karena ini reupload
         // $document->status = 'Pending';
         $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
