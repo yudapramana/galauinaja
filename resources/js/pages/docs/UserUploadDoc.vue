@@ -54,17 +54,20 @@
                   <li v-for="file in doctype.files" :key="file.id"
                     class="cursor-pointer p-1 rounded hover-bg-light small">
                     <div class="d-flex align-items-center justify-content-between w-100">
-                      <div @click="previewFile(file)" class="d-flex align-items-center">
+                      <div class="d-flex align-items-center">
                         <i class="fas fa-file-pdf text-danger mr-2"></i>
-                        <span>{{ file.file_name }}</span>
+                        <span @click="previewFile(file)">{{ file.file_name }}</span>
                         <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
                           {{ file.status || 'Pending' }}
                         </span>
+                        <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                          Perbarui
+                        </span>
                       </div>
-                      <button v-if="file.status === 'Rejected'" class="btn btn-sm btn-outline-danger ml-2"
+                      <!-- <button v-if="file.status === 'Rejected'" class="btn btn-sm btn-outline-danger ml-2"
                         @click="reuploadFile(file, doctype)">
                         Perbarui
-                      </button>
+                      </button> -->
                     </div>
 
                     <div v-if="file.status === 'Rejected' && file.verif_notes" class="text-danger mt-1 ml-4 small">
