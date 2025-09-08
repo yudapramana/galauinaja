@@ -33,6 +33,31 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 |
 */
 
+Route::get('/checkfile', function(){
+    $nip = '199407292022031002';
+    $user = User::where('username', $nip)->with('employee')->first();
+    $employee = $user->employee;
+
+
+    $document = EmpDocument::where('id_employee', $employee->id)->first();
+
+    // Cek di disk yang benar
+    if (!Storage::disk('public')->exists($document->file_path)) {
+        // Log::warning("File not found for delete: {$document->file_path}");
+        return "File not found on public for delete: {$document->file_path}";
+    } else {
+        return "File FOUND on public for delete: {$document->file_path}";
+    }
+
+    // Cek di disk yang benar
+    if (!Storage::exists($document->file_path)) {
+        // Log::warning("File not found for delete: {$document->file_path}");
+        return "File not found on local for delete: {$document->file_path}";
+    } else {
+        return "File FOUND on local for delete: {$document->file_path}";
+    }
+});
+
 
 Route::get('/getfiles', function(){
     $nip = '199407292022031002';
