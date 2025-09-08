@@ -456,9 +456,17 @@ const reuploadFile = (file, doctype) => {
     file: null,               // file baru, jika ada
     file_id: file.id          // ID file lama untuk keperluan update (PATCH)
   };
+
+  console.log('uploadForm');
+  console.log(uploadForm);
 };
 
 const submitUpload = async () => {
+
+  console.log('uploadForm on BUTTON SUBMIT');
+  console.log(uploadForm);
+
+
   if (!uploadForm.value.file && !uploadForm.value.file_id) {
     Swal.fire({
       icon: 'warning',
@@ -503,7 +511,7 @@ const submitUpload = async () => {
 
     Swal.fire({
       icon: 'success',
-      title: uploadForm.value.file_id ? 'Reupload Berhasil!' : 'Upload Berhasil!',
+      title: uploadForm.value.file_id ? 'Dokumen Berhasil Diperbarui!' : 'Upload Berhasil!',
       showConfirmButton: false,
       timer: 1500
     });

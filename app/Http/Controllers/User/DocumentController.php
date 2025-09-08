@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\VervalLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\FileHelper;
 use Log;
 
 class DocumentController extends Controller
@@ -246,73 +247,69 @@ class DocumentController extends Controller
             'doc_number' => 'nullable|string|max:255',
             'doc_date' => 'nullable|date',
             'parameter'  => 'nullable|string|max:255',
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'file'       => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+        //////
+        // Parse Nama File
+        $parsed = parseFileName($document->file_name);
 
+        $oldPath = $document->file_path;
+        $parameterChanged = $parsed['parameter'] != $request->parameter;
+        $fileUploaded     = $request->hasFile('file');
 
-        // Cek di disk yang benar
-        // if (!Storage::exists($document->file_path)) {
-        //     Log::warning("File Local not found for delete: {$document->file_path}");
-        // } else {
-        //    Log::warning("File Local FOUND for delete: {$document->file_path}"); 
-        // }
+        if ($parameterChanged && !$fileUploaded) {
+            // === CASE: Ubah parameter saja ===
+            $parsed['parameter'] = $request->parameter;
 
-        // if (!Storage::disk('public')->exists($document->file_path)) {
-        //     Log::warning("File Public not found for delete: {$document->file_path}");
-        // } else {
-        //    Log::warning("File Public FOUND for delete: {$document->file_path}"); 
-        // }
+            $newFileName = buildFileName(
+                $parsed['label'],
+                $parsed['parameter'],
+                $parsed['nip'],
+                $parsed['extension']
+            );
+            $newPath = 'documents/'.$employee->nip.'/'.$newFileName;
 
-        // if (!Storage::disk('public')->exists($document->file_path)) {
-        // // Log::warning("File not found for delete: {$document->file_path}");
-        //     return "File not found on public for delete: {$document->file_path}";
-        // } else {
-        //     return "File FOUND on public for delete: {$document->file_path}";
-        // }
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->move($oldPath, $newPath);
 
-        // Ganti file jika ada file baru
-        if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
-            // if ($document->file_path && Storage::exists($document->file_path)) {
-            //     Storage::delete($document->file_path);
-            // }
+                $document->file_name = $newFileName;
+                $document->file_path = $newPath;
+            }
+        }
+        elseif ($fileUploaded) {
+            // === CASE: Upload file baru (parameter bisa sama atau berubah) ===
+            $parsed['parameter'] = $request->parameter;
 
-            // Hapus file lama jika ada
-            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
-                Storage::disk('public')->delete($document->file_path);
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $newFileName = buildFileName(
+                $parsed['label'],
+                $parsed['parameter'],
+                $parsed['nip'],
+                $extension
+            );
+            $newPath = 'documents/'.$employee->nip.'/'.$newFileName;
+
+            // hapus file lama
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
             }
 
-            $file = $request->file('file');
+            // simpan file baru
+            $storedPath = $request->file('file')->storeAs('documents/'.$employee->nip, $newFileName, 'public');
 
-            // Simpan file baru
-            $filePath = $file->storeAs(
-                'documents/'.$employee->nip,
-                $document->file_name,
-                'public'
-            );
+            $document->file_name = $newFileName;
+            $document->file_path = $storedPath;
         }
-
-        // $file = $request->file('file');
-        // $filePath = $file->storeAs(
-        //     'documents/'.$employee->nip,
-        //     $document->file_name,
-        //     'public'
-        // );
+        //////
 
         // Update metadata
-        $document->doc_number = $request->doc_number;
-        $document->doc_date   = $request->doc_date;
-        $document->parameter  = $request->parameter;
-        // $document->file_path  = $filePath;
-        // Reset status dan catatan verifikasi karena ini reupload
-        // $document->status = 'Pending';
+        $document->parameter = $request->parameter;
         $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
         $document->verif_notes = null;
-
         $document->save();
 
          // Simpan ke verval_logs
