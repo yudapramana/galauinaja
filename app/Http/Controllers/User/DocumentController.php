@@ -255,17 +255,17 @@ class DocumentController extends Controller
 
 
         // Cek di disk yang benar
-        if (!Storage::exists($document->file_path)) {
-            Log::warning("File Local not found for delete: {$document->file_path}");
-        } else {
-           Log::warning("File Local FOUND for delete: {$document->file_path}"); 
-        }
+        // if (!Storage::exists($document->file_path)) {
+        //     Log::warning("File Local not found for delete: {$document->file_path}");
+        // } else {
+        //    Log::warning("File Local FOUND for delete: {$document->file_path}"); 
+        // }
 
-        if (!Storage::disk('public')->exists($document->file_path)) {
-            Log::warning("File Public not found for delete: {$document->file_path}");
-        } else {
-           Log::warning("File Public FOUND for delete: {$document->file_path}"); 
-        }
+        // if (!Storage::disk('public')->exists($document->file_path)) {
+        //     Log::warning("File Public not found for delete: {$document->file_path}");
+        // } else {
+        //    Log::warning("File Public FOUND for delete: {$document->file_path}"); 
+        // }
 
 
 
