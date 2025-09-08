@@ -56,7 +56,7 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'formatted_created_at',
+        // 'formatted_created_at',
         'org_id',
         'org_name',
         'nip_name',
@@ -75,18 +75,6 @@ class User extends Authenticatable
             get: fn($value) => RoleType::from($value)->name,
         );
     }
-
-    // public function avatar(): Attribute
-    // {
-    //     // return Attribute::make(
-    //     //     get: fn($value) => asset(Storage::url($value) ?? 'noimage.png'),
-    //     // );
-
-    //     return Attribute::make(
-    //         get: fn($value) => $value ? $this->attribute['profile_picture_square'] : "http://res.cloudinary.com/kemenagpessel/image/upload/v1709086972/profile_picture_pegawai/ijf9mhs8e1m2mjjgz69l.png",
-    //     );
-    // }
-
 
     public function getAvatarAttribute(){
         if($this->attributes['avatar']){
@@ -159,8 +147,30 @@ class User extends Authenticatable
         return $roleNames;
     }
 
+    // public function getMustChangePasswordAttribute(): bool
+    // {
+    //     return Hash::check($this->username, $this->password);
+    // }
+
     public function getMustChangePasswordAttribute(): bool
     {
-        return Hash::check($this->username, $this->password);
+        $plain = (string) ($this->username ?? '');
+        $hash  = (string) ($this->attributes['password'] ?? '');
+
+        if ($hash === '') return true;
+
+        $algo = \password_get_info($hash)['algoName'] ?? null;
+
+        try {
+            if ($algo === 'bcrypt') {
+                return Hash::driver('bcrypt')->check($plain, $hash);
+            } elseif (in_array($algo, ['argon2i', 'argon2id'], true)) {
+                // di Laravel, driver "argon" memverifikasi argon2i/argon2id
+                return Hash::driver('argon')->check($plain, $hash);
+            }
+            return true; // format tak dikenal → paksa ganti
+        } catch (\Throwable $e) {
+            return true;
+        }
     }
 }

@@ -78,6 +78,15 @@ const logout = () => {
                             </p>
                         </router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link to="/admin/verval-history" :class="$route.path.startsWith('/admin/verval-history') ? 'active' : ''"
+                            active-class="active" class="nav-link">
+                            <i class="nav-icon fas fa-clipboard-check"></i>
+                            <p>
+                                Log Verval
+                            </p>
+                        </router-link>
+                    </li>
                     <!-- <li class="nav-item">
                         <router-link to="/admin/reports" :class="$route.path.startsWith('/admin/reports') ? 'active' : ''"
                             active-class="active" class="nav-link">
@@ -133,6 +142,14 @@ const logout = () => {
                             <i class="nav-icon fas fa-users"></i>
                             <p>
                                 Pengguna
+                            </p>
+                        </router-link>
+                    </li>
+                    <li class="nav-item" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'">
+                        <router-link to="/admin/admins" active-class="active" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>
+                                Pengelola
                             </p>
                         </router-link>
                     </li>

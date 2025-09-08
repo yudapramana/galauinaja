@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VervalLogController;
 use App\Http\Controllers\API\DocumentLogController;
 use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
@@ -259,6 +260,9 @@ Route::get('/all-users', function () {
 });
 
 Route::middleware('auth')->group(function () {
+
+    Route::get('/api/verval-logs', [VervalLogController::class, 'index']);
+
 
     Route::get('/api/master', [MasterController::class, 'index']);
 

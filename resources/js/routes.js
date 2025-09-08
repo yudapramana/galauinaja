@@ -23,7 +23,11 @@ export default [
         path: 'vervals',
         name: 'admin.vervals',
         component: () => import('./pages/vervals/VervalList.vue'),
-
+      },
+      {
+        path: 'verval-history',
+        name: 'admin.verval-history',
+        component: () => import('./pages/vervals/VervalHistory.vue'),
       },
       {
         path: 'workunits',
@@ -45,6 +49,11 @@ export default [
         path: 'users',
         name: 'admin.users',
         component: () => import('./pages/users/UserList.vue'),
+      },
+      {
+        path: 'admins',
+        name: 'admin.admins',
+        component: () => import('./pages/admins/AdminList.vue'),
       },
       {
         path: 'users/:id/documents',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\RoleType;
 
 class UserController extends Controller
 {
@@ -13,6 +14,7 @@ class UserController extends Controller
     {
         $users = User::withAggregate('employee', 'id_work_unit')
             ->with(['employee.workUnit'])
+            // Pencarian
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -26,10 +28,23 @@ class UserController extends Controller
                         });
                 });
             })
+            // Filter unit kerja
             ->when($request->work_unit_id, function ($query, $workUnitId) {
                 $query->whereHas('employee', function ($q) use ($workUnitId) {
                     $q->where('id_work_unit', $workUnitId);
                 });
+            })
+             // Exclude role (gunakan kolom users.role yang enum/int value)
+            ->when($request->filled('exclude_role'), function ($query) use ($request) {
+                $raw = strtoupper($request->input('exclude_role')); // contoh: "USER"
+
+                try {
+                    // Ambil enum dari nama case (USER -> RoleType::USER)
+                    $roleEnum = RoleType::from(constant(RoleType::class . '::' . $raw)->value);
+                    $query->where('role', '!=', $roleEnum->value);
+                } catch (\Throwable $e) {
+                    // Jika nama tidak valid, bisa diabaikan atau lempar exception
+                }
             })
             // ->orderBy('employee_id_work_unit', 'asc')
             ->orderBy('username', 'asc') // sort by tanggal lahir
