@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\VervalLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
@@ -251,6 +252,22 @@ class DocumentController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+
+
+        // Cek di disk yang benar
+        if (!Storage::exists($document->file_path)) {
+            Log::warning("File Local not found for delete: {$document->file_path}");
+        } else {
+           Log::warning("File Local FOUND for delete: {$document->file_path}"); 
+        }
+
+        if (!Storage::disk('public')->exists($document->file_path)) {
+            Log::warning("File Public not found for delete: {$document->file_path}");
+        } else {
+           Log::warning("File Public FOUND for delete: {$document->file_path}"); 
+        }
+
+
 
         // Ganti file jika ada file baru
         if ($request->hasFile('file')) {
