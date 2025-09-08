@@ -267,7 +267,12 @@ class DocumentController extends Controller
         //    Log::warning("File Public FOUND for delete: {$document->file_path}"); 
         // }
 
-
+        if (!Storage::disk('public')->exists($document->file_path)) {
+        // Log::warning("File not found for delete: {$document->file_path}");
+            return "File not found on public for delete: {$document->file_path}";
+        } else {
+            return "File FOUND on public for delete: {$document->file_path}";
+        }
 
         // Ganti file jika ada file baru
         if ($request->hasFile('file')) {
