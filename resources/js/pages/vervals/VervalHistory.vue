@@ -152,8 +152,11 @@ const isLoading = ref(false)
 
 const search = ref('')
 const status = ref('')
+// const statuses = [
+//   'Uploaded','Reuploaded','Approved','Rejected','Uploaded by Admin','Reuploaded by Admin'
+// ]
 const statuses = [
-  'Uploaded','Reuploaded','Approved','Rejected','Uploaded by Admin','Reuploaded by Admin'
+  'Approved','Rejected','Uploaded by Admin','Reuploaded by Admin'
 ]
 const dateFrom = ref('')
 const dateTo = ref('')

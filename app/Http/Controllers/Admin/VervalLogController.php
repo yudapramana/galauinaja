@@ -49,6 +49,8 @@ class VervalLogController extends Controller
             })
             ->when($dateFrom, fn($q) => $q->whereDate('created_at', '>=', $dateFrom))
             ->when($dateTo,   fn($q) => $q->whereDate('created_at', '<=', $dateTo))
+            // exclude Uploaded dan Reuploaded
+            ->whereNotIn('verval_status', ['Uploaded', 'Reuploaded'])
             ->orderByDesc('created_at');
 
         $logs = $query->paginate($perPage);
