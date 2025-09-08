@@ -42,6 +42,16 @@ Route::get('/checkfile', function(){
 
     $document = EmpDocument::where('id_employee', $employee->id)->first();
 
+
+     // Cek di disk yang benar
+    if (!Storage::exists($document->file_path)) {
+        // Log::warning("File not found for delete: {$document->file_path}");
+        return "File not found on local for delete: {$document->file_path}";
+    } else {
+        return "File FOUND on local for delete: {$document->file_path}";
+    }
+
+    
     // Cek di disk yang benar
     if (!Storage::disk('public')->exists($document->file_path)) {
         // Log::warning("File not found for delete: {$document->file_path}");
@@ -50,13 +60,7 @@ Route::get('/checkfile', function(){
         return "File FOUND on public for delete: {$document->file_path}";
     }
 
-    // Cek di disk yang benar
-    if (!Storage::exists($document->file_path)) {
-        // Log::warning("File not found for delete: {$document->file_path}");
-        return "File not found on local for delete: {$document->file_path}";
-    } else {
-        return "File FOUND on local for delete: {$document->file_path}";
-    }
+   
 });
 
 
