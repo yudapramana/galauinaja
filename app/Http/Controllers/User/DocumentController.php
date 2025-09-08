@@ -257,6 +257,9 @@ class DocumentController extends Controller
             // Hapus file lama jika ada
             if ($document->file_path && Storage::exists($document->file_path)) {
                 Storage::delete($document->file_path);
+                if (Storage::disk('public')->exists($document->file_path)) {
+                    Storage::disk('public')->delete($document->file_path);
+                }
             }
 
             $file = $request->file('file');
