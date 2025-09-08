@@ -271,7 +271,7 @@ class DocumentController extends Controller
         $document->doc_number = $request->doc_number;
         $document->doc_date   = $request->doc_date;
         $document->parameter  = $request->parameter;
-
+        $document->file_path  = $filePath;
         // Reset status dan catatan verifikasi karena ini reupload
         // $document->status = 'Pending';
         $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
