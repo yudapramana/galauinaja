@@ -52,7 +52,7 @@ class UserController extends Controller
             // ->orderBy('employee_id_work_unit', 'asc')
             ->orderBy('role', 'asc') // sort by tanggal lahir
             // ->orderBy('username', 'asc') // sort by tanggal lahir
-            ->paginate(10);
+            ->paginate(setting('pagination_limit'));
 
         return response()->json($users);
     }
