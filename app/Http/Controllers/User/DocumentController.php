@@ -246,7 +246,7 @@ class DocumentController extends Controller
             'doc_number' => 'nullable|string|max:255',
             'doc_date' => 'nullable|date',
             'parameter'  => 'nullable|string|max:255',
-            'file'       => 'nullable|file|mimes:pdf|max:1024', // max 1MB
+            'file' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -267,12 +267,12 @@ class DocumentController extends Controller
         //    Log::warning("File Public FOUND for delete: {$document->file_path}"); 
         // }
 
-        if (!Storage::disk('public')->exists($document->file_path)) {
-        // Log::warning("File not found for delete: {$document->file_path}");
-            return "File not found on public for delete: {$document->file_path}";
-        } else {
-            return "File FOUND on public for delete: {$document->file_path}";
-        }
+        // if (!Storage::disk('public')->exists($document->file_path)) {
+        // // Log::warning("File not found for delete: {$document->file_path}");
+        //     return "File not found on public for delete: {$document->file_path}";
+        // } else {
+        //     return "File FOUND on public for delete: {$document->file_path}";
+        // }
 
         // Ganti file jika ada file baru
         if ($request->hasFile('file')) {
