@@ -15,7 +15,6 @@ class EmployeeDocumentController extends Controller
     public function index()
     {
         $documents = EmpDocument::where('id_employee', auth()->user()->id_employee)->with('doctype')->get();
-        // $documents = 'pantek';
 
         return response()->json([
             'data' => $documents

@@ -9,13 +9,11 @@ use Illuminate\Support\Facades\Storage;
 
 class EmpDocument extends Model 
 {
+    use SoftDeletes;
 
     protected $table = 'emp_documents';
     public $timestamps = true;
     
-
-    use SoftDeletes;
-
     protected $dates = ['deleted_at'];
 
     protected $guarded = [];
