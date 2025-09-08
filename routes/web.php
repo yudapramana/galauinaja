@@ -21,6 +21,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
