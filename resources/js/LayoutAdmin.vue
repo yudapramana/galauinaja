@@ -76,7 +76,7 @@ onMounted(() => {
         <SidebarRight v-if="authUserStore.isAuthenticated" />
         <AppFooter v-if="authUserStore.isAuthenticated" />
 
-        <v-bottom-navigation grow v-if="screenDisplayStore.isMobile">
+        <!-- <v-bottom-navigation grow v-if="screenDisplayStore.isMobile">
             <v-btn value="dashboard" to="/admin/dashboard">
                 <v-icon>mdi-home</v-icon>
 
@@ -102,12 +102,8 @@ onMounted(() => {
                 <span>Profil</span>
             </v-btn>
 
-            <!-- <v-btn value="logout" @click.prevent="logout">
-                    <v-icon>mdi-logout</v-icon>
-
-                    <span>Logout</span>
-                </v-btn> -->
-        </v-bottom-navigation>
+            
+        </v-bottom-navigation> -->
 
         <VLayoutItem model-value position="bottom" class="text-end" size="88"
             v-if="screenDisplayStore.isMobile && authUserStore.isAuthenticated && route.name == 'admin.reports'">
