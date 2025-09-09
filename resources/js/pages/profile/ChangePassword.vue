@@ -82,11 +82,11 @@ const handleChangePassword = async () => {
 
                                 <!-- Current Password -->
                                 <div class="form-group mb-3">
-                                    <label for="currentPassword">Current Password</label>
+                                    <label for="currentPassword">Kata Sandi Saat Ini</label>
                                     <div class="input-group">
                                         <input :type="showCurrentPassword ? 'text' : 'password'"
                                             v-model="changePasswordForm.currentPassword" id="currentPassword"
-                                            class="form-control" placeholder="Enter current password" />
+                                            class="form-control" placeholder="Masukkan Kata Sandi Saat Ini" />
                                         <button class="btn btn-outline-secondary" type="button"
                                             @click="showCurrentPassword = !showCurrentPassword">
                                             <i :class="showCurrentPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
@@ -99,11 +99,11 @@ const handleChangePassword = async () => {
 
                                 <!-- New Password -->
                                 <div class="form-group mb-3">
-                                    <label for="newPassword">New Password</label>
+                                    <label for="newPassword">Kata Sandi Baru</label>
                                     <div class="input-group">
                                         <input :type="showNewPassword ? 'text' : 'password'"
                                             v-model="changePasswordForm.password" id="newPassword" class="form-control"
-                                            placeholder="Enter new password" />
+                                            placeholder="Kata Sandi Baru" />
                                         <button class="btn btn-outline-secondary" type="button"
                                             @click="showNewPassword = !showNewPassword">
                                             <i :class="showNewPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
@@ -116,11 +116,11 @@ const handleChangePassword = async () => {
 
                                 <!-- Confirm Password -->
                                 <div class="form-group mb-3">
-                                    <label for="passwordConfirmation">Confirm New Password</label>
+                                    <label for="passwordConfirmation">Konfirmasi Kata Sandi Baru</label>
                                     <div class="input-group">
                                         <input :type="showConfirmPassword ? 'text' : 'password'"
                                             v-model="changePasswordForm.passwordConfirmation" id="passwordConfirmation"
-                                            class="form-control" placeholder="Confirm new password" />
+                                            class="form-control" placeholder="Konfirmasi Kata Sandi Baru" />
                                         <button class="btn btn-outline-secondary" type="button"
                                             @click="showConfirmPassword = !showConfirmPassword">
                                             <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>

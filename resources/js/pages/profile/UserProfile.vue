@@ -477,12 +477,11 @@ onMounted(() => {
                                 <div class="tab-pane" id="changePassword">
                                     <form @submit.prevent="handleChangePassword" class="form-horizontal">
                                         <div class="form-group row">
-                                            <label for="currentPassword" class="col-sm-3 col-form-label">Current
-                                                Password</label>
+                                            <label for="currentPassword" class="col-sm-3 col-form-label">Kata Sandi Saat Ini</label>
                                             <div class="col-sm-9">
                                                 <input v-model="changePasswordForm.currentPassword" type="password"
                                                     class="form-control " id="currentPassword"
-                                                    placeholder="Current Password">
+                                                    placeholder="Kata Sandi Saat Ini">
                                                 <span class="text-danger text-sm"
                                                     v-if="errors && errors.current_password">{{
                                                         errors.current_password[0]
@@ -490,22 +489,20 @@ onMounted(() => {
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label for="newPassword" class="col-sm-3 col-form-label">New
-                                                Password</label>
+                                            <label for="newPassword" class="col-sm-3 col-form-label">Kata Sandi Baru</label>
                                             <div class="col-sm-9">
                                                 <input v-model="changePasswordForm.password" type="password"
-                                                    class="form-control " id="newPassword" placeholder="New Password">
+                                                    class="form-control " id="newPassword" placeholder="Kata Sandi Baru">
                                                 <span class="text-danger text-sm" v-if="errors && errors.password">{{
                                                     errors.password[0] }}</span>
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label for="passwordConfirmation" class="col-sm-3 col-form-label">Confirm
-                                                New Password</label>
+                                            <label for="passwordConfirmation" class="col-sm-3 col-form-label">Konfirmasi Kata Sandi Baru</label>
                                             <div class="col-sm-9">
                                                 <input v-model="changePasswordForm.passwordConfirmation" type="password"
                                                     class="form-control " id="passwordConfirmation"
-                                                    placeholder="Confirm New Password">
+                                                    placeholder="Konfirmasi Kata Sandi Baru">
                                             </div>
                                         </div>
                                         <div class="form-group row">
