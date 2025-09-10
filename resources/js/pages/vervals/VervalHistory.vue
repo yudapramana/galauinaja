@@ -167,11 +167,16 @@ const format = (d) => formatDate(d, 'DD/MM/YYYY HH:mm')
 
 const offsetIndex = computed(() => (meta.value.current_page - 1) * (meta.value.per_page || 10))
 
+const buildPreviewUrl = (path) =>
+  `/api/preview/pdf?path=${encodeURIComponent(path)}`;
+
 const fileUrl = (path) => {
   // sesuaikan base url storage kamu
   // contoh umum: /storage/ + path (jika pakai laravel storage:link)
   if (!path) return '#'
-  return `/storage/${path}`.replace(/\/+/, '/')
+  var url = buildPreviewUrl(path);
+  return url;
+  // return `/storage/${path}`.replace(/\/+/, '/')
 }
 
 const badgeClass = (s) => {

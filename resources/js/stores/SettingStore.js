@@ -6,6 +6,9 @@ import { useStorage } from '@vueuse/core';
 export const useSettingStore = defineStore('SettingStore', () => {
     const setting = useStorage('SettingStore:setting', {
         app_name: '',
+        date_format: 'YYYY-MM-DD',
+        pagination_limit: 10,
+        maintenance: null,
     });
     const theme = useStorage('SettingStore:theme', ref('light'));
     const toggle = useStorage('SettingStore:toggle', ref('expanded'));
@@ -21,7 +24,7 @@ export const useSettingStore = defineStore('SettingStore', () => {
     const getSetting = async () => {
         // console.log('setting.value.app_name');
         // console.log(setting.value.app_name);
-        if (!setting.value.app_name) {
+        if ((!setting.value.app_name) || (setting.value.maintenance == null)) {
             console.log('tidak masuk sini kan ya');
             await axios.get('/api/settings')
                 .then((response) => {
@@ -41,5 +44,9 @@ export const useSettingStore = defineStore('SettingStore', () => {
         }
     };
 
-    return { setting, getSetting, theme, changeTheme, toggleMenuIcon };
+    const resetMaintenance = () => {
+        setting.value.maintenance = null
+    }
+
+    return { setting, getSetting, theme, changeTheme, toggleMenuIcon, resetMaintenance };
 });

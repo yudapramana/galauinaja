@@ -1,11 +1,21 @@
 <script setup>
 import { useAuthUserStore } from "../stores/AuthUserStore.js";
 import { useScreenDisplayStore } from '../stores/ScreenDisplayStore.js';
+import { useSettingStore } from "../stores/SettingStore.js";
+import { reactive, ref, nextTick, onMounted } from 'vue';
 
 const screenDisplayStore = useScreenDisplayStore();
 const authUserStore = useAuthUserStore();
+const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 
-
+onMounted(() => {
+    // initiation
+    console.log('initiation')
+    settingStore.resetMaintenance()
+    settingStore.getSetting()
+});
 
 
 </script>
@@ -15,7 +25,14 @@ const authUserStore = useAuthUserStore();
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Beranda</h1>
+                    <h1 class="m-0">
+                    Beranda 
+                    <span v-if="settingStore.setting.maintenance == true" 
+                            class="badge bg-warning text-dark px-2 py-1" 
+                            style="font-size: 0.7rem; vertical-align: middle;">
+                        Maintenance
+                    </span>
+                    </h1>
                     <!-- authUserStore.isAdminRole : {{ authUserStore.isAdminRole }} <br>
                     authUserStore.activeLayout : {{ authUserStore.activeLayout }} <br> -->
                 </div>
@@ -32,6 +49,23 @@ const authUserStore = useAuthUserStore();
 
     <div class="content">
         <div class="container-fluid">
+            
+            <div v-if="settingStore.setting.maintenance == true" class="row">
+                <div class="col-12 mb-2">
+                    <div class="alert alert-warning alert-dismissible fade show " role="alert">
+                        <strong>Pemberitahuan Pemeliharaan Sistem</strong><br>
+                        Yth. Bapak/Ibu Pengguna SIGARDA, saat ini sedang dilakukan pemeliharaan sistem
+                        sehubungan dengan proses integrasi storage server dengan Google Drive.
+                        Selama periode ini, sebagian layanan mungkin tidak dapat diakses.
+                        Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-6 col-sm-12 col-lg-6">
                     <div class="card bg-light d-flex flex-fill">

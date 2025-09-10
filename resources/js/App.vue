@@ -12,6 +12,8 @@ const route = useRoute();
 const router = useRouter();
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 
 // Tema (dark / light)
 const currentThemeMode = computed(() =>

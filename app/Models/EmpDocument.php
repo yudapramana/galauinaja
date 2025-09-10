@@ -37,7 +37,7 @@ class EmpDocument extends Model
 
     public function getFileUrlAttribute()
     {
-        return $this->file_path ? Storage::url($this->file_path) : null;
+        return $this->file_path ? url('secure/'.$this->file_path) : null;
     }
 
     public function assignee()

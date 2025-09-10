@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\FileHelper;
 use Log;
+use Yaza\LaravelGoogleDriveStorage\Gdrive;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DocumentController extends Controller
 {
@@ -29,12 +32,12 @@ class DocumentController extends Controller
                 'doc_number' => $doc->doc_number,
                 'doc_date' => $doc->doc_date,
                 'parameter' => $doc->parameter,
-                'file_url' => url('storage/' . $doc->file_path),
+                'file_path' => $doc->file_path,
+                'file_url' => url('secure/' . $doc->file_path),
                 'file_name' => $doc->file_name,
                 'status' => $doc->status,
                 'verif_notes' => $doc->verif_notes
             ];
-            // 'file_url' => url('storage/documents/' . $doc->file_path),
         });
 
         return response()->json([
@@ -58,12 +61,12 @@ class DocumentController extends Controller
                 'doc_number' => $doc->doc_number,
                 'doc_date' => $doc->doc_date,
                 'parameter' => $doc->parameter,
-                'file_url' => url('storage/' . $doc->file_path),
+                'file_path' => $doc->file_path,
+                'file_url' => url('secure/' . $doc->file_path),
                 'file_name' => $doc->file_name,
                 'status' => $doc->status,
                 'verif_notes' => $doc->verif_notes
             ];
-            // 'file_url' => url('storage/documents/' . $doc->file_path),
         });
 
         $user = User::find($user->id);
@@ -114,7 +117,7 @@ class DocumentController extends Controller
         if ($fileNameExists) {
             return response()->json([
                 'errors' => [
-                    'file_name' => ['File sudah diupload. Hapus dan tambahkan kembali jika ingin upload ulang.']
+                    'file_name' => ['File sudah diupload dengan nama yang sama. Perbarui item jika ingin upload ulang.']
                 ]
             ], 422);
         }
@@ -122,7 +125,7 @@ class DocumentController extends Controller
         $filePath = $file->storeAs(
             'documents/' . $employee->nip,
             $fileName,
-            'public'
+            'privatedisk'
         );
 
         // Simpan ke database dokumen
@@ -159,86 +162,6 @@ class DocumentController extends Controller
         ]);
     }
 
-
-    // public function uploadDocument(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'id_doc_type' => 'required|exists:doc_types,id',
-    //         'doc_number' => 'required|string|max:255',
-    //         'doc_date' => 'required|date',
-    //         'parameter' => 'nullable|string|max:255',
-    //         'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // 2MB max
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'errors' => $validator->errors()
-    //         ], 422);
-    //     }
-
-
-    //     // Upload file
-    //     $file = $request->file('file');
-    //     // $filename = time() . '_' . $file->getClientOriginalName();
-    //     // $path = $file->storeAs('documents', $filename, 'public');
-    //     $extension = $file->getClientOriginalExtension();
-
-    //     // return 'USERID: ' . $request->user_id;
-
-    //     if(isset($request->user_id)) {
-    //         $user = User::find($request->user_id);
-    //         $employee = $user->employee;
-    //     } else {
-    //         $employee = Auth::user()->employee;
-    //     }
-
-    //     $employeeId = $employee->id;
-    //     $docType = DocType::find($request->id_doc_type);
-
-    //     // Buat nama file
-    //     $fileName = $docType->label . ($request->parameter ?? '') . '_' . $employee->nip . '.' . $extension;
-    //     // $fileName = $docType->label . $request->parameter . '_' .$employee->nip . '.'. $extension;
-
-    //     // Cek apakah file_name sudah ada di database
-    //     $fileNameExists = EmpDocument::where('file_name', $fileName)->exists();
-    //     if ($fileNameExists) {
-    //         return response()->json([
-    //             'errors' => [
-    //                 'file_name' => ['File sudah diupload. Hapus dan tambahkan kembali jika ingin upload ulang.']
-    //             ]
-    //         ], 422);
-    //     }
-
-    //     $filePath = $file->storeAs(
-    //         'documents/'.$employee->nip,
-    //         $fileName,
-    //         'public'
-    //     );
-
-    //     // Simpan ke database
-    //     $document = new EmpDocument();
-    //     $document->id_employee = $employeeId;
-    //     $document->id_doc_type = $request->id_doc_type;
-    //     $document->doc_number = $request->doc_number;
-    //     $document->file_name = $fileName;
-    //     $document->doc_date = $request->doc_date;
-    //     $document->parameter = $request->parameter;
-    //     $document->file_path = $filePath;
-    //     if(isset($request->user_id)) {
-    //         $document->status = 'Approved';
-    //     }
-    //     $document->save();
-
-    //     if(isset($request->user_id)) {
-    //         $user->docs_update_state = true;
-    //         $user->save();
-    //     }
-
-    //     return response()->json([
-    //         'message' => 'Dokumen berhasil diupload.'
-    //     ]);
-    // }
-
     public function reupload(Request $request, $id)
     {
         $document = EmpDocument::findOrFail($id);
@@ -258,51 +181,99 @@ class DocumentController extends Controller
         $parsed = parseFileName($document->file_name);
 
         $oldPath = $document->file_path;
-        $parameterChanged = $parsed['parameter'] != $request->parameter;
+        $baseDir = 'documents/'.$employee->nip;
+
+        // Normalisasi parameter
+        $paramReq = trim((string) ($request->parameter ?? ''));
+        $paramOld = trim((string) ($parsed['parameter'] ?? ''));
+
+        $parameterChanged = $paramOld !== $paramReq;
         $fileUploaded     = $request->hasFile('file');
 
         if ($parameterChanged && !$fileUploaded) {
-            // === CASE: Ubah parameter saja ===
-            $parsed['parameter'] = $request->parameter;
+            // === (1) Ubah parameter saja: RENAME (move) ===
+            $parsed['parameter'] = $paramReq;
 
             $newFileName = buildFileName(
                 $parsed['label'],
                 $parsed['parameter'],
                 $parsed['nip'],
-                $parsed['extension']
+                $parsed['extension'] // pakai extension lama
             );
-            $newPath = 'documents/'.$employee->nip.'/'.$newFileName;
+            $newPath = $baseDir.'/'.$newFileName;
 
-            if (Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->move($oldPath, $newPath);
+            // Cek duplikat nama file (wajib untuk perubahan parameter)
+            if (EmpDocument::where('file_name', $newFileName)->exists()) {
+                return response()->json([
+                    'errors' => [
+                        'file_name' => ['File sudah diupload dengan nama yang sama. Perbarui item jika ingin upload ulang.']
+                    ]
+                ], 422);
+            }
 
+            if ($oldPath && Storage::disk('privatedisk')->exists($oldPath)) {
+                Storage::disk('privatedisk')->move($oldPath, $newPath);
                 $document->file_name = $newFileName;
                 $document->file_path = $newPath;
             }
-        }
-        elseif ($fileUploaded) {
-            // === CASE: Upload file baru (parameter bisa sama atau berubah) ===
-            $parsed['parameter'] = $request->parameter;
 
-            $extension = $request->file('file')->getClientOriginalExtension();
+        } elseif ($fileUploaded && !$parameterChanged) {
+            // === (2) Ubah file saja: REPLACE isi (tanpa cek duplikat) ===
+            $extension   = $request->file('file')->getClientOriginalExtension();
+            $newFileName = buildFileName(
+                $parsed['label'],
+                $paramOld,          // parameter tetap
+                $parsed['nip'],
+                $extension          // extension baru dari file upload
+            );
+            $newPath = $baseDir.'/'.$newFileName;
+
+            // Hapus file lama bila ada (boleh sama/beda nama)
+            if ($oldPath && Storage::disk('privatedisk')->exists($oldPath)) {
+                Storage::disk('privatedisk')->delete($oldPath);
+            }
+
+            // Simpan file baru
+            $storedPath = $request->file('file')->storeAs($baseDir, $newFileName, 'privatedisk');
+
+            $document->file_name = $newFileName;
+            $document->file_path = $storedPath;
+
+        } elseif ($fileUploaded && $parameterChanged) {
+            // === (3) Ubah file & parameter: DELETE lama → SIMPAN baru (cek duplikat) ===
+            $parsed['parameter'] = $paramReq;
+
+            $extension   = $request->file('file')->getClientOriginalExtension();
             $newFileName = buildFileName(
                 $parsed['label'],
                 $parsed['parameter'],
                 $parsed['nip'],
                 $extension
             );
-            $newPath = 'documents/'.$employee->nip.'/'.$newFileName;
+            $newPath = $baseDir.'/'.$newFileName;
 
-            // hapus file lama
-            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            // Cek duplikat nama file (karena parameter berubah)
+            if (EmpDocument::where('file_name', $newFileName)->exists()) {
+                return response()->json([
+                    'errors' => [
+                        'file_name' => ['File sudah diupload dengan nama yang sama. Perbarui item jika ingin upload ulang.']
+                    ]
+                ], 422);
             }
 
-            // simpan file baru
-            $storedPath = $request->file('file')->storeAs('documents/'.$employee->nip, $newFileName, 'public');
+            if ($oldPath && Storage::disk('privatedisk')->exists($oldPath)) {
+                Storage::disk('privatedisk')->delete($oldPath);
+            }
+
+            $storedPath = $request->file('file')->storeAs($baseDir, $newFileName, 'privatedisk');
 
             $document->file_name = $newFileName;
             $document->file_path = $storedPath;
+
+        } else {
+            // === Tidak ada perubahan (tidak upload & parameter sama) ===
+            // Boleh dikosongkan atau return info
+            // return response()->json(['message' => 'Tidak ada perubahan'], 200);
         }
         //////
 
@@ -342,7 +313,7 @@ class DocumentController extends Controller
         $employee = $user->employee;
 
         $directory = 'documents/' . $employee->nip;
-        $files = Storage::disk('public')->allFiles($directory);
+        $files = Storage::disk('privatedisk')->allFiles($directory);
 
         // Remove the directory prefix from each file path
         $filesWithoutPrefix = array_map(function ($file) use ($directory) {
@@ -360,17 +331,28 @@ class DocumentController extends Controller
                 $docTypeId = $docType->id;
             } else {
                 continue;
-                return 'apasih';
             }
             
-            EmpDocument::firstOrCreate([
-                'id_employee' => $employee->id,
-                'id_doc_type' => $docTypeId,
-                'parameter' => $param,
-                'file_path' => $directory . '/' . $fileName,
-                'file_name' => $fileName,
-                'status' => 'Approved',
-            ]);
+            // EmpDocument::firstOrCreate([
+            //     'id_employee' => $employee->id,
+            //     'id_doc_type' => $docTypeId,
+            //     'parameter' => $param,
+            //     'file_path' => $directory . '/' . $fileName,
+            //     'file_name' => $fileName,
+            //     'status' => 'Approved',
+            // ]);
+            EmpDocument::updateOrCreate(
+                [
+                    'id_employee' => $employee->id,
+                    'id_doc_type' => $docType->id,
+                    'parameter'   => $param,
+                ],
+                [
+                    'file_path' => $directory.'/'.$fileName, // simpan path relatif di Drive
+                    'file_name' => $fileName,
+                    'status'    => 'Approved',
+                ]
+            );
         }
 
         $user->update([

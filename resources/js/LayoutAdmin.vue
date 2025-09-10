@@ -16,6 +16,8 @@ const screenDisplayStore = useScreenDisplayStore();
 const deferredPrompt = ref(null);
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 
 const logout = () => {
     authUserStore.logout();

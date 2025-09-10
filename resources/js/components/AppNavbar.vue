@@ -3,6 +3,8 @@ import { useSettingStore } from '../stores/SettingStore';
 import { useAuthUserStore } from '../stores/AuthUserStore';
 
 const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 const authUserStore = useAuthUserStore();
 
 const handleSwitchLayout = () => {

@@ -2,33 +2,49 @@
 import { onMounted, ref } from 'vue';
 import { useToastr } from '@/toastr';
 
-const settings = ref([]);
+const settings = ref({});
+const original = ref({}); // simpan nilai awal dari server
+const errors = ref(null);
 const toastr = useToastr();
 
-const getSettings = () => {
-    axios.get('/api/settings')
-        .then((response) => {
-            settings.value = response.data;
-        });
+const isOn = (v) => v === true || v === 1 || v === '1' || v === 'true' || v === 'on';
+
+const getSettings = async () => {
+  const { data } = await axios.get('/api/settings');
+  settings.value = data;
+  original.value = { ...data }; // snapshot awal
 };
 
-const errors = ref();
-const updateSettings = () => {
-    errors.value = '';
-    axios.post('/api/settings', settings.value)
-        .then((response) => {
-            toastr.success('Settings updated successfully!');
-        })
-        .catch((error) => {
-            if (error.response && error.response.status === 422) {
-                errors.value = error.response.data.errors;
-            }
-        });
+const updateSettings = async () => {
+  errors.value = null;
+
+  const prevOn = isOn(original.value.maintenance);
+  const nextOn = isOn(settings.value.maintenance);
+
+  // Konfirmasi hanya saat toggle dari OFF -> ON
+  if (!prevOn && nextOn) {
+    const ok = confirm(
+      'Turn ON maintenance mode? This will log out ALL users immediately.'
+    );
+    if (!ok) return;
+  }
+
+  try {
+    await axios.post('/api/settings', settings.value);
+    toastr.success('Settings updated successfully!');
+    // Setelah sukses, perbarui snapshot agar konfirmasi tidak muncul lagi kalau tidak ada perubahan
+    original.value = { ...settings.value };
+
+    // Jika mau paksa reload saat menjadi ON, baru aktifkan ini:
+    // if (!prevOn && nextOn) location.reload();
+  } catch (error) {
+    if (error.response?.status === 422) {
+      errors.value = error.response.data.errors;
+    }
+  }
 };
 
-onMounted(() => {
-    getSettings();
-});
+onMounted(getSettings);
 </script>
 
 <template>
@@ -85,6 +101,29 @@ onMounted(() => {
                                         id="paginationLimit" placeholder="Enter pagination limit">
                                     <span class="text-danger text-sm" v-if="errors && errors.pagination_limit">{{
                                         errors.pagination_limit[0] }}</span>
+                                </div>
+
+                                 <!-- NEW: Maintenance Mode toggle -->
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input"
+                                            id="maintenanceSwitch"
+                                            v-model="settings.maintenance"
+                                            :true-value="'1'"
+                                            :false-value="'0'"
+                                        />
+                                        <label class="custom-control-label" for="maintenanceSwitch">
+                                        Maintenance Mode
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Saat ON, semua user akan langsung di-logout.
+                                    </small>
+                                    <span class="text-danger text-sm" v-if="errors && errors.maintenance">
+                                        {{ errors.maintenance[0] }}
+                                    </span>
                                 </div>
                             </div>
 

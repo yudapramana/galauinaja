@@ -55,7 +55,7 @@
                 </div>
 
                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
-                  <li v-for="file in doctype.files" :key="file.id" @click="previewFile(file.file_url)"
+                  <li v-for="file in doctype.files" :key="file.id" @click="previewFile(file.file_path)"
                     class="cursor-pointer p-1 rounded hover-bg-light small">
                     <i class="fas fa-file-pdf text-danger mr-2"></i> {{ file.file_name }}
                   </li>
@@ -165,18 +165,44 @@ const toggleExpand = (doctype) => {
   doctype.expanded = !doctype.expanded;
 };
 
-const previewFile = async (url) => {
+
+const buildPreviewUrl = (path) =>
+  `/api/preview/pdf?path=${encodeURIComponent(path)}`;
+
+const previewFile = async (path) => {
   pdfError.value = false;
-  previewUrl.value = url; // Tampilkan modal terlebih dahulu
+
+  if (!path) {
+    pdfError.value = 'missing_path';
+    return;
+  }
+
+  const baseUrl = buildPreviewUrl(path);
+  previewUrl.value = baseUrl; // tampilkan duluan
 
   try {
-    const res = await fetch(url, { method: 'HEAD' });
+    const res = await fetch(baseUrl, {
+      method: 'HEAD',
+      credentials: 'include',
+      headers: { Accept: 'application/pdf' },
+    });
 
-    if (!res.ok || !res.headers.get('content-type')?.includes('pdf')) {
-      pdfError.value = true;
+    if (!res.ok) {
+      pdfError.value =
+        res.status === 404
+          ? 'not_found'
+          : res.status >= 500
+          ? 'internal_server_error'
+          : 'fetch_failed';
+      return;
     }
-  } catch (err) {
-    pdfError.value = true;
+
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (!ct.includes('pdf')) {
+      pdfError.value = 'not_pdf';
+    }
+  } catch {
+    pdfError.value = 'network_error';
   }
 };
 

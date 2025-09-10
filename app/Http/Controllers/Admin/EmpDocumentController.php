@@ -10,9 +10,118 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
+use Yaza\LaravelGoogleDriveStorage\Gdrive;
 
 class EmpDocumentController extends Controller
 {
+
+    public function show(Request $request)
+    {
+        $path = $request->query('path');
+        $after = Str::after($path, 'documents/');
+        $nip = Str::before($after, '/'); // "199407292022031002"
+        abort_unless($path, 404, 'Missing path');
+        $user = Auth::user();
+
+        // NIP pemilik dokumen (dari relasi user->employee)
+        $userNip = optional($user->employee)->nip;
+
+        // Aturan akses:
+        // 1) Jika NIP user == NIP pada URL → izinkan (meski can_multiple_role false)
+        // 2) Jika berbeda → hanya izinkan kalau can_multiple_role == true
+        $isOwner      = $userNip && $userNip === $nip;
+        $canMultiRole = (bool)($user->can_multiple_role ?? false);
+
+        if (!$isOwner && !$canMultiRole) {
+            abort(403, 'Forbidden');
+        }
+
+
+        $disk = Storage::disk('google');
+        abort_unless($disk->exists($path), 404, 'File not found');
+
+        // Ambil metadata tanpa mengunduh isi file
+        $mime = $disk->mimeType($path) ?: 'application/pdf';
+        $size = $disk->size($path);                // bytes (jika adapter support)
+        $lastModTs = $disk->lastModified($path);   // unix timestamp (jika adapter support)
+        $lastModHttp = $lastModTs ? gmdate('D, d M Y H:i:s', $lastModTs) . ' GMT' : null;
+
+        // ===== HTTP 304: If-Modified-Since =====
+        if ($lastModHttp && $request->headers->has('If-Modified-Since')) {
+            $ifModSince = strtotime($request->header('If-Modified-Since'));
+            if ($ifModSince !== false && $ifModSince >= $lastModTs) {
+                return response('', Response::HTTP_NOT_MODIFIED, array_filter([
+                    'Last-Modified' => $lastModHttp,
+                    'Cache-Control' => 'private, max-age=3600',
+                ]));
+            }
+        }
+
+        // Stream langsung dari Drive (mulai kirim lebih cepat, tanpa buffer besar)
+        $stream = $disk->readStream($path);
+        abort_if($stream === false, 500, 'Failed to open stream');
+
+        $filename = basename($path);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);               // kirim apa adanya
+            if (is_resource($stream)) fclose($stream);
+        }, 200, array_filter([
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'Cache-Control'       => 'private, max-age=3600',
+            'Last-Modified'       => $lastModHttp,
+            // Jangan set Accept-Ranges jika backend tidak support 206 secara native
+            // 'Content-Length'   => $size,   // boleh di-set kalau adapter mengembalikan size dengan cepat
+            "Content-Security-Policy" => "frame-ancestors 'self'",
+        ]));
+    }
+
+    // public function show(Request $request)
+    // {
+    //     // path dikirim lewat query ?path=...
+    //     $path = $request->query('path');
+    //     abort_unless($path, 404, 'Missing path');
+
+    //     // Ambil file dari Gdrive
+    //     $data = Gdrive::get($path); // ->file (binary/base64), ->ext (mime), ->name (opsional)
+
+    //     // Pastikan MIME
+    //     $mime = (!empty($data->ext) && Str::contains($data->ext, '/'))
+    //         ? $data->ext
+    //         : 'application/pdf';
+
+    //     // Jika file base64, decode dulu
+    //     $content = $data->file;
+    //     if (is_string($content) && !Str::startsWith($content, '%PDF-')) {
+    //         $decoded = base64_decode($content, true);
+    //         if ($decoded !== false) {
+    //             $content = $decoded;
+    //         }
+    //     }
+
+    //     // Nama file untuk header
+    //     $filename = $data->name ?? basename($path);
+
+    //     // (Opsional) hitung panjang konten agar viewer lebih mulus
+    //     $length = is_string($content) ? strlen($content) : null;
+
+    //     return response($content, 200, array_filter([
+    //         'Content-Type'              => $mime, // Wajib: application/pdf
+    //         'Content-Disposition'       => 'inline; filename="'.$filename.'"',
+    //         'Content-Transfer-Encoding' => 'binary',
+    //         'Accept-Ranges'             => 'bytes',           // memberi hint partial, meski tidak 206
+    //         'Content-Length'            => $length,           // opsional tapi membantu
+    //         'Cache-Control'             => 'private, max-age=3600',
+    //         // Pastikan iframe boleh menampilkan (sesuai kebutuhan keamanan kamu)
+    //         // 'X-Frame-Options'           => 'SAMEORIGIN',
+    //         "Content-Security-Policy"   => "frame-ancestors 'self'",
+    //     ]));
+    // }
+
     public function index(Request $request)
     {
         // $query = EmpDocument::where('status', 'Pending')->with(['employee', 'docType'])
@@ -195,6 +304,65 @@ class EmpDocumentController extends Controller
             ], 409); // 409 Conflict
         }
 
+
+        //
+        $requestedApproved = $request->status === 'Approved';
+        $path              = ltrim($doc->file_path ?? '', '/'); // contoh: documents/1994.../FILE.pdf
+
+        // === Jika akan Approved: pindahkan file dari privatedisk -> google ===
+        if ($requestedApproved && $path) {
+            $srcDisk = Storage::disk('privatedisk');
+            $dstDisk = Storage::disk('google');
+
+            $srcExists = $srcDisk->exists($path);
+            $dstExists = $dstDisk->exists($path);
+
+            // Pastikan folder tujuan di Google Drive ada
+            Gdrive::makeDir(dirname($path));
+
+            // Jika file belum ada di Google, dan ada di private -> lakukan copy stream
+            if (!$dstExists) {
+                if (!$srcExists) {
+                    // Tidak ada di private maupun di google -> gagal
+                    return response()->json([
+                        'message' => 'File sumber tidak ditemukan untuk dipindahkan.',
+                        'code'    => 'SOURCE_FILE_MISSING'
+                    ], 404);
+                }
+
+                // Tulis ke google via stream (hapus dulu jika perlu untuk hindari konflik)
+                $stream = $srcDisk->readStream($path);
+                if ($stream === false) {
+                    return response()->json([
+                        'message' => 'Gagal membuka stream file sumber.',
+                        'code'    => 'STREAM_OPEN_FAILED'
+                    ], 500);
+                }
+
+                // Pastikan tidak ada file tujuan yang menghalangi
+                if ($dstDisk->exists($path)) {
+                    $dstDisk->delete($path);
+                }
+
+                $dstOk = $dstDisk->writeStream($path, $stream);
+                if (is_resource($stream)) fclose($stream);
+
+                if ($dstOk === false) {
+                    return response()->json([
+                        'message' => 'Gagal menulis file ke Google Drive.',
+                        'code'    => 'WRITE_DEST_FAILED'
+                    ], 500);
+                }
+            }
+
+            // Hapus file di privatedisk bila ada
+            if ($srcExists) {
+                $srcDisk->delete($path);
+            }
+            // Catatan: $doc->file_path tetap sama (format terdahulu).
+            // Jika Anda menyimpan kolom disk/driver, update di sini (mis. $doc->file_disk = 'google').
+        }
+        //
 
 
         DB::transaction(function () use ($doc, $request, $userId) {

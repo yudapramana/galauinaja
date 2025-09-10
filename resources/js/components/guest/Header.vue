@@ -6,6 +6,8 @@ import CloudImage from '../../components/CloudImage.vue';
 
 const router = useRouter();
 const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 const authUserStore = useAuthUserStore();
 
 const logout = () => {

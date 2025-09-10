@@ -3,7 +3,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title">📄 Preview Dokumen test</h5>
+                    <h5 class="modal-title">📄 Preview Dokumen</h5>
                     <button type="button" class="close" @click="$emit('close')"><span>&times;</span></button>
                 </div>
                 <div class="modal-body p-3">

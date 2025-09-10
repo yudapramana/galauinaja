@@ -4,10 +4,14 @@ import { useToastr } from '@/toastr';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 import { useScreenDisplayStore } from '../../stores/ScreenDisplayStore.js';
 import { useMasterDataStore } from '../../stores/MasterDataStore.js';
+import { useSettingStore } from '../../stores/SettingStore.js';
 
 const screenDisplayStore = useScreenDisplayStore();
 const authUserStore = useAuthUserStore();
 const masterDataStore = useMasterDataStore();
+const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 const toastr = useToastr();
 const errors = ref([]);
 const image_cloud_id = ref('');
@@ -462,10 +466,13 @@ onMounted(() => {
 
                                         <div class="col-12">
                                             <hr />
-                                            <button type="submit" class="btn btn-success btn-sm" :disabled="isLoading">
+                                            <button v-if="!settingStore.setting.maintenance" type="submit" class="btn btn-success btn-sm" :disabled="isLoading">
                                                 <i v-if="isLoading" class="fa fa-spinner fa-spin me-1"></i>
                                                 <i v-else class="fa fa-save me-1"></i>
                                                 Simpan Perubahan
+                                            </button>
+                                            <button v-else type="button" class="btn btn-warning btn-sm" disabled>
+                                                Maintenance
                                             </button>
                                         </div>
                                     </form>

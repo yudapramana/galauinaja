@@ -46,8 +46,7 @@
                       <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length }}</span>
                     </span>
                   </div>
-                  <button v-if="!settingStore.setting.maintenance" class="btn btn-sm btn-success ml-2" @click="openUploadModal(doctype)">+ Upload</button>
-                  <button v-else type="button" class="btn btn-warning btn-sm ml-2" disabled>Fitur Maintenance</button>
+                  <button class="btn btn-sm btn-success ml-2" @click="openUploadModal(doctype)">+ Upload</button>
                 </div>
 
                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
@@ -61,17 +60,9 @@
                         <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
                           {{ file.status || 'Pending' }}
                         </span>
-                        <template v-if="!settingStore.setting.maintenance">
-                          <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
-                            Perbarui
-                          </span>
-                        </template>
-                        <template v-else>
-                            <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-warning ml-2" disabled>
-                              Maintenance
-                            </span>
-                        </template>
-                        
+                        <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                          Perbarui
+                        </span>
                       </div>
                       <!-- <button v-if="file.status === 'Rejected'" class="btn btn-sm btn-outline-danger ml-2"
                         @click="reuploadFile(file, doctype)">
@@ -219,11 +210,8 @@ import LoadingState from './LoadingState.vue';
 import SearchBox from './SearchBox.vue';
 import TreeList from './TreeList.vue';
 import PreviewModal from './PreviewModal.vue';
-import { useSettingStore } from '../../stores/SettingStore';
 
-const settingStore = useSettingStore();
-settingStore.setting.maintenance =
-  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
+
 const treeData = ref([]);
 const previewUrl = ref(null);
 const searchQuery = ref('');
@@ -250,6 +238,7 @@ const progressBarColor = computed(() => {
 });
 const pdfFrame = ref(null);
 const pdfError = ref(false);
+const pdfErrorCode = ref('');
 const onIframeLoad = () => {
   // Iframe load berhasil
   pdfError.value = false;
@@ -336,47 +325,116 @@ const toggleExpand = (doctype) => {
 
 const buildPreviewUrl = (path) => `/api/preview/pdf?path=${encodeURIComponent(path)}`;
 
-const previewFile = async (file) => {
-  console.log('file');
-  console.log(file);
+const previewFile = (file) => {
+  pdfError.value = false;
+  selectedPreviewFile.value = file;
 
-  if(file.status == 'Approved') {
+  const path = file?.file_path;
+  if (!path) { pdfError.value = true; return; }
 
-    pdfError.value = false;
-    selectedPreviewFile.value = file;
-
-    const path = file?.file_path;
-    if (!path) { pdfError.value = true; return; }
-
-    previewUrl.value = buildPreviewUrl(path);
-    
-  } else {
-    pdfError.value = false;
-      selectedPreviewFile.value = file;
-      previewUrl.value = file.file_url;
-      try {
-        const res = await fetch(file.file_url, { method: 'HEAD' });
-
-        if (!res.ok) {
-          if (res.status === 404) {
-            pdfError.value = 'not_found';
-          } else {
-            pdfError.value = true;
-          }
-          return;
-        }
-
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('pdf')) {
-          pdfError.value = true;
-        }
-      } catch (err) {
-        pdfError.value = true;
-      }
-  } 
-  
-  await fetchVervalLog(file.id);
+  previewUrl.value = buildPreviewUrl(path);
+  fetchVervalLog(file.id); // non-blocking
 };
+
+
+// const previewFile = async (file) => {
+//   console.log('file', file);
+
+//   pdfError.value = false;
+//   selectedPreviewFile.value = file;
+
+//   // pastikan path tersedia
+//   if (!file || !file.file_path) {
+//     pdfError.value = true;
+//     pdfErrorCode.value = 'missing_path';
+//     return;
+//   }
+
+//   // gunakan path, bukan file_url
+//   const baseUrl = buildPreviewUrl(file.file_path);
+
+//   // biarkan <iframe> yang menambahkan #toolbar=0 dst
+//   previewUrl.value = baseUrl;
+
+//   try {
+//     // coba HEAD dulu untuk cek ketersediaan & content-type
+//     let res = await fetch(baseUrl, { method: 'HEAD', credentials: 'include' });
+
+//     if (!res.ok) {
+//       if (res.status === 404) {
+//         pdfError.value = true;
+//         pdfErrorCode.value = 'not_found';
+//         return;
+//       }
+
+//       if (res.status === 500) {
+//         pdfError.value = true;
+//         pdfErrorCode.value = 'internal_server_error';
+//         return;
+//       }
+      
+//       console.log('res');
+//       console.log(res);
+
+//       // jika HEAD tidak diizinkan, fallback GET range kecil
+//       if (res.status === 405 || res.status === 501) {
+//         res = await fetch(baseUrl, {
+//           method: 'GET',
+//           headers: { Range: 'bytes=0-0' },
+//           credentials: 'include',
+//         });
+//         if (!res.ok && res.status !== 206) {
+//           pdfError.value = true;
+//           return;
+//         }
+//       } else {
+//         pdfError.value = true;
+//         return;
+//       }
+//     }
+
+//     const contentType = res.headers.get('content-type');
+//     if (!contentType || !contentType.includes('pdf')) {
+//       // backend kamu harus mengirim application/pdf
+//       pdfError.value = true;
+//       pdfErrorCode.value = 'not_pdf';
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     pdfError.value = true;
+//   }
+
+//   await fetchVervalLog(file.id);
+// ;}
+
+// const previewFile = async (file) => {
+//   console.log('file');
+//   console.log(file);
+
+//   pdfError.value = false;
+//   selectedPreviewFile.value = file;
+//   previewUrl.value = file.file_url;
+//   try {
+//     const res = await fetch(file.file_url, { method: 'HEAD' });
+
+//     if (!res.ok) {
+//       if (res.status === 404) {
+//         pdfError.value = 'not_found';
+//       } else {
+//         pdfError.value = true;
+//       }
+//       return;
+//     }
+
+//     const contentType = res.headers.get('content-type');
+//     if (!contentType || !contentType.includes('pdf')) {
+//       pdfError.value = true;
+//     }
+//   } catch (err) {
+//     pdfError.value = true;
+//   }
+//   await fetchVervalLog(file.id);
+// };
 
 const clearSearch = () => {
   searchQuery.value = '';
@@ -475,7 +533,8 @@ const reuploadFile = (file, doctype) => {
   isEditMode.value = true; // aktifkan mode edit
 
   // Set file yang sedang diedit
-  existingFileUrl.value = file.file_url || ''; // gunakan URL file lama untuk preview
+  // existingFileUrl.value = file.file_url || ''; // gunakan URL file lama untuk preview
+  existingFileUrl.value = file.file_path ? buildPreviewUrl(file.file_path) : ''; // gunakan URL file lama untuk preview
   uploadForm.value = {
     doc_number: file.doc_number || '',
     doc_date: file.doc_date || '',

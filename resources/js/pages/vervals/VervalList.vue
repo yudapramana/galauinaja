@@ -78,8 +78,11 @@
                   </span>
                 </td>
                 <td>
-                  <button class="btn btn-sm btn-primary mr-1" @click="openVerifModal(doc)">
+                  <button v-if="!settingStore.setting.maintenance" class="btn btn-sm btn-primary mr-1 mb-1" @click="openVerifModal(doc)">
                     Verifikasi
+                  </button>
+                  <button v-else type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
+                      Maintenance
                   </button>
                   <button
                     class="btn btn-sm btn-outline-danger"
@@ -228,7 +231,11 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { useSettingStore } from '../../stores/SettingStore'
 
+const settingStore = useSettingStore();
+settingStore.setting.maintenance =
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
 const search = ref('')
 const documents = ref([])
 const isLoading = ref(false)

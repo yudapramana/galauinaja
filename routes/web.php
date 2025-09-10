@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\VervalLogController;
 use App\Http\Controllers\API\DocumentLogController;
 use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\PublicDocController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
 use App\Models\DocType;
@@ -23,6 +24,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use Illuminate\Support\Facades\Storage;
+use Yaza\LaravelGoogleDriveStorage\Gdrive;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +37,35 @@ use Illuminate\Support\Facades\Storage;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/secure/documents/{nip}/{filename}', [PublicDocController::class, 'stream'])
+        ->where(['nip' => '\d+', 'filename' => '[^/]+'])
+        ->name('secure.docs.stream');
+});
+
+Route::get('/get-gdrive-file', function() {
+    $path = '199407292022031002/AKYBS_199407292022031002.pdf';
+    $data = Gdrive::get($path); // ->file (binary), ->ext (mime), ->name (opsional)
+
+    // Pastikan mime-nya benar
+    $mime = ($data->ext && str_contains($data->ext, '/'))
+        ? $data->ext
+        : 'application/pdf';
+
+    return Response::make($data->file, 200, [
+        'Content-Type'              => $mime,                 // penting: application/pdf
+        'Content-Disposition'       => 'inline; filename="AKYBS_199407292022031002.pdf"',
+        'Content-Transfer-Encoding' => 'binary',
+        'Accept-Ranges'             => 'bytes',
+        'Cache-Control'             => 'private, max-age=3600',
+    ]);
+});
+
+
+
+
 Route::get('/show-duplicates', function(){
    
     
@@ -47,6 +79,33 @@ Route::get('/show-duplicates', function(){
 
        return $dups;
 });
+
+
+Route::get('/delete-duplicates', function(){
+   
+    DB::transaction(function () {
+        // Ambil daftar file_name yang duplikat (belum soft-deleted)
+        $dups = DB::table('emp_documents')
+            ->select('file_name')
+            ->whereNull('deleted_at')
+            ->groupBy('file_name')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('file_name');
+
+        foreach ($dups as $name) {
+            // Urutkan terbaru dulu (created_at desc), biarkan yang pertama tetap ada
+            $rows = EmpDocument::where('file_name', $name)
+                ->whereNull('deleted_at')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id') // tie-breaker
+                ->get();
+
+            // Buang elemen pertama (terbaru) → sisanya di-soft delete
+            $rows->skip(1)->each->delete();
+        }
+    });
+});
+
 
 Route::get('/delete-duplicates', function(){
    
@@ -226,6 +285,49 @@ Route::get('/set-admin', function() {
     return 'done';
 });
 
+Route::get('/employee-to-user-faster', function () {
+    ini_set('max_execution_time', '300');
+    DB::connection()->disableQueryLog();
+
+    // hash sekali saja → hemat CPU
+    $defaultHashed = Hash::make('GantiPassword123!'); // TODO: paksa user ganti di login pertama
+
+    $now = now();
+    $total = 0;
+
+    // Ambil kolom minimal, yang belum punya user
+    \App\Models\Employee::doesntHave('user')
+        ->select('id', 'full_name', 'email', 'nip')
+        ->whereNotNull('email')   // opsional: hanya yang punya email
+        ->chunkById(1000, function ($chunk) use (&$total, $defaultHashed, $now) {
+            $rows = [];
+            foreach ($chunk as $e) {
+                $rows[] = [
+                    'id_employee' => $e->id,
+                    'name'        => $e->full_name,
+                    'email'       => $e->email,
+                    'username'    => $e->nip,
+                    'password'    => $defaultHashed,
+                    'created_at'  => $now,
+                    'updated_at'  => $now,
+                ];
+            }
+
+            // upsert berdasarkan id_employee (unik)
+            \App\Models\User::withoutEvents(function () use ($rows) {
+                \App\Models\User::upsert(
+                    $rows,
+                    ['id_employee'],                                   // uniqueBy
+                    ['name', 'email', 'username', 'password','updated_at'] // update columns
+                );
+            });
+
+            $total += count($rows);
+        });
+
+    return response()->json(['status' => 'ok', 'affected' => $total]);
+});
+
 Route::get('/employee-to-user', function() {
     ini_set('max_execution_time', '300'); //300 seconds = 5 minutes
 
@@ -260,14 +362,23 @@ Route::get('/logout_all', function () {
     return 'done';
 });
 
+Route::get('/terms-of-service', function () {
+    return view('tos');
+});
+
+Route::get('/privacy-policy', function () {
+    return view('privacy_policy');
+});
+
 Route::get('/landing', function () {
     return view('landing');
 });
 
 Route::get('/', function () {
-    // return 'jancok';
     return redirect('/landing');
 });
+
+
 
 Route::get('/get-password', function () {
     return 'apasih';
@@ -299,6 +410,10 @@ Route::get('/all-users', function () {
 });
 
 Route::middleware('auth')->group(function () {
+
+
+    Route::get('api/preview/pdf', [EmpDocumentController::class, 'show'])
+        ->name('pdf.preview');
 
     Route::get('/api/verval-logs', [VervalLogController::class, 'index']);
 
