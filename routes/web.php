@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\VervalLogController;
 use App\Http\Controllers\API\DocumentLogController;
 use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PublicDocController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
@@ -38,6 +39,8 @@ use Yaza\LaravelGoogleDriveStorage\Gdrive;
 |
 */
 
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 
 Route::middleware('auth')->group(function () {
     Route::get('/secure/documents/{nip}/{filename}', [PublicDocController::class, 'stream'])

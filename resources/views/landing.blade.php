@@ -90,6 +90,9 @@
                 <span class="pill">Transparan</span>
             </div>
             <a href="/login" class="btn btn-success btn-sm mt-2">Masuk Sistem</a>
+            <a href="{{ route('google.redirect') }}" class="btn btn-success btn-outline btn-sm mt-2">
+                Login with Google
+            </a>
         </div>
     </section>
 

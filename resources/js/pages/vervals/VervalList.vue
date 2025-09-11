@@ -212,9 +212,13 @@
                 </div>
 
                 <div class="text-end mt-3">
-                  <button type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
+                  <button v-if="!settingStore.setting.maintenance" type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
                     <i v-if="isSubmitting" class="fas fa-spinner fa-spin me-1"></i>
                     Simpan Verifikasi
+                  </button>
+
+                  <button v-else type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
+                      Maintenance
                   </button>
                 </div>
               </form>
