@@ -365,6 +365,12 @@ Route::get('/logout_all', function () {
     return 'done';
 });
 
+
+Route::get('/terms-and-conditions', function () {
+    return view('tnc');
+});
+
+
 Route::get('/terms-of-service', function () {
     return view('tos');
 });
@@ -374,11 +380,11 @@ Route::get('/privacy-policy', function () {
 });
 
 Route::get('/landing', function () {
-    return view('landing');
+    return view('landing2');
 });
 
 Route::get('/', function () {
-    return redirect('/landing');
+    return view('/landing');
 });
 
 
