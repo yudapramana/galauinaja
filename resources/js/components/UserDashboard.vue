@@ -67,7 +67,7 @@ onMounted(() => {
             </div>
 
             <div class="row">
-                <div class="col-md-6 col-sm-12 col-lg-6">
+                <div class="col-md-9 col-sm-12 col-lg-9">
                     <div class="card bg-light d-flex flex-fill">
                         <div class="card-header text-muted border-bottom-0 pb-0 mb-0">
                             {{ authUserStore.user?.employee?.job_title }}
@@ -100,6 +100,14 @@ onMounted(() => {
                                 <router-link to="/user/upload" class="btn btn-sm btn-success" style="display: block; font-size: small;">
                                     Input Dokumen <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
+                                <a
+                                    v-if="authUserStore.user.role == 'SUPERADMIN'"
+                                    href="/oauth/google"
+                                    class="btn btn-sm btn-warning"
+                                    style="display: block; font-size: small;"
+                                    >
+                                    <i class="fab fa-google"></i>&nbsp;Connect Google
+                                </a>
                             </div>
                         </div>
                         

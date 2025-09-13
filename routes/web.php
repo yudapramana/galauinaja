@@ -14,7 +14,9 @@ use App\Http\Controllers\API\DocumentLogController;
 use App\Http\Controllers\API\WorkUnitController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\OauthController;
 use App\Http\Controllers\PublicDocController;
+use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
 use App\Models\DocType;
@@ -39,8 +41,16 @@ use Yaza\LaravelGoogleDriveStorage\Gdrive;
 |
 */
 
-Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+Route::get('oauth/google', [OauthController::class, 'redirectToProvider'])->name('oauth.google');  
+Route::get('oauth/google/callback', [OauthController::class, 'handleProviderCallback'])->name('oauth.google.callback');
+
+// Untuk redirect ke Google
+Route::get('/login/google/redirect', [SocialiteController::class, 'redirect'])
+    ->name('google.redirect');
+
+// Untuk callback dari Google
+Route::get('/login/google/callback', [SocialiteController::class, 'callback'])
+    ->name('google.callback');
 
 Route::middleware('auth')->group(function () {
     Route::get('/secure/documents/{nip}/{filename}', [PublicDocController::class, 'stream'])
