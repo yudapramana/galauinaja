@@ -17,6 +17,7 @@
         "mpdf/mpdf": "^8.2",
         "njoguamos/laravel-turnstile": "^2.2",
         "orangehill/iseed": "^3.0",
+        "spatie/laravel-google-cloud-storage": "*",
         "yaza/laravel-google-drive-storage": "*"
     },
     "require-dev": {

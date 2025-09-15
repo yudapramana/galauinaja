@@ -40,7 +40,7 @@ class EmpDocumentController extends Controller
         }
 
 
-        $disk = Storage::disk('google');
+        $disk = Storage::disk('gcs');
         abort_unless($disk->exists($path), 404, 'File not found');
 
         // Ambil metadata tanpa mengunduh isi file
@@ -312,13 +312,13 @@ class EmpDocumentController extends Controller
         // === Jika akan Approved: pindahkan file dari privatedisk -> google ===
         if ($requestedApproved && $path) {
             $srcDisk = Storage::disk('privatedisk');
-            $dstDisk = Storage::disk('google');
+            $dstDisk = Storage::disk('gcs');
 
             $srcExists = $srcDisk->exists($path);
             $dstExists = $dstDisk->exists($path);
 
             // Pastikan folder tujuan di Google Drive ada
-            Gdrive::makeDir(dirname($path));
+            // Gdrive::makeDir(dirname($path));
 
             // Jika file belum ada di Google, dan ada di private -> lakukan copy stream
             if (!$dstExists) {
