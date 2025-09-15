@@ -146,6 +146,8 @@ Route::get('/delete-duplicates', function(){
 });
 
 
+
+
 Route::get('/checkfile', function(){
     $nip = '199407292022031002';
     $user = User::where('username', $nip)->with('employee')->first();
