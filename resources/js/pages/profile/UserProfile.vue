@@ -466,14 +466,15 @@ onMounted(() => {
 
                                         <div class="col-12">
                                             <hr />
-                                            <button v-if="!settingStore.setting.maintenance" type="submit" class="btn btn-success btn-sm" :disabled="isLoading">
+                                            <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm" disabled>
+                                                Maintenance
+                                            </button>
+                                            <button v-else type="submit" class="btn btn-success btn-sm" :disabled="isLoading">
                                                 <i v-if="isLoading" class="fa fa-spinner fa-spin me-1"></i>
                                                 <i v-else class="fa fa-save me-1"></i>
                                                 Simpan Perubahan
                                             </button>
-                                            <button v-else type="button" class="btn btn-warning btn-sm" disabled>
-                                                Maintenance
-                                            </button>
+                                            
                                         </div>
                                     </form>
 

@@ -46,8 +46,8 @@
                       <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length }}</span>
                     </span>
                   </div>
-                  <button v-if="!settingStore.setting.maintenance" class="btn btn-sm btn-success ml-2" @click="openUploadModal(doctype)">+ Upload</button>
-                  <button v-else type="button" class="btn btn-warning btn-sm ml-2" disabled>Fitur Maintenance</button>
+                  <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm ml-2" disabled>Fitur Maintenance</button>
+                  <button v-else class="btn btn-sm btn-success ml-2" @click="openUploadModal(doctype)">+ Upload</button>
                 </div>
 
                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
@@ -61,15 +61,16 @@
                         <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
                           {{ file.status || 'Pending' }}
                         </span>
-                        <template v-if="!settingStore.setting.maintenance">
-                          <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
-                            Perbarui
-                          </span>
-                        </template>
-                        <template v-else>
+                        
+                        <template v-if="settingStore.showMaintenanceBadge">
                             <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-warning ml-2" disabled>
                               Maintenance
                             </span>
+                        </template>
+                        <template v-else>
+                          <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                            Perbarui
+                          </span>
                         </template>
                         
                       </div>

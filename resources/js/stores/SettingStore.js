@@ -1,7 +1,8 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useStorage } from '@vueuse/core';
+import { useAuthUserStore } from "./AuthUserStore";
 
 export const useSettingStore = defineStore('SettingStore', () => {
     const setting = useStorage('SettingStore:setting', {
@@ -48,5 +49,16 @@ export const useSettingStore = defineStore('SettingStore', () => {
         setting.value.maintenance = null
     }
 
-    return { setting, getSetting, theme, changeTheme, toggleMenuIcon, resetMaintenance };
+    // Ambil store auth (asumsikan ada dan bernama useAuthUserStore)
+    const authUserStore = useAuthUserStore();
+
+     // Computed untuk menampilkan badge maintenance:
+    // true jika maintenance aktif dan user BUKAN SUPERADMIN
+    const showMaintenanceBadge = computed(() => {
+        // Pastikan struktur user ada sebelum akses role
+        const role = authUserStore?.user?.role ?? null;
+        return Boolean(setting.value.maintenance) && role !== 'SUPERADMIN';
+    });
+
+    return { setting, getSetting, theme, changeTheme, toggleMenuIcon, resetMaintenance, showMaintenanceBadge };
 });
