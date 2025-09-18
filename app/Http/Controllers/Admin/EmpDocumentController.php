@@ -25,41 +25,26 @@ class EmpDocumentController extends Controller
         $path = $request->query('path');
         abort_unless($path, 404, 'Missing path');
 
-        // return $path;
         $after = Str::after($path, 'documents/');
-        $nip = Str::before($after, '/'); // "199407292022031002"
+        $nip   = Str::before($after, '/');
 
-        $user = Auth::user();
-
-        Log::info('step1');
-
-        // NIP pemilik dokumen (dari relasi user->employee) / dari user->username
+        $user   = Auth::user();
         $userNip = $user->username;
 
-        Log::info('step2');
-
-        // Aturan akses:
-        // 1) Jika NIP user == NIP pada URL → izinkan (meski can_multiple_role false)
-        // 2) Jika berbeda → hanya izinkan kalau can_multiple_role == true
         $isOwner      = $userNip && $userNip === $nip;
         $canMultiRole = (bool)($user->can_multiple_role ?? false);
-        Log::info('step3');
 
         if (!$isOwner && !$canMultiRole) {
             abort(403, 'Forbidden');
         }
-        Log::info('step4');
-
 
         $disk = Storage::disk('gcs');
         abort_unless($disk->exists($path), 404, 'File not found');
 
-        // Ambil metadata tanpa mengunduh isi file
-        $mime = $disk->mimeType($path) ?: 'application/pdf';
-        $size = $disk->size($path);                // bytes (jika adapter support)
-        $lastModTs = $disk->lastModified($path);   // unix timestamp (jika adapter support)
+        $mime       = $disk->mimeType($path) ?: 'application/pdf';
+        $size       = $disk->size($path);
+        $lastModTs  = $disk->lastModified($path);
         $lastModHttp = $lastModTs ? gmdate('D, d M Y H:i:s', $lastModTs) . ' GMT' : null;
-        Log::info('step5');
 
         // ===== HTTP 304: If-Modified-Since =====
         if ($lastModHttp && $request->headers->has('If-Modified-Since')) {
@@ -71,29 +56,113 @@ class EmpDocumentController extends Controller
                 ]));
             }
         }
-        Log::info('step6');
-
-        // Stream langsung dari Drive (mulai kirim lebih cepat, tanpa buffer besar)
-        $stream = $disk->readStream($path);
-        abort_if($stream === false, 500, 'Failed to open stream');
-        Log::info('step7');
 
         $filename = basename($path);
-        Log::info('step8');
+
+        // 🔹 Fix: kalau HEAD → jangan stream isi file
+        if ($request->isMethod('HEAD')) {
+            return response('', 200, array_filter([
+                'Content-Type'              => $mime,
+                'Content-Disposition'       => 'inline; filename="'.$filename.'"',
+                'Cache-Control'             => 'private, max-age=3600',
+                'Last-Modified'             => $lastModHttp,
+                'Content-Length'            => $size,
+                "Content-Security-Policy"   => "frame-ancestors 'self'",
+            ]));
+        }
+
+        // 🔹 Normal GET → stream isi file
+        $stream = $disk->readStream($path);
+        abort_if($stream === false, 500, 'Failed to open stream');
 
         return response()->stream(function () use ($stream) {
-            fpassthru($stream);               // kirim apa adanya
+            fpassthru($stream);
             if (is_resource($stream)) fclose($stream);
         }, 200, array_filter([
-            'Content-Type'        => $mime,
-            'Content-Disposition' => 'inline; filename="'.$filename.'"',
-            'Cache-Control'       => 'private, max-age=3600',
-            'Last-Modified'       => $lastModHttp,
-            // Jangan set Accept-Ranges jika backend tidak support 206 secara native
-            // 'Content-Length'   => $size,   // boleh di-set kalau adapter mengembalikan size dengan cepat
-            "Content-Security-Policy" => "frame-ancestors 'self'",
+            'Content-Type'              => $mime,
+            'Content-Disposition'       => 'inline; filename="'.$filename.'"',
+            'Cache-Control'             => 'private, max-age=3600',
+            'Last-Modified'             => $lastModHttp,
+            "Content-Security-Policy"   => "frame-ancestors 'self'",
+            // 'Content-Length' => $size, // optional
         ]));
     }
+
+
+    // public function show(Request $request)
+    // {
+    //     $path = $request->query('path');
+    //     abort_unless($path, 404, 'Missing path');
+
+    //     // return $path;
+    //     $after = Str::after($path, 'documents/');
+    //     $nip = Str::before($after, '/'); // "199407292022031002"
+
+    //     $user = Auth::user();
+
+    //     Log::info('step1');
+
+    //     // NIP pemilik dokumen (dari relasi user->employee) / dari user->username
+    //     $userNip = $user->username;
+
+    //     Log::info('step2');
+
+    //     // Aturan akses:
+    //     // 1) Jika NIP user == NIP pada URL → izinkan (meski can_multiple_role false)
+    //     // 2) Jika berbeda → hanya izinkan kalau can_multiple_role == true
+    //     $isOwner      = $userNip && $userNip === $nip;
+    //     $canMultiRole = (bool)($user->can_multiple_role ?? false);
+    //     Log::info('step3');
+
+    //     if (!$isOwner && !$canMultiRole) {
+    //         abort(403, 'Forbidden');
+    //     }
+    //     Log::info('step4');
+
+
+    //     $disk = Storage::disk('gcs');
+    //     abort_unless($disk->exists($path), 404, 'File not found');
+
+    //     // Ambil metadata tanpa mengunduh isi file
+    //     $mime = $disk->mimeType($path) ?: 'application/pdf';
+    //     $size = $disk->size($path);                // bytes (jika adapter support)
+    //     $lastModTs = $disk->lastModified($path);   // unix timestamp (jika adapter support)
+    //     $lastModHttp = $lastModTs ? gmdate('D, d M Y H:i:s', $lastModTs) . ' GMT' : null;
+    //     Log::info('step5');
+
+    //     // ===== HTTP 304: If-Modified-Since =====
+    //     if ($lastModHttp && $request->headers->has('If-Modified-Since')) {
+    //         $ifModSince = strtotime($request->header('If-Modified-Since'));
+    //         if ($ifModSince !== false && $ifModSince >= $lastModTs) {
+    //             return response('', Response::HTTP_NOT_MODIFIED, array_filter([
+    //                 'Last-Modified' => $lastModHttp,
+    //                 'Cache-Control' => 'private, max-age=3600',
+    //             ]));
+    //         }
+    //     }
+    //     Log::info('step6');
+
+    //     // Stream langsung dari Drive (mulai kirim lebih cepat, tanpa buffer besar)
+    //     $stream = $disk->readStream($path);
+    //     abort_if($stream === false, 500, 'Failed to open stream');
+    //     Log::info('step7');
+
+    //     $filename = basename($path);
+    //     Log::info('step8');
+
+    //     return response()->stream(function () use ($stream) {
+    //         fpassthru($stream);               // kirim apa adanya
+    //         if (is_resource($stream)) fclose($stream);
+    //     }, 200, array_filter([
+    //         'Content-Type'        => $mime,
+    //         'Content-Disposition' => 'inline; filename="'.$filename.'"',
+    //         'Cache-Control'       => 'private, max-age=3600',
+    //         'Last-Modified'       => $lastModHttp,
+    //         // Jangan set Accept-Ranges jika backend tidak support 206 secara native
+    //         // 'Content-Length'   => $size,   // boleh di-set kalau adapter mengembalikan size dengan cepat
+    //         "Content-Security-Policy" => "frame-ancestors 'self'",
+    //     ]));
+    // }
 
     // public function show(Request $request)
     // {
