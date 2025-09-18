@@ -242,6 +242,54 @@ class EmpDocumentController extends Controller
         return response()->json($documents);
     }
 
+    // public function claim(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'count' => 'sometimes|integer|min:1|max:50',
+    //     ]);
+    //     $take = (int)($validated['count'] ?? 5);
+
+    //     $userId = auth()->id();
+    //     $lockTtlMinutes = 30;
+
+    //     return DB::transaction(function () use ($userId, $lockTtlMinutes, $take) {
+    //         // Ambil N dokumen Pending yang belum di-assign atau lock expired (FIFO)
+    //         $docs = EmpDocument::where('status', 'Pending')
+    //             ->where(function ($q) {
+    //                 $q->whereNull('assigned_to')
+    //                 ->orWhere('lock_expires_at', '<', now());
+    //             })
+    //             ->orderBy('created_at')
+    //             ->lockForUpdate()
+    //             ->limit($take)
+    //             ->get();
+
+    //         if ($docs->isEmpty()) {
+    //             return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
+    //         }
+
+    //         $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
+
+    //         foreach ($docs as $doc) {
+    //             $doc->assigned_to = $userId;
+    //             $doc->assigned_at = now();
+    //             $doc->lock_expires_at = $expiresAt;
+    //             $doc->save();
+    //         }
+
+    //         // kembalikan dengan relasi yang diperlukan
+    //         $docs->load(['employee', 'docType']);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'claimed' => $docs->count(),
+    //             'data'    => $docs,
+    //         ]);
+    //     });
+    // }
+
+    
+
     public function claim(Request $request)
     {
         $validated = $request->validate([
@@ -252,41 +300,79 @@ class EmpDocumentController extends Controller
         $userId = auth()->id();
         $lockTtlMinutes = 30;
 
-        return DB::transaction(function () use ($userId, $lockTtlMinutes, $take) {
-            // Ambil N dokumen Pending yang belum di-assign atau lock expired (FIFO)
-            $docs = EmpDocument::where('status', 'Pending')
+        // lakukan seluruh operasi dalam transaction
+        $claimedDocs = DB::transaction(function () use ($userId, $lockTtlMinutes, $take) {
+            $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
+
+            // 1) Coba ambil dokumen priority (misal employee tertentu)
+            $docsPriority = EmpDocument::where('status', 'Pending')
                 ->where(function ($q) {
                     $q->whereNull('assigned_to')
                     ->orWhere('lock_expires_at', '<', now());
+                })
+                ->whereHas('employee', function ($q) {
+                    $q->where('nip', '199407292022031002');
                 })
                 ->orderBy('created_at')
                 ->lockForUpdate()
                 ->limit($take)
                 ->get();
 
-            if ($docs->isEmpty()) {
+            $docsToClaim = $docsPriority;
+
+            // 2) Jika jumlah priority < $take, ambil sisanya dari antrian umum (exclude yang sudah diambil)
+            if ($docsPriority->count() < $take) {
+                $remaining = $take - $docsPriority->count();
+
+                $query = EmpDocument::where('status', 'Pending')
+                    ->where(function ($q) {
+                        $q->whereNull('assigned_to')
+                        ->orWhere('lock_expires_at', '<', now());
+                    });
+
+                // exclude ids yang sudah diambil sebagai priority (jika ada)
+                if ($docsPriority->isNotEmpty()) {
+                    $query->whereNotIn('id', $docsPriority->pluck('id')->toArray());
+                }
+
+                $docsGeneral = $query
+                    ->orderBy('created_at')
+                    ->lockForUpdate()
+                    ->limit($remaining)
+                    ->get();
+
+                $docsToClaim = $docsToClaim->concat($docsGeneral);
+            }
+
+            // 3) Kalau tidak ada dokumen sama sekali, kembalikan koleksi kosong
+            if ($docsToClaim->isEmpty()) {
+                // return collect(); // kosong
                 return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
             }
 
-            $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
-
-            foreach ($docs as $doc) {
+            // 4) Assign & lock setiap dokumen (pakai looping agar Eloquent events tetap jalan)
+            foreach ($docsToClaim as $doc) {
                 $doc->assigned_to = $userId;
                 $doc->assigned_at = now();
                 $doc->lock_expires_at = $expiresAt;
                 $doc->save();
             }
 
-            // kembalikan dengan relasi yang diperlukan
-            $docs->load(['employee', 'docType']);
+            // 5) Load relasi yang diperlukan sebelum mengembalikan
+            return $docsToClaim->load(['employee', 'docType']);
+        }); // transaksi commit / rollback di sini
 
-            return response()->json([
-                'success' => true,
-                'claimed' => $docs->count(),
-                'data'    => $docs,
-            ]);
-        });
+        if ($claimedDocs->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'claimed' => $claimedDocs->count(),
+            'data'    => $claimedDocs,
+        ]);
     }
+
 
     public function release(EmpDocument $empDocument)
     {
