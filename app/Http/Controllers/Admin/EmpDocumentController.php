@@ -28,7 +28,6 @@ class EmpDocumentController extends Controller
         abort_unless($path, 404, 'Missing path');
 
         $user = Auth::user();
-        return $user;
 
 
         Log::info('step1');
@@ -36,7 +35,6 @@ class EmpDocumentController extends Controller
         // NIP pemilik dokumen (dari relasi user->employee)
         $userNip = optional($user->employee)->nip;
         Log::info('step2');
-        return $userNip;
 
         // Aturan akses:
         // 1) Jika NIP user == NIP pada URL → izinkan (meski can_multiple_role false)
@@ -49,6 +47,7 @@ class EmpDocumentController extends Controller
             abort(403, 'Forbidden');
         }
         Log::info('step4');
+        return $userNip;
 
 
         $disk = Storage::disk('gcs');
