@@ -22,7 +22,7 @@ class EmpDocumentController extends Controller
     public function show(Request $request)
     {
         $path = $request->query('path');
-
+        return $path;
         $after = Str::after($path, 'documents/');
         $nip = Str::before($after, '/'); // "199407292022031002"
         abort_unless($path, 404, 'Missing path');
@@ -31,7 +31,6 @@ class EmpDocumentController extends Controller
 
 
         Log::info('step1');
-        return $user;
 
         // NIP pemilik dokumen (dari relasi user->employee)
         $userNip = optional($user->employee)->nip;
