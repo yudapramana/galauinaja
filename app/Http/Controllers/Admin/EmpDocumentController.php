@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Yaza\LaravelGoogleDriveStorage\Gdrive;
+use Log;
 
 class EmpDocumentController extends Controller
 {
@@ -26,18 +27,24 @@ class EmpDocumentController extends Controller
         abort_unless($path, 404, 'Missing path');
         $user = Auth::user();
 
+        Log::info('step1');
+
+
         // NIP pemilik dokumen (dari relasi user->employee)
         $userNip = optional($user->employee)->nip;
+        Log::info('step2');
 
         // Aturan akses:
         // 1) Jika NIP user == NIP pada URL → izinkan (meski can_multiple_role false)
         // 2) Jika berbeda → hanya izinkan kalau can_multiple_role == true
         $isOwner      = $userNip && $userNip === $nip;
         $canMultiRole = (bool)($user->can_multiple_role ?? false);
+        Log::info('step3');
 
         if (!$isOwner && !$canMultiRole) {
             abort(403, 'Forbidden');
         }
+        Log::info('step4');
 
 
         $disk = Storage::disk('gcs');
@@ -48,6 +55,7 @@ class EmpDocumentController extends Controller
         $size = $disk->size($path);                // bytes (jika adapter support)
         $lastModTs = $disk->lastModified($path);   // unix timestamp (jika adapter support)
         $lastModHttp = $lastModTs ? gmdate('D, d M Y H:i:s', $lastModTs) . ' GMT' : null;
+        Log::info('step5');
 
         // ===== HTTP 304: If-Modified-Since =====
         if ($lastModHttp && $request->headers->has('If-Modified-Since')) {
@@ -59,13 +67,15 @@ class EmpDocumentController extends Controller
                 ]));
             }
         }
-        return 'error';
+        Log::info('step6');
 
         // Stream langsung dari Drive (mulai kirim lebih cepat, tanpa buffer besar)
         $stream = $disk->readStream($path);
         abort_if($stream === false, 500, 'Failed to open stream');
+        Log::info('step7');
 
         $filename = basename($path);
+        Log::info('step8');
 
         return response()->stream(function () use ($stream) {
             fpassthru($stream);               // kirim apa adanya
