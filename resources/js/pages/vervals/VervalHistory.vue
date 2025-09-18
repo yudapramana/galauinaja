@@ -168,7 +168,7 @@ const format = (d) => formatDate(d, 'DD/MM/YYYY HH:mm')
 const offsetIndex = computed(() => (meta.value.current_page - 1) * (meta.value.per_page || 10))
 
 const buildPreviewUrl = (path) =>
-  `/api/preview/pdf?path=${encodeURIComponent(path)}`;
+  `/api/preview/pdf?path=${encodeURI(path)}`;
 
 const fileUrl = (path) => {
   // sesuaikan base url storage kamu

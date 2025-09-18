@@ -167,7 +167,7 @@ const toggleExpand = (doctype) => {
 
 
 const buildPreviewUrl = (path) =>
-  `/api/preview/pdf?path=${encodeURIComponent(path)}`;
+  `/api/preview/pdf?path=${encodeURI(path)}`;
 
 const previewFile = async (path) => {
   pdfError.value = false;

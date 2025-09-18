@@ -323,7 +323,7 @@ const toggleExpand = (doctype) => {
   doctype.expanded = !doctype.expanded;
 };
 
-const buildPreviewUrl = (path) => `/api/preview/pdf?path=${encodeURIComponent(path)}`;
+const buildPreviewUrl = (path) => `/api/preview/pdf?path=${encodeURI(path)}`;
 
 const previewFile = (file) => {
   pdfError.value = false;

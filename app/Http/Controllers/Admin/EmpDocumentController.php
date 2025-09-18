@@ -22,7 +22,7 @@ class EmpDocumentController extends Controller
     public function show(Request $request)
     {
         $path = $request->query('path');
-        return $path;
+        // return $path;
         $after = Str::after($path, 'documents/');
         $nip = Str::before($after, '/'); // "199407292022031002"
         abort_unless($path, 404, 'Missing path');
