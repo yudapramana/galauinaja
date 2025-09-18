@@ -539,9 +539,11 @@ const submitUpload = async () => {
 
     Swal.fire({
       icon: 'success',
-      title: uploadForm.value.file_id ? 'Dokumen Berhasil Diperbarui!' : 'Upload Berhasil!',
+      title: uploadForm.value.file_id 
+        ? 'Dokumen berhasil diperbarui. Perubahan akan tampil dalam 1–2 menit, mohon tunggu sebentar.'
+        : 'Dokumen berhasil diupload. Perubahan akan tampil dalam 1–2 menit, mohon tunggu sebentar.',
       showConfirmButton: false,
-      timer: 1500
+      timer: 2000
     });
 
     await refreshSingleFolder(selectedDoctype.value.id);
