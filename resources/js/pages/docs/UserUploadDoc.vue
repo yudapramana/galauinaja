@@ -68,7 +68,7 @@
                             </span>
                         </template>
                         <template v-else>
-                          <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                          <span v-if="file.status !== 'Approved' || authUserStore.user.role == 'SUPERADMIN'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
                             Perbarui
                           </span>
                         </template>
