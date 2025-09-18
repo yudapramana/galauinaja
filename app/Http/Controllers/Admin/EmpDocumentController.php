@@ -59,6 +59,7 @@ class EmpDocumentController extends Controller
                 ]));
             }
         }
+        return 'error';
 
         // Stream langsung dari Drive (mulai kirim lebih cepat, tanpa buffer besar)
         $stream = $disk->readStream($path);
