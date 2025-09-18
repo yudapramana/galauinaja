@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 
 use App\Models\EmpDocument;
+use App\Models\Employee;
 use App\Models\VervalLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,12 +31,11 @@ class EmpDocumentController extends Controller
 
         $user = Auth::user();
 
-        return $user;
-
         Log::info('step1');
 
-        // NIP pemilik dokumen (dari relasi user->employee)
-        $userNip = optional($user->employee)->nip;
+        // NIP pemilik dokumen (dari relasi user->employee) / dari user->username
+        $userNip = $user->username;
+
         Log::info('step2');
 
         // Aturan akses:
