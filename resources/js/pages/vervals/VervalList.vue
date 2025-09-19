@@ -124,12 +124,12 @@
 
     <!-- Modal Verifikasi -->
     <div class="modal fade" id="verifModal" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-dialog modal-fullscreen" role="document">
         <div class="modal-content">
           <div class="modal-header py-2">
             <h5 class="modal-title">Verifikasi Dokumen Pegawai</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
             </button>
           </div>
 
@@ -462,3 +462,18 @@ watch(search, useDebounceFn(() => fetchDocuments(1), 300))
 
 onMounted(() => refreshAll())
 </script>
+
+<style scoped>
+  .modal-dialog.modal-fullscreen {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .modal-content {
+    height: 100% !important;
+    border: 0;
+    border-radius: 0;
+  }
+</style>

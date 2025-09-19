@@ -288,8 +288,6 @@ class EmpDocumentController extends Controller
     //     });
     // }
 
-    
-
     public function claim(Request $request)
     {
         $validated = $request->validate([
@@ -297,81 +295,57 @@ class EmpDocumentController extends Controller
         ]);
         $take = (int)($validated['count'] ?? 5);
 
-        $userId = auth()->id();
+        $userId         = auth()->id();
         $lockTtlMinutes = 30;
+        $nipPriority    = '199407292022031002';
 
-        // lakukan seluruh operasi dalam transaction
-        $claimedDocs = DB::transaction(function () use ($userId, $lockTtlMinutes, $take) {
-            $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
-
-            // 1) Coba ambil dokumen priority (misal employee tertentu)
-            $docsPriority = EmpDocument::where('status', 'Pending')
+        return DB::transaction(function () use ($userId, $lockTtlMinutes, $take, $nipPriority) {
+            // Ambil N dokumen Pending yang eligible (unassigned atau lock kadaluarsa)
+            // PRIORITAS: dokumen dengan employee.nip = $nipPriority, lalu FIFO by created_at
+            $docs = EmpDocument::where('status', 'Pending')
                 ->where(function ($q) {
                     $q->whereNull('assigned_to')
                     ->orWhere('lock_expires_at', '<', now());
                 })
-                ->whereHas('employee', function ($q) {
-                    $q->where('nip', '199407292022031002');
-                })
-                ->orderBy('created_at')
                 ->lockForUpdate()
+                ->orderByRaw(
+                    // Prioritaskan dokumen yang employee.nip cocok => nilai 0, lainnya 1
+                    "CASE WHEN EXISTS (
+                        SELECT 1
+                        FROM employees e
+                        WHERE e.id = emp_documents.id_employee
+                        AND e.nip = ?
+                    ) THEN 0 ELSE 1 END ASC",
+                    [$nipPriority]
+                )
+                ->orderBy('created_at', 'asc') // FIFO dalam masing-masing kelompok prioritas
                 ->limit($take)
                 ->get();
 
-            $docsToClaim = $docsPriority;
-
-            // 2) Jika jumlah priority < $take, ambil sisanya dari antrian umum (exclude yang sudah diambil)
-            if ($docsPriority->count() < $take) {
-                $remaining = $take - $docsPriority->count();
-
-                $query = EmpDocument::where('status', 'Pending')
-                    ->where(function ($q) {
-                        $q->whereNull('assigned_to')
-                        ->orWhere('lock_expires_at', '<', now());
-                    });
-
-                // exclude ids yang sudah diambil sebagai priority (jika ada)
-                if ($docsPriority->isNotEmpty()) {
-                    $query->whereNotIn('id', $docsPriority->pluck('id')->toArray());
-                }
-
-                $docsGeneral = $query
-                    ->orderBy('created_at')
-                    ->lockForUpdate()
-                    ->limit($remaining)
-                    ->get();
-
-                $docsToClaim = $docsToClaim->concat($docsGeneral);
-            }
-
-            // 3) Kalau tidak ada dokumen sama sekali, kembalikan koleksi kosong
-            if ($docsToClaim->isEmpty()) {
-                // return collect(); // kosong
+            if ($docs->isEmpty()) {
                 return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
             }
 
-            // 4) Assign & lock setiap dokumen (pakai looping agar Eloquent events tetap jalan)
-            foreach ($docsToClaim as $doc) {
-                $doc->assigned_to = $userId;
-                $doc->assigned_at = now();
+            $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
+
+            foreach ($docs as $doc) {
+                $doc->assigned_to     = $userId;
+                $doc->assigned_at     = now();
                 $doc->lock_expires_at = $expiresAt;
                 $doc->save();
             }
 
-            // 5) Load relasi yang diperlukan sebelum mengembalikan
-            return $docsToClaim->load(['employee', 'docType']);
-        }); // transaksi commit / rollback di sini
+            // Kembalikan dengan relasi yang diperlukan
+            $docs->load(['employee', 'docType']);
 
-        if ($claimedDocs->isEmpty()) {
-            return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'claimed' => $claimedDocs->count(),
-            'data'    => $claimedDocs,
-        ]);
+            return response()->json([
+                'success' => true,
+                'claimed' => $docs->count(),
+                'data'    => $docs,
+            ]);
+        });
     }
+
 
 
     public function release(EmpDocument $empDocument)
