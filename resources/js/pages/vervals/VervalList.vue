@@ -543,11 +543,18 @@ watch(
 // Debounce search
 watch(search, useDebounceFn(() => fetchDocuments(1), 300));
 
+const ensureSelect2Ready = () => {
+  if (!window.jQuery) throw new Error('jQuery belum ter-load');
+  if (!window.jQuery.fn || !window.jQuery.fn.select2) throw new Error('Select2 belum ter-load');
+};
+
+// di onMounted
 onMounted(async () => {
-  await fetchWorkUnits()     // muat daftar unit dulu
-  await nextTick()
-  initSelect2WorkUnit()      // inisialisasi select2
-  await refreshAll()
+  await fetchWorkUnits();
+  await nextTick();
+  ensureSelect2Ready();
+  initSelect2WorkUnit();
+  await refreshAll();
 });
 
 // jika daftar work units berubah (misal dari API), re-init select2
