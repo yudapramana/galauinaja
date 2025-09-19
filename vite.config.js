@@ -18,12 +18,14 @@ export default defineConfig({
         })
     ],
     resolve: {
-        alias: {
+        dedupe: ['jquery'],                // cegah duplikasi instance
+        alias: { jquery: 'jquery/dist/jquery.js' },
+        // alias: {
             //   "@": "/resources/assets/js",
             // use vue's runtime compiler to support vue components
             // directly within blade templates
             //   vue: "vue/dist/vue.esm-bundler.js",
-        },
+        // },
     },
     //   envPrefix: ["VITE_", "MIX_"],
 });
