@@ -500,6 +500,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('/api/work-units')->group(function () {
         // Get tree data
         Route::get('/tree', [WorkUnitController::class, 'tree']);
+        Route::get('/fetch', [WorkUnitController::class, 'fetch']);
     
         // CRUD Routes
         Route::get('/', [WorkUnitController::class, 'index']);           // Optional: List semua unit (flat)

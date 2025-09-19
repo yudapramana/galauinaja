@@ -9,7 +9,15 @@ use Illuminate\Support\Facades\Validator;
 
 class WorkUnitController extends Controller
 {
-    
+    public function fetch()
+    {
+        return response()->json(
+            WorkUnit::query()
+                ->select('id', 'unit_name', 'unit_code', 'parent_unit')
+                ->orderBy('unit_name')
+                ->get()
+        );
+    }
     
     public function index(Request $request)
     {

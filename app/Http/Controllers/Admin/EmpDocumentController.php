@@ -288,54 +288,130 @@ class EmpDocumentController extends Controller
     //     });
     // }
 
+    // public function claim(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'count' => 'sometimes|integer|min:1|max:50',
+    //     ]);
+    //     $take = (int)($validated['count'] ?? 5);
+
+    //     $userId         = auth()->id();
+    //     $lockTtlMinutes = 30;
+    //     $nipPriority    = '199407292022031002';
+
+    //     return DB::transaction(function () use ($userId, $lockTtlMinutes, $take, $nipPriority) {
+    //         // Ambil N dokumen Pending yang eligible (unassigned atau lock kadaluarsa)
+    //         // PRIORITAS: dokumen dengan employee.nip = $nipPriority, lalu FIFO by created_at
+    //         $docs = EmpDocument::where('status', 'Pending')
+    //             ->where(function ($q) {
+    //                 $q->whereNull('assigned_to')
+    //                 ->orWhere('lock_expires_at', '<', now());
+    //             })
+    //             ->lockForUpdate()
+    //             ->orderByRaw(
+    //                 // Prioritaskan dokumen yang employee.nip cocok => nilai 0, lainnya 1
+    //                 "CASE WHEN EXISTS (
+    //                     SELECT 1
+    //                     FROM employees e
+    //                     WHERE e.id = emp_documents.id_employee
+    //                     AND e.nip = ?
+    //                 ) THEN 0 ELSE 1 END ASC",
+    //                 [$nipPriority]
+    //             )
+    //             ->orderBy('created_at', 'asc') // FIFO dalam masing-masing kelompok prioritas
+    //             ->limit($take)
+    //             ->get();
+
+    //         if ($docs->isEmpty()) {
+    //             return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
+    //         }
+
+    //         $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
+
+    //         foreach ($docs as $doc) {
+    //             $doc->assigned_to     = $userId;
+    //             $doc->assigned_at     = now();
+    //             $doc->lock_expires_at = $expiresAt;
+    //             $doc->save();
+    //         }
+
+    //         // Kembalikan dengan relasi yang diperlukan
+    //         $docs->load(['employee', 'docType']);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'claimed' => $docs->count(),
+    //             'data'    => $docs,
+    //         ]);
+    //     });
+    // }
+
+   
+
     public function claim(Request $request)
     {
         $validated = $request->validate([
-            'count' => 'sometimes|integer|min:1|max:50',
+            'count'        => 'sometimes|integer|min:1|max:50',
+            'id_work_unit' => 'nullable|integer|exists:work_units,id',
         ]);
-        $take = (int)($validated['count'] ?? 5);
 
-        $userId         = auth()->id();
-        $lockTtlMinutes = 30;
-        $nipPriority    = '199407292022031002';
+        $take         = (int)($validated['count'] ?? 5);
+        $idWorkUnit   = $validated['id_work_unit'] ?? null; // <— dari dropdown (boleh null)
+        $userId       = auth()->id();
+        $lockTtlMin   = 30;
+        $nipPriority  = '199407292022031002';
+        $now          = now();
 
-        return DB::transaction(function () use ($userId, $lockTtlMinutes, $take, $nipPriority) {
-            // Ambil N dokumen Pending yang eligible (unassigned atau lock kadaluarsa)
-            // PRIORITAS: dokumen dengan employee.nip = $nipPriority, lalu FIFO by created_at
-            $docs = EmpDocument::where('status', 'Pending')
-                ->where(function ($q) {
+        return DB::transaction(function () use ($userId, $lockTtlMin, $take, $nipPriority, $idWorkUnit, $now) {
+
+            $q = EmpDocument::query()
+                ->where('status', 'Pending')
+                ->where(function ($q) use ($now) {
                     $q->whereNull('assigned_to')
-                    ->orWhere('lock_expires_at', '<', now());
-                })
-                ->lockForUpdate()
-                ->orderByRaw(
-                    // Prioritaskan dokumen yang employee.nip cocok => nilai 0, lainnya 1
-                    "CASE WHEN EXISTS (
-                        SELECT 1
-                        FROM employees e
-                        WHERE e.id = emp_documents.id_employee
-                        AND e.nip = ?
-                    ) THEN 0 ELSE 1 END ASC",
-                    [$nipPriority]
-                )
-                ->orderBy('created_at', 'asc') // FIFO dalam masing-masing kelompok prioritas
-                ->limit($take)
-                ->get();
+                    ->orWhere('lock_expires_at', '<', $now);
+                });
+
+            // Filter by Work Unit kalau dipilih
+            if ($idWorkUnit) {
+                $q->whereHas('employee', function ($sub) use ($idWorkUnit) {
+                    $sub->where('id_work_unit', $idWorkUnit);
+                });
+            }
+
+            // Kunci baris kandidat agar anti double-claim
+            // Jika DB Anda MySQL 8+ / PostgreSQL, pertimbangkan skip locked:
+            // $q->lock('for update skip locked');
+            $q->lockForUpdate();
+
+            // Prioritas NIP tertentu, lalu FIFO
+            $q->orderByRaw(
+                "CASE WHEN EXISTS (
+                    SELECT 1
+                    FROM employees e
+                    WHERE e.id = emp_documents.id_employee
+                    AND e.nip = ?
+                ) THEN 0 ELSE 1 END",
+                [$nipPriority]
+            )
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')   // tie-breaker yang stabil
+            ->limit($take);
+
+            $docs = $q->get();
 
             if ($docs->isEmpty()) {
                 return response()->json(['message' => 'Tidak ada dokumen yang tersedia untuk di-claim'], 404);
             }
 
-            $expiresAt = Carbon::now()->addMinutes($lockTtlMinutes);
+            $expiresAt = (clone $now)->addMinutes($lockTtlMin);
 
             foreach ($docs as $doc) {
                 $doc->assigned_to     = $userId;
-                $doc->assigned_at     = now();
+                $doc->assigned_at     = $now;
                 $doc->lock_expires_at = $expiresAt;
                 $doc->save();
             }
 
-            // Kembalikan dengan relasi yang diperlukan
             $docs->load(['employee', 'docType']);
 
             return response()->json([
@@ -345,7 +421,6 @@ class EmpDocumentController extends Controller
             ]);
         });
     }
-
 
 
     public function release(EmpDocument $empDocument)
@@ -365,12 +440,34 @@ class EmpDocumentController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function remaining()
+    // public function remaining()
+    // {
+    //     $count = EmpDocument::where('status', 'Pending')
+    //         ->where(function ($q) {
+    //             $q->whereNull('assigned_to')
+    //             ->orWhere('lock_expires_at', '<', now());
+    //         })
+    //         ->count();
+
+    //     return response()->json(['remaining' => $count]);
+    // }
+
+    public function remaining(Request $request)
     {
+        $validated = $request->validate([
+            'id_work_unit' => 'nullable|integer|exists:work_units,id',
+        ]);
+
+        $idWorkUnit = $validated['id_work_unit'] ?? null;
+        $now = now();
+
         $count = EmpDocument::where('status', 'Pending')
-            ->where(function ($q) {
+            ->where(function ($q) use ($now) {
                 $q->whereNull('assigned_to')
-                ->orWhere('lock_expires_at', '<', now());
+                ->orWhere('lock_expires_at', '<', $now);
+            })
+            ->when($idWorkUnit, function ($q) use ($idWorkUnit) {
+                $q->whereHas('employee', fn ($s) => $s->where('id_work_unit', $idWorkUnit));
             })
             ->count();
 

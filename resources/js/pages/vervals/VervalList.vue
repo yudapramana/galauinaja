@@ -1,25 +1,46 @@
 <template>
-  <section class="content-header">
-    <div class="container-fluid d-flex justify-content-between align-items-end">
-      <h1 class="mb-2">Verifikasi Dokumen Pegawai</h1>
+  <section class="content-header py-1">
+    <div class="container-fluid">
 
-      <div class="d-flex align-items-center">
-        <span class="badge badge-info mr-3">
-          Sisa antrian: {{ remainingCountDisplay }}
-        </span>
+      <!-- Baris 1: Judul + Dropdown Select2 (compact) -->
+      <div class="d-flex align-items-center flex-nowrap mb-1">
+        <h1 class="m-0 font-weight-bold text-dark text-truncate pr-2">
+          Verifikasi Dokumen Pegawai
+        </h1>
 
-        <div class="btn-group">
-          <button class="btn btn-outline-primary btn-sm" @click="claimFive" :disabled="isClaiming">
-            <i v-if="isClaiming" class="fas fa-spinner fa-spin mr-1"></i>
-            Ambil 5 Dokumen
-          </button>
-          <button class="btn btn-secondary btn-sm ml-2" @click="refreshAll">
-            Refresh
-          </button>
+        <div class="ml-auto">
+          <select
+            ref="workUnitSelect"
+            class="select2bs4 wu-compact"
+            data-placeholder="Semua Unit Kerja"
+            style="width: 300px;"  
+          >
+            <option :value="null">Semua Unit Kerja</option>
+            <option v-for="wu in workUnits" :key="wu.id" :value="wu.id">
+              {{ wu.unit_code }} — {{ wu.unit_name }}
+            </option>
+          </select>
         </div>
       </div>
+
+      <!-- Baris 2: Sisa antrian + tombol (rapat & di kanan) -->
+      <div class="d-flex align-items-center justify-content-end">
+        <span class="badge badge-info badge-pill mr-2">
+          Sisa: {{ remainingCountDisplay }}
+        </span>
+        <button class="btn btn-outline-primary btn-sm mr-1" @click="claimFive" :disabled="isClaiming">
+          <i v-if="isClaiming" class="fas fa-spinner fa-spin mr-1"></i>
+          Ambil 5 Dokumen
+        </button>
+        <button class="btn btn-secondary btn-sm" @click="refreshAll">Refresh</button>
+      </div>
+
     </div>
   </section>
+
+
+
+
 
   <section class="content">
     <div class="container-fluid">
@@ -233,7 +254,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import axios from 'axios'
 import Swal from 'sweetalert2'
@@ -242,6 +263,38 @@ import { useSettingStore } from '../../stores/SettingStore'
 const settingStore = useSettingStore();
 settingStore.setting.maintenance =
   ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
+
+// pastikan jQuery & Select2 sudah tersedia global (AdminLTE 3)
+const workUnitSelect = ref(null)
+// tetap gunakan state lama:
+const workUnits = ref([])                // <— list dropdown
+const selectedWorkUnit = ref(null)       // <— id yang dipilih (nullable)
+
+// INIT select2 + sinkronisasi dengan Vue
+const initSelect2WorkUnit = () => {
+  const $el = window.$(workUnitSelect.value)
+  // hancurkan dulu jika pernah di-init
+  if ($el.hasClass('select2-hidden-accessible')) {
+    $el.select2('destroy')
+  }
+  $el.select2({
+    theme: 'bootstrap4',
+    width: 'style',           // patuhi style="width: 240px;"
+    dropdownAutoWidth: true,
+    placeholder: 'Semua Unit Kerja',
+    allowClear: true,
+    minimumResultsForSearch: 8 // tampilkan search hanya bila opsi >= 8
+  })
+   // ⇩ nilai dari select2 dinormalisasi
+  $el.on('change', function () {
+    selectedWorkUnit.value = toWorkUnitId($el.val());
+    fetchRemaining();
+  });
+  // set nilai awal
+  const initVal = selectedWorkUnit.value == null ? null : String(selectedWorkUnit.value)
+  $el.val(initVal).trigger('change.select2')
+}
+
 const search = ref('')
 const documents = ref([])
 const isLoading = ref(false)
@@ -288,6 +341,20 @@ const rejectionNotes = [
   { code: 'G010', note: 'Dokumen mengandung data palsu atau terindikasi tidak asli.' }
 ]
 
+
+// === API helper: Work Units ===
+const fetchWorkUnits = async () => {
+  try {
+    // Endpoint sederhana: GET /api/work-units -> [{id, unit_name, unit_code, parent_unit}]
+    const { data } = await axios.get('/api/work-units/fetch')
+    // Antisipasi bentuk data: bisa array langsung atau {data: []}
+    workUnits.value = Array.isArray(data) ? data : (data?.data || [])
+  } catch (e) {
+    workUnits.value = []
+  }
+}
+
+
 // === API calls ===
 const fetchDocuments = async (page = 1) => {
   isLoading.value = true
@@ -312,16 +379,26 @@ const fetchDocuments = async (page = 1) => {
   }
 }
 
+// utils
+const toWorkUnitId = (val) => {
+  if (val === undefined || val === null) return null;
+  if (val === '' || val === 'null') return null;
+  const n = parseInt(val, 10);
+  return Number.isNaN(n) ? null : n;
+};
+
 const fetchRemaining = async () => {
-  // Backend yang disarankan: GET /api/emp-documents/remaining -> { remaining: number }
   try {
-    const { data } = await axios.get('/api/emp-documents/remaining')
-    remainingCount.value = typeof data?.remaining === 'number' ? data.remaining : null
+    const params = {};
+    const wu = toWorkUnitId(selectedWorkUnit.value);
+    if (wu !== null) params.id_work_unit = wu; // ⇦ kirim hanya jika angka valid
+
+    const { data } = await axios.get('/api/emp-documents/remaining', { params });
+    remainingCount.value = typeof data?.remaining === 'number' ? data.remaining : null;
   } catch (e) {
-    // fallback: jika endpoint belum ada, biarkan null (—)
-    remainingCount.value = null
+    remainingCount.value = null;
   }
-}
+};
 
 const refreshAll = async () => {
   await Promise.all([fetchDocuments(meta.value.current_page), fetchRemaining()])
@@ -331,7 +408,11 @@ const claimFive = async () => {
   isClaiming.value = true
   try {
     // ambil 5 dokumen dari antrian
-    const { data } = await axios.post('/api/emp-documents/claim', { count: 5 })
+    // kirim id_work_unit yang terpilih ke backend
+    const { data } = await axios.post('/api/emp-documents/claim', {
+      count: 5,
+      id_work_unit: toWorkUnitId(selectedWorkUnit.value)
+    })
     await refreshAll()
 
     const claimedCount = data?.claimed ?? (Array.isArray(data?.data) ? data.data.length : (data?.data ? 1 : 0))
@@ -457,10 +538,31 @@ watch(
   }
 )
 
-// Debounce search
-watch(search, useDebounceFn(() => fetchDocuments(1), 300))
 
-onMounted(() => refreshAll())
+
+// Debounce search
+watch(search, useDebounceFn(() => fetchDocuments(1), 300));
+
+onMounted(async () => {
+  await fetchWorkUnits()     // muat daftar unit dulu
+  await nextTick()
+  initSelect2WorkUnit()      // inisialisasi select2
+  await refreshAll()
+});
+
+// jika daftar work units berubah (misal dari API), re-init select2
+watch(() => workUnits.value.length, async () => {
+  await nextTick()
+  initSelect2WorkUnit()
+})
+
+// jika selectedWorkUnit berubah dari tempat lain (opsional), sync ke select2
+// watch(selectedWorkUnit, (val) => {
+//   const $el = window.$(workUnitSelect.value);
+//   const want = val == null ? null : String(val);
+//   const cur  = $el.val() ?? null; // bisa string atau null
+//   if (cur !== want) $el.val(want).trigger('change.select2');
+// });
 </script>
 
 <style scoped>
@@ -476,4 +578,46 @@ onMounted(() => refreshAll())
     border: 0;
     border-radius: 0;
   }
+</style>
+
+
+<style scoped>
+.content-header { padding-top: .25rem; padding-bottom: .25rem; }
+.content-header h1 { font-size: 1.05rem; line-height: 1.2; }
+.badge.badge-pill { padding: .25rem .5rem; font-weight: 600; }
+.input-group-sm .form-control { height: calc(1.8125rem + 2px); padding-top: .125rem; padding-bottom: .125rem; }
+/* pastikan select2 container mengikuti tinggi input-group-sm */
+.select2-container--bootstrap4 .select2-selection--single {
+  min-height: calc(1.8125rem + 2px);
+  line-height: 1.2;
+  padding: .125rem .5rem;
+}
+.select2-container--bootstrap4 .select2-selection__arrow { height: 100%; }
+</style>
+
+<style scoped>
+/* tinggi & font-size kecil */
+.select2-container--bootstrap4 .select2-selection--single {
+  min-height: 30px;                 /* ~sm */
+  height: 30px;
+  padding: 2px 6px;
+  line-height: 1.2;
+  font-size: .875rem;               /* sm */
+  border-radius: .2rem;
+}
+
+/* rapikan teks & arrow */
+.select2-container--bootstrap4 .select2-selection__rendered {
+  padding-left: 2px;
+  padding-right: 22px;              /* ruang untuk arrow */
+}
+.select2-container--bootstrap4 .select2-selection__arrow {
+  height: 100%;
+  right: 6px;
+}
+
+/* kelas helper untuk dropdown ini (opsional) */
+.wu-compact + .select2-container--bootstrap4 {
+  font-size: .875rem;
+}
 </style>
