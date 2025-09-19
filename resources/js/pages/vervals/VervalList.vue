@@ -270,6 +270,15 @@ const workUnitSelect = ref(null)
 const workUnits = ref([])                // <— list dropdown
 const selectedWorkUnit = ref(null)       // <— id yang dipilih (nullable)
 
+// ⇩ muat Select2 **hanya jika belum ada**
+const ensureSelect2Ready = async () => {
+  if (!window.jQuery) throw new Error('jQuery belum ter-load');
+  if (!window.jQuery.fn || !window.jQuery.fn.select2) {
+    // lazy-load UMD Select2 ke instance jQuery global
+    await import('admin-lte/plugins/select2/js/select2.full.min.js');
+  }
+};
+
 // INIT select2 + sinkronisasi dengan Vue
 const initSelect2WorkUnit = () => {
   const $el = window.$(workUnitSelect.value)
@@ -543,17 +552,14 @@ watch(
 // Debounce search
 watch(search, useDebounceFn(() => fetchDocuments(1), 300));
 
-const ensureSelect2Ready = () => {
-  if (!window.jQuery) throw new Error('jQuery belum ter-load');
-  if (!window.jQuery.fn || !window.jQuery.fn.select2) throw new Error('Select2 belum ter-load');
-};
+
 
 // di onMounted
 onMounted(async () => {
-  await fetchWorkUnits();
-  await nextTick();
-  ensureSelect2Ready();
-  initSelect2WorkUnit();
+  await fetchWorkUnits();  // isi <option> dulu
+  await nextTick();        // pastikan <select> sudah ter-render
+  await ensureSelect2Ready();
+  initSelect2WorkUnit();   // baru init
   await refreshAll();
 });
 
