@@ -41,6 +41,33 @@ use Yaza\LaravelGoogleDriveStorage\Gdrive;
 |
 */
 
+Route::get('/show-pending-documents', function() {
+
+    $rows = DB::table('work_units as wu')
+        ->leftJoin('employees as e', function ($join) {
+            $join->on('e.id_work_unit', '=', 'wu.id')
+                ->whereNull('e.deleted_at');
+        })
+        ->leftJoin('emp_documents as d', function ($join) {
+            $join->on('d.id_employee', '=', 'e.id')
+                ->whereNull('d.deleted_at')
+                ->where('d.status', '=', 'Pending');
+        })
+        ->whereNull('wu.deleted_at')
+        ->groupBy('wu.id', 'wu.unit_code', 'wu.unit_name')
+        ->orderBy('wu.unit_code') // atau unit_name
+        ->select([
+            'wu.id',
+            'wu.unit_code',
+            'wu.unit_name',
+            DB::raw('COUNT(d.id) AS pending_count'),
+        ])
+        ->get();
+
+    return $rows;
+});
+
+
 Route::get('oauth/google', [OauthController::class, 'redirectToProvider'])->name('oauth.google');  
 Route::get('oauth/google/callback', [OauthController::class, 'handleProviderCallback'])->name('oauth.google.callback');
 

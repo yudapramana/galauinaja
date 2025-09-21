@@ -98,7 +98,10 @@
               </tr>
               <tr v-for="(doc, index) in documents" :key="doc.id">
                 <td>{{ index + 1 + (meta.current_page - 1) * meta.per_page }}</td>
-                <td>{{ doc.employee.full_name }}</td>
+                <td>
+                  {{ doc.employee.full_name }} <br>
+                  <strong>{{ doc.employee.workunit.unit_name }}</strong>
+                </td>
                 <td>{{ doc.employee.nip }}</td>
                 <td>{{ doc.doc_type.type_name }}</td>
                 <td class="text-truncate" style="max-width: 240px;">{{ doc.file_name }}</td>
@@ -197,7 +200,9 @@
                   <tbody>
                     <tr>
                       <th>Nama</th>
-                      <td>{{ selectedDoc?.employee?.full_name || '-' }}</td>
+                      <td>
+                        {{ selectedDoc?.employee?.full_name || '-' }}<br>
+                      </td>
                     </tr>
                     <tr>
                       <th>NIP</th>

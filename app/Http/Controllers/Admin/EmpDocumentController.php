@@ -223,7 +223,7 @@ class EmpDocumentController extends Controller
 
         $userId = auth()->id();
 
-        $query = EmpDocument::with(['employee', 'docType'])
+        $query = EmpDocument::with(['employee.workunit', 'docType'])
             ->where('status', 'Pending')
             // hanya dokumen milik user ini (assigned ke dia)
             ->where(function ($q) use ($userId) {
