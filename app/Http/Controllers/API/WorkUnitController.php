@@ -6,18 +6,65 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\WorkUnit;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class WorkUnitController extends Controller
 {
+    // public function fetch()
+    // {
+    //     return response()->json(
+    //         WorkUnit::query()
+    //             ->select('id', 'unit_name', 'unit_code', 'parent_unit')
+    //             ->orderBy('unit_name')
+    //             ->get()
+    //     );
+    // }
+
     public function fetch()
     {
-        return response()->json(
-            WorkUnit::query()
-                ->select('id', 'unit_name', 'unit_code', 'parent_unit')
-                ->orderBy('unit_name')
-                ->get()
-        );
+        // Ambil tree sampai 3 level anak, mulai dari akar (parent_unit = null)
+        $units = WorkUnit::with('children.children.children')
+            ->whereNull('parent_unit')
+            ->get();
+
+        // Flatten ke list datar (pre-order) dengan urutan berdasarkan unit_code
+        $flat = collect();
+
+        $walk = function ($nodes) use (&$walk, &$flat) {
+            // Urutkan nodes saat ini berdasarkan unit_code (natural, case-insensitive)
+            $sorted = collect($nodes)->sortBy(
+                fn ($x) => (string)($x->unit_code ?? ''),
+                SORT_NATURAL | SORT_FLAG_CASE
+            )->values();
+
+            foreach ($sorted as $n) {
+                $flat->push([
+                    'id'          => $n->id,
+                    'unit_name'   => $n->unit_name,
+                    'unit_code'   => $n->unit_code,
+                    'parent_unit' => $n->parent_unit,
+                ]);
+
+                if ($n->relationLoaded('children') && $n->children->isNotEmpty()) {
+                    // Urutkan anak berdasarkan unit_code lalu telusuri
+                    $children = $n->children->sortBy(
+                        fn ($c) => (string)($c->unit_code ?? ''),
+                        SORT_NATURAL | SORT_FLAG_CASE
+                    )->values();
+
+                    $walk($children);
+                }
+            }
+        };
+
+        $walk($units);
+
+        // Hilangkan potensi duplikasi (jaga-jaga)
+        $flat = $flat->unique('id')->values();
+
+        return response()->json($flat);
     }
+
     
     public function index(Request $request)
     {

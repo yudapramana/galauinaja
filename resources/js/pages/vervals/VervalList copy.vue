@@ -254,20 +254,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useSettingStore } from '../../stores/SettingStore';
-
-// >>>>>>>>>>>>>>>  Tambahkan 3 baris ini di paling atas script:
-import jQuery from 'jquery'
-window.$ = window.jQuery = jQuery
-import 'select2/dist/js/select2.full.min.js'  // pastikan package "select2" terpasang
-// (Opsional) import CSS tema bila perlu:
-import 'select2/dist/css/select2.min.css'
-import 'admin-lte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css'
-// <<<<<<<<<<<<<<<<
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import axios from 'axios'
+import Swal from 'sweetalert2'
+import { useSettingStore } from '../../stores/SettingStore'
 
 const settingStore = useSettingStore();
 settingStore.setting.maintenance =
@@ -279,7 +270,14 @@ const workUnitSelect = ref(null)
 const workUnits = ref([])                // <— list dropdown
 const selectedWorkUnit = ref(null)       // <— id yang dipilih (nullable)
 
-
+// ⇩ muat Select2 **hanya jika belum ada**
+const ensureSelect2Ready = async () => {
+  if (!window.jQuery) throw new Error('jQuery belum ter-load');
+  if (!window.jQuery.fn || !window.jQuery.fn.select2) {
+    // lazy-load UMD Select2 ke instance jQuery global
+    await import('admin-lte/plugins/select2/js/select2.full.min.js');
+  }
+};
 
 // INIT select2 + sinkronisasi dengan Vue
 const initSelect2WorkUnit = () => {
@@ -560,6 +558,7 @@ watch(search, useDebounceFn(() => fetchDocuments(1), 300));
 onMounted(async () => {
   await fetchWorkUnits();  // isi <option> dulu
   await nextTick();        // pastikan <select> sudah ter-render
+  await ensureSelect2Ready();
   initSelect2WorkUnit();   // baru init
   await refreshAll();
 });
@@ -570,7 +569,13 @@ watch(() => workUnits.value.length, async () => {
   initSelect2WorkUnit()
 })
 
-
+// jika selectedWorkUnit berubah dari tempat lain (opsional), sync ke select2
+// watch(selectedWorkUnit, (val) => {
+//   const $el = window.$(workUnitSelect.value);
+//   const want = val == null ? null : String(val);
+//   const cur  = $el.val() ?? null; // bisa string atau null
+//   if (cur !== want) $el.val(want).trigger('change.select2');
+// });
 </script>
 
 <style scoped>

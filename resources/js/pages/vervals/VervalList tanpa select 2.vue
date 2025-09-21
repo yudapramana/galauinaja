@@ -1,25 +1,25 @@
 <template>
   <section class="content-header py-1">
     <div class="container-fluid">
-
-      <!-- Baris 1: Judul + Dropdown Select2 (compact) -->
+      <!-- Baris 1: Judul + Dropdown (native, compact) -->
       <div class="d-flex align-items-center flex-nowrap mb-1">
         <h1 class="m-0 font-weight-bold text-dark text-truncate pr-2">
           Verifikasi Dokumen Pegawai
         </h1>
 
-        <div class="ml-auto">
-          <select
-            ref="workUnitSelect"
-            class="select2bs4 wu-compact"
-            data-placeholder="Semua Unit Kerja"
-            style="width: 300px;"  
-          >
-            <option :value="null">Semua Unit Kerja</option>
-            <option v-for="wu in workUnits" :key="wu.id" :value="wu.id">
-              {{ wu.unit_code }} — {{ wu.unit_name }}
-            </option>
-          </select>
+        <div class="ml-auto" style="min-width: 300px;">
+          <div class="input-group input-group-sm">
+            <select
+              v-model="selectedWorkUnit"
+              class="form-control form-control-sm"
+              @change="fetchRemaining"
+            >
+              <option value="">Semua Unit Kerja</option>
+              <option v-for="wu in workUnits" :key="wu.id" :value="String(wu.id)">
+                {{ wu.unit_code }} — {{ wu.unit_name }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -34,13 +34,8 @@
         </button>
         <button class="btn btn-secondary btn-sm" @click="refreshAll">Refresh</button>
       </div>
-
     </div>
   </section>
-
-
-
-
 
   <section class="content">
     <div class="container-fluid">
@@ -100,12 +95,12 @@
                 </td>
                 <td>
                   <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
-                      Maintenance
+                    Maintenance
                   </button>
                   <button v-else class="btn btn-sm btn-primary mr-1 mb-1" @click="openVerifModal(doc)">
                     Verifikasi
                   </button>
-                  
+
                   <button
                     class="btn btn-sm btn-outline-danger"
                     @click="releaseDoc(doc)"
@@ -149,7 +144,7 @@
         <div class="modal-content">
           <div class="modal-header py-2">
             <h5 class="modal-title">Verifikasi Dokumen Pegawai</h5>
-             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
           </div>
@@ -235,14 +230,12 @@
 
                 <div class="text-end mt-3">
                   <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
-                      Maintenance
+                    Maintenance
                   </button>
                   <button v-else type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
                     <i v-if="isSubmitting" class="fas fa-spinner fa-spin me-1"></i>
                     Simpan Verifikasi
                   </button>
-
-                  
                 </div>
               </form>
             </div>
@@ -254,57 +247,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useSettingStore } from '../../stores/SettingStore';
+import { ref, onMounted, watch, computed } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import axios from 'axios'
+import Swal from 'sweetalert2'
+import { useSettingStore } from '../../stores/SettingStore'
 
-// >>>>>>>>>>>>>>>  Tambahkan 3 baris ini di paling atas script:
-import jQuery from 'jquery'
-window.$ = window.jQuery = jQuery
-import 'select2/dist/js/select2.full.min.js'  // pastikan package "select2" terpasang
-// (Opsional) import CSS tema bila perlu:
-import 'select2/dist/css/select2.min.css'
-import 'admin-lte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css'
-// <<<<<<<<<<<<<<<<
-
-const settingStore = useSettingStore();
+const settingStore = useSettingStore()
 settingStore.setting.maintenance =
-  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance);
+  ['1', 1, true, 'true', 'on'].includes(settingStore.setting.maintenance)
 
-// pastikan jQuery & Select2 sudah tersedia global (AdminLTE 3)
-const workUnitSelect = ref(null)
-// tetap gunakan state lama:
-const workUnits = ref([])                // <— list dropdown
-const selectedWorkUnit = ref(null)       // <— id yang dipilih (nullable)
-
-
-
-// INIT select2 + sinkronisasi dengan Vue
-const initSelect2WorkUnit = () => {
-  const $el = window.$(workUnitSelect.value)
-  // hancurkan dulu jika pernah di-init
-  if ($el.hasClass('select2-hidden-accessible')) {
-    $el.select2('destroy')
-  }
-  $el.select2({
-    theme: 'bootstrap4',
-    width: 'style',           // patuhi style="width: 240px;"
-    dropdownAutoWidth: true,
-    placeholder: 'Semua Unit Kerja',
-    allowClear: true,
-    minimumResultsForSearch: 8 // tampilkan search hanya bila opsi >= 8
-  })
-   // ⇩ nilai dari select2 dinormalisasi
-  $el.on('change', function () {
-    selectedWorkUnit.value = toWorkUnitId($el.val());
-    fetchRemaining();
-  });
-  // set nilai awal
-  const initVal = selectedWorkUnit.value == null ? null : String(selectedWorkUnit.value)
-  $el.val(initVal).trigger('change.select2')
-}
+// --- State dasar ---
+const workUnits = ref([])              // data dropdown
+const selectedWorkUnit = ref('')       // simpan sebagai string; '' berarti semua
 
 const search = ref('')
 const documents = ref([])
@@ -352,19 +307,23 @@ const rejectionNotes = [
   { code: 'G010', note: 'Dokumen mengandung data palsu atau terindikasi tidak asli.' }
 ]
 
+// === Helpers ===
+const toWorkUnitId = (val) => {
+  if (val === undefined || val === null || val === '' || val === 'null') return null
+  const n = parseInt(val, 10)
+  return Number.isNaN(n) ? null : n
+}
 
 // === API helper: Work Units ===
 const fetchWorkUnits = async () => {
   try {
-    // Endpoint sederhana: GET /api/work-units -> [{id, unit_name, unit_code, parent_unit}]
+    // GET /api/work-units/fetch -> [{id, unit_name, unit_code, parent_unit}]
     const { data } = await axios.get('/api/work-units/fetch')
-    // Antisipasi bentuk data: bisa array langsung atau {data: []}
     workUnits.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (e) {
     workUnits.value = []
   }
 }
-
 
 // === API calls ===
 const fetchDocuments = async (page = 1) => {
@@ -390,26 +349,18 @@ const fetchDocuments = async (page = 1) => {
   }
 }
 
-// utils
-const toWorkUnitId = (val) => {
-  if (val === undefined || val === null) return null;
-  if (val === '' || val === 'null') return null;
-  const n = parseInt(val, 10);
-  return Number.isNaN(n) ? null : n;
-};
-
 const fetchRemaining = async () => {
   try {
-    const params = {};
-    const wu = toWorkUnitId(selectedWorkUnit.value);
-    if (wu !== null) params.id_work_unit = wu; // ⇦ kirim hanya jika angka valid
+    const params = {}
+    const wu = toWorkUnitId(selectedWorkUnit.value)
+    if (wu !== null) params.id_work_unit = wu
 
-    const { data } = await axios.get('/api/emp-documents/remaining', { params });
-    remainingCount.value = typeof data?.remaining === 'number' ? data.remaining : null;
+    const { data } = await axios.get('/api/emp-documents/remaining', { params })
+    remainingCount.value = typeof data?.remaining === 'number' ? data.remaining : null
   } catch (e) {
-    remainingCount.value = null;
+    remainingCount.value = null
   }
-};
+}
 
 const refreshAll = async () => {
   await Promise.all([fetchDocuments(meta.value.current_page), fetchRemaining()])
@@ -418,12 +369,11 @@ const refreshAll = async () => {
 const claimFive = async () => {
   isClaiming.value = true
   try {
-    // ambil 5 dokumen dari antrian
-    // kirim id_work_unit yang terpilih ke backend
-    const { data } = await axios.post('/api/emp-documents/claim', {
-      count: 5,
-      id_work_unit: toWorkUnitId(selectedWorkUnit.value)
-    })
+    const payload = { count: 5 }
+    const wu = toWorkUnitId(selectedWorkUnit.value)
+    if (wu !== null) payload.id_work_unit = wu
+
+    const { data } = await axios.post('/api/emp-documents/claim', payload)
     await refreshAll()
 
     const claimedCount = data?.claimed ?? (Array.isArray(data?.data) ? data.data.length : (data?.data ? 1 : 0))
@@ -435,7 +385,6 @@ const claimFive = async () => {
       showConfirmButton: false
     })
 
-    // opsional: buka modal untuk dokumen pertama hasil klaim
     if (Array.isArray(data?.data) && data.data.length) {
       openVerifModal(data.data[0])
     } else if (documents.value.length) {
@@ -549,83 +498,43 @@ watch(
   }
 )
 
-
-
 // Debounce search
-watch(search, useDebounceFn(() => fetchDocuments(1), 300));
+watch(search, useDebounceFn(() => fetchDocuments(1), 300))
 
+// Update remaining saat workunit berubah
+watch(selectedWorkUnit, () => fetchRemaining())
 
-
-// di onMounted
+// onMounted
 onMounted(async () => {
-  await fetchWorkUnits();  // isi <option> dulu
-  await nextTick();        // pastikan <select> sudah ter-render
-  initSelect2WorkUnit();   // baru init
-  await refreshAll();
-});
-
-// jika daftar work units berubah (misal dari API), re-init select2
-watch(() => workUnits.value.length, async () => {
-  await nextTick()
-  initSelect2WorkUnit()
+  await fetchWorkUnits()
+  await refreshAll()
 })
-
-
 </script>
 
 <style scoped>
-  .modal-dialog.modal-fullscreen {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .modal-content {
-    height: 100% !important;
-    border: 0;
-    border-radius: 0;
-  }
-</style>
-
-
-<style scoped>
+/* Header & badge lebih rapat */
 .content-header { padding-top: .25rem; padding-bottom: .25rem; }
 .content-header h1 { font-size: 1.05rem; line-height: 1.2; }
 .badge.badge-pill { padding: .25rem .5rem; font-weight: 600; }
-.input-group-sm .form-control { height: calc(1.8125rem + 2px); padding-top: .125rem; padding-bottom: .125rem; }
-/* pastikan select2 container mengikuti tinggi input-group-sm */
-.select2-container--bootstrap4 .select2-selection--single {
-  min-height: calc(1.8125rem + 2px);
-  line-height: 1.2;
-  padding: .125rem .5rem;
-}
-.select2-container--bootstrap4 .select2-selection__arrow { height: 100%; }
-</style>
 
-<style scoped>
-/* tinggi & font-size kecil */
-.select2-container--bootstrap4 .select2-selection--single {
-  min-height: 30px;                 /* ~sm */
-  height: 30px;
-  padding: 2px 6px;
-  line-height: 1.2;
-  font-size: .875rem;               /* sm */
-  border-radius: .2rem;
+/* Modal fullscreen */
+.modal-dialog.modal-fullscreen {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.modal-content {
+  height: 100% !important;
+  border: 0;
+  border-radius: 0;
 }
 
-/* rapikan teks & arrow */
-.select2-container--bootstrap4 .select2-selection__rendered {
-  padding-left: 2px;
-  padding-right: 22px;              /* ruang untuk arrow */
-}
-.select2-container--bootstrap4 .select2-selection__arrow {
-  height: 100%;
-  right: 6px;
-}
-
-/* kelas helper untuk dropdown ini (opsional) */
-.wu-compact + .select2-container--bootstrap4 {
-  font-size: .875rem;
+/* Tinggi kontrol kecil */
+.input-group-sm .form-control {
+  height: calc(1.8125rem + 2px);
+  padding-top: .125rem;
+  padding-bottom: .125rem;
 }
 </style>
