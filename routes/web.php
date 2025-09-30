@@ -537,8 +537,12 @@ Route::middleware('auth')->group(function () {
 
 
     Route::prefix('/api/work-units')->group(function () {
+        Route::get('{id}/employees', [WorkUnitController::class, 'fetchEmployee']);
+
+
         // Get tree data
         Route::get('/tree', [WorkUnitController::class, 'tree']);
+        Route::get('/monitor', [WorkUnitController::class, 'monitor']);
         Route::get('/fetch', [WorkUnitController::class, 'fetch']);
     
         // CRUD Routes

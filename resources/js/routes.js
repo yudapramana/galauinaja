@@ -35,6 +35,11 @@ export default [
         component: () => import('./pages/vervals/VervalHistory.vue'),
       },
       {
+        path: 'monitor-workout',
+        name: 'admin.workunits.monitor',
+        component: () => import('./pages/workunits/WorkUnitMonitor.vue'),
+      },
+      {
         path: 'workunits',
         name: 'admin.workunits',
         component: () => import('./pages/workunits/WorkUnitList.vue'),

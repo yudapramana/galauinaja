@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\WorkUnit;
 use Illuminate\Support\Facades\Validator;
@@ -19,6 +20,50 @@ class WorkUnitController extends Controller
     //             ->get()
     //     );
     // }
+
+    /**
+     * Return employees by work unit id.
+     * GET /api/work-units/{id}/employees
+     */
+    public function fetchEmployee(Request $request, $id)
+    {
+        // Optional: simple pagination support ?page=&per_page=
+        $perPage = (int) $request->get('per_page', 0);
+
+        $query = Employee::query()
+            ->select([
+                'id',
+                // 'nip',
+                'full_name',
+                // 'job_title',
+                // 'employment_status',
+                // 'gol_ruang',
+                // 'email',
+                // 'phone_number',
+                'progress_dokumen',
+                'id_work_unit',
+            ])
+            ->where('id_work_unit', $id)
+            ->whereNull('deleted_at') // softDeletes filter
+            ->orderBy('progress_dokumen', 'DESC');
+
+        if ($perPage > 0) {
+            $paginator = $query->paginate($perPage);
+            // Return only the data array for simplicity on frontend (adjust if you want meta)
+            return response()->json([
+                'data' => $paginator->items(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                ]
+            ]);
+        }
+
+        return response()->json($query->get());
+    }
+
 
     public function fetch()
     {
@@ -101,6 +146,13 @@ class WorkUnitController extends Controller
     public function tree()
     {
         $units = WorkUnit::with('children.children.children')->whereNull('parent_unit')->get();
+        return response()->json($units);
+    }
+
+    public function monitor()
+    {
+        // return 'ampek';
+        $units = WorkUnit::select('id', 'unit_name', 'unit_code')->get();
         return response()->json($units);
     }
 

@@ -89,6 +89,15 @@ const logout = () => {
                             </p>
                         </router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link to="/admin/monitor-workout" :class="$route.path.startsWith('/admin/monitor-workout') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'"
+                            active-class="active" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>
+                                Monitor Pegawai
+                            </p>
+                        </router-link>
+                    </li>
                     <!-- <li class="nav-item">
                         <router-link to="/admin/reports" :class="$route.path.startsWith('/admin/reports') ? 'active' : ''"
                             active-class="active" class="nav-link">
