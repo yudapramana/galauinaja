@@ -94,7 +94,7 @@
 
     <!-- Preview Modal -->
     <PreviewModal v-if="previewUrl" :preview-url="previewUrl" :selected-preview-file="selectedPreviewFile"
-        :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError"
+        :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError" :isApprovedPreview="isApprovedPreview"
         @close="previewUrl = null; selectedPreviewFile = null; vervalLogs = [];" />
 
     <!-- Modal Upload -->
@@ -234,6 +234,7 @@ const vervalLogs = ref([]);
 const isLoadingVerval = ref(false);
 const isEditMode = ref(false); // true = edit, false = upload baru
 const existingFileUrl = ref(''); // e.g. '/storage/docs/123456.pdf'
+const isApprovedPreview = ref(false);
 
 const pdfFrame = ref(null);
 const pdfError = ref(false);
@@ -352,10 +353,13 @@ const previewFile = async (file) => {
   console.log('file');
   console.log(file);
 
+  isApprovedPreview.value = (file.status === 'Approved'); // 👈 simpan status
+
   if(file.status == 'Approved') {
 
     pdfError.value = false;
     selectedPreviewFile.value = file;
+    isApprovedPreview.value = (file.status === 'Approved'); // 👈 simpan status
 
     const path = file?.file_path;
     if (!path) { pdfError.value = true; return; }
