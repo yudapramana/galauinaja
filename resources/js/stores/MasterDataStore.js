@@ -43,7 +43,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         console.log('doctypeList.value.length:', doctypeList.value.length);
         // console.log('doctypeList.value:', doctypeList.value);
     
-        if (doctypeList.value.length === 0 || authUserStore.user.role == 'SUPERADMIN') {
+        if (doctypeList.value.length === 0 || authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN') {
             loadingStore.toggleLoading();
     
             try {
