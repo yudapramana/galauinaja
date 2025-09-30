@@ -54,7 +54,7 @@ const logout = () => {
                     </li>
                     
                     <li class="nav-item">
-                        <router-link to="/admin/docusers" :class="$route.path.startsWith('/admin/docusers') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN'"
+                        <router-link to="/admin/docusers" :class="$route.path.startsWith('/admin/docusers') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'"
                             active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-calendar-alt"></i>
                             <p>
