@@ -311,51 +311,25 @@ class DocumentController extends Controller
         $userlogin = Auth::user();
         $user = User::find($userlogin ->id);
         $employee = $user->employee;
+        $empStatus = $employee->employment_status;
 
-        $directory = 'documents/' . $employee->nip;
-        $files = Storage::disk('privatedisk')->allFiles($directory);
+        $empDocs = EmpDocument::where('id_employee', $employee->id)->get();
 
-        // Remove the directory prefix from each file path
-        $filesWithoutPrefix = array_map(function ($file) use ($directory) {
-            return str_replace($directory . '/', '', $file);
-        }, $files);
+        foreach ($empDocs as $key => $doc) {
 
-        return $filesWithoutPrefix;
-        return 'return before foreach';
+            $docType = DocType::where('id', $doc->id_doc_type)->first();
+            if($docType->status != $empStatus) {
+                $docTypeNew = DocType::where([
+                    'label' => $docType->label,
+                    'status' => $empStatus
+                ])->first();
 
-        foreach ($filesWithoutPrefix as $key => $fileName) {
-            $exploded = explode('_', $fileName);
-            $length = count($exploded);
-
-            $label = $exploded[0];
-            $param = ($length == 3) ? $exploded[1] : null;
-            $docType = DocType::where('label', $label)->first();
-            if($docType) {
-                $docTypeId = $docType->id;
-            } else {
-                continue;
+                if($docTypeNew){
+                    $doc->update([
+                        'id_doc_type' => $docTypeNew->id
+                    ]);
+                }
             }
-            
-            // EmpDocument::firstOrCreate([
-            //     'id_employee' => $employee->id,
-            //     'id_doc_type' => $docTypeId,
-            //     'parameter' => $param,
-            //     'file_path' => $directory . '/' . $fileName,
-            //     'file_name' => $fileName,
-            //     'status' => 'Approved',
-            // ]);
-            EmpDocument::updateOrCreate(
-                [
-                    'id_employee' => $employee->id,
-                    'id_doc_type' => $docType->id,
-                    'parameter'   => $param,
-                ],
-                [
-                    'file_path' => $directory.'/'.$fileName, // simpan path relatif di Drive
-                    'file_name' => $fileName,
-                    'status'    => 'Approved',
-                ]
-            );
         }
 
         $user->update([
@@ -366,5 +340,70 @@ class DocumentController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    // public function syncFiles()
+    // {
+    //     $userlogin = Auth::user();
+    //     $user = User::find($userlogin ->id);
+    //     $employee = $user->employee;
+
+    //     $directory = 'documents/' . $employee->nip;
+    //     $files = Storage::disk('privatedisk')->allFiles($directory);
+
+    //     // Remove the directory prefix from each file path
+    //     $filesWithoutPrefix = array_map(function ($file) use ($directory) {
+    //         return str_replace($directory . '/', '', $file);
+    //     }, $files);
+
+    //     return $filesWithoutPrefix;
+    //     return 'return before foreach';
+
+    //     foreach ($filesWithoutPrefix as $key => $fileName) {
+    //         $exploded = explode('_', $fileName);
+    //         $length = count($exploded);
+
+    //         $label = $exploded[0];
+    //         $param = ($length == 3) ? $exploded[1] : null;
+    //         $docType = DocType::where([
+    //             'label' => $label,
+    //             'status' => $employee->employment_status
+    //         ])->first();
+
+    //         if($docType) {
+    //             $docTypeId = $docType->id;
+    //         } else {
+    //             continue;
+    //         }
+            
+    //         // EmpDocument::firstOrCreate([
+    //         //     'id_employee' => $employee->id,
+    //         //     'id_doc_type' => $docTypeId,
+    //         //     'parameter' => $param,
+    //         //     'file_path' => $directory . '/' . $fileName,
+    //         //     'file_name' => $fileName,
+    //         //     'status' => 'Approved',
+    //         // ]);
+    //         EmpDocument::updateOrCreate(
+    //             [
+    //                 'id_employee' => $employee->id,
+    //                 'id_doc_type' => $docType->id,
+    //                 'parameter'   => $param,
+    //             ],
+    //             [
+    //                 'file_path' => $directory.'/'.$fileName, // simpan path relatif di Drive
+    //                 'file_name' => $fileName,
+    //                 'status'    => 'Approved',
+    //             ]
+    //         );
+    //     }
+
+    //     $user->update([
+    //         'docs_update_state' => true,
+    //     ]);
+    //     $employee = $user->employee;
+    //     $employee->update(['docs_progress_state' => true]);
+
+    //     return response()->json(['success' => true]);
+    // }
 
 }
