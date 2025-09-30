@@ -320,6 +320,7 @@ class DocumentController extends Controller
             return str_replace($directory . '/', '', $file);
         }, $files);
 
+        return $filesWithoutPrefix;
         return 'return before foreach';
 
         foreach ($filesWithoutPrefix as $key => $fileName) {
