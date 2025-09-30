@@ -68,7 +68,7 @@
                             </span>
                         </template>
                         <template v-else>
-                          <span v-if="file.status !== 'Approved' || authUserStore.user.role == 'SUPERADMIN'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                          <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
                             Perbarui
                           </span>
                         </template>
@@ -105,7 +105,7 @@
 
   <!-- Preview Modal -->
   <PreviewModal v-if="previewUrl" :preview-url="previewUrl" :selected-preview-file="selectedPreviewFile"
-    :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError"
+    :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError" :isApprovedPreview="isApprovedPreview"
     @close="previewUrl = null; selectedPreviewFile = null; vervalLogs = [];" />
 
   <!-- Upload Modal -->
@@ -148,7 +148,7 @@
 
               <div class="input-group mb-3">
                 <input v-model="uploadForm.parameter" type="text" class="form-control" required @keydown.prevent
-                  placeholder="Pilih parameter dari tombol di atas">
+                  placeholder="Pilih parameter dari tombol di atas" readonly>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
                 </div>
@@ -234,6 +234,8 @@ const vervalLogs = ref([]);
 const isLoadingVerval = ref(false);
 const isEditMode = ref(false); // true = edit, false = upload baru
 const existingFileUrl = ref(''); // e.g. '/storage/docs/123456.pdf'
+const isApprovedPreview = ref(false);
+
 
 
 const showUploadModal = ref(false);
@@ -300,7 +302,7 @@ const fetchVervalLog = async (fileId) => {
 const fetchData = async () => {
   console.log('eh kepanggil fetchdata didalam');
   // const docsRes = await axios.get('/api/my-documents');
-
+  isLoading.value = true;
   await masterDataStore.getDoctypeList();
   await authUserStore.getMyDocuments();
   const doctypeList = masterDataStore.doctypeList;
@@ -328,7 +330,10 @@ const fetchData = async () => {
         doc_type_text: doctype.text,
       }))
     };
+
   });
+
+  isLoading.value = false;
 };
 
 const toggleExpand = (doctype) => {
@@ -341,10 +346,13 @@ const previewFile = async (file) => {
   console.log('file');
   console.log(file);
 
+  isApprovedPreview.value = (file.status === 'Approved'); // 👈 simpan status
+
   if(file.status == 'Approved') {
 
     pdfError.value = false;
     selectedPreviewFile.value = file;
+    isApprovedPreview.value = (file.status === 'Approved'); // 👈 simpan status
 
     const path = file?.file_path;
     if (!path) { pdfError.value = true; return; }

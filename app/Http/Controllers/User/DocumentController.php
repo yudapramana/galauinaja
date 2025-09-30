@@ -137,9 +137,10 @@ class DocumentController extends Controller
         $document->doc_date = $request->doc_date;
         $document->parameter = $request->parameter;
         $document->file_path = $filePath;
-        if (isset($request->user_id)) {
-            $document->status = 'Approved';
-        }
+        // if (isset($request->user_id)) {
+        //     $document->status = 'Approved';
+        // }
+        $document->status = 'Pending';
         $document->save();
 
         // Simpan ke verval_logs
@@ -279,7 +280,8 @@ class DocumentController extends Controller
 
         // Update metadata
         $document->parameter = $request->parameter;
-        $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
+        // $document->status = isset($request->user_id) ? 'Approved' : 'Pending';
+        $document->status = 'Pending';
         $document->verif_notes = null;
         $document->save();
 
@@ -306,10 +308,12 @@ class DocumentController extends Controller
         ]);
     }
 
-    public function syncFiles()
+    public function syncFiles(Request $request)
     {
-        $userlogin = Auth::user();
-        $user = User::find($userlogin ->id);
+        // Ambil user_id dari request, kalau tidak ada gunakan Auth::id()
+        $user_id = $request->input('user_id', Auth::id());
+
+        $user = User::findOrFail($user_id);
         $employee = $user->employee;
         $empStatus = $employee->employment_status;
 

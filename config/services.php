@@ -39,6 +39,13 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
+    'kirimi' => [
+        'base_uri'  => env('KIRIMI_BASE_URI', 'https://api.kirimi.id'),
+        'user_code' => env('KIRIMI_USER_CODE'),
+        'device_id' => env('KIRIMI_DEVICE_ID'),
+        'secret'    => env('KIRIMI_SECRET'),
+        'timeout'   => (int) env('KIRIMI_TIMEOUT', 15),
+    ],
     
 
 

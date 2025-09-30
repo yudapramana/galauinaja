@@ -19,6 +19,7 @@ use App\Http\Controllers\PublicDocController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\User\DocumentController;
 use App\Http\Controllers\User\EmployeeDocumentController;
+use App\Http\Controllers\WhatsAppController;
 use App\Models\DocType;
 use App\Models\EmpDocument;
 use App\Models\Employee;
@@ -28,6 +29,8 @@ use Illuminate\Support\Facades\Route;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use Illuminate\Support\Facades\Storage;
 use Yaza\LaravelGoogleDriveStorage\Gdrive;
+use App\Http\Controllers\Auth\PasswordResetWhatsappController;
+
 
 
 /*
@@ -40,6 +43,15 @@ use Yaza\LaravelGoogleDriveStorage\Gdrive;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/password/wa/request', [PasswordResetWhatsappController::class, 'showRequestForm'])->name('password.wa.request');
+Route::get('/password/wa/reset',   [PasswordResetWhatsappController::class, 'showResetForm'])->name('password.wa.reset');
+Route::post('/password/wa/reset',  [PasswordResetWhatsappController::class, 'resetPassword'])->name('password.wa.reset.submit');
+
+
+Route::post('/wa/send', [WhatsAppController::class, 'send']);
+Route::get('/wa/sendget', [WhatsAppController::class, 'sendGet']);
+
 
 Route::get('/show-pending-documents', function() {
 

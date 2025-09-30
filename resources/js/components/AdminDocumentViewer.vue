@@ -20,14 +20,18 @@
                     <div class="input-group mb-3">
                         <input type="text" v-model="searchQuery" class="form-control" placeholder="Cari dokumen...">
                         <div class="input-group-append">
+                            <button :disabled="isLoading" class="btn btn-outline-secondary" type="button" @click="refreshData">
+                                <!-- <i class="fas fa-sync"></i> -->
+                                <i v-if="isLoading" class="fa fa-spinner fa-spin mr-1"></i>
+                                <i v-else class="fas fa-sync"></i>
+
+                            </button>
                             <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
                         </div>
                     </div>
 
-                    <div v-if="isLoading" class="text-center p-5">
-                        <div class="spinner-border text-primary mb-2" role="status"></div>
-                        <div class="text-muted">Memuat dokumen...</div>
-                    </div>
+                    <!-- Loading State -->
+                    <LoadingState v-if="isLoading" />
 
                     <div v-else-if="filteredTree.length" class="tree">
                         <ul class="list-unstyled mb-0">
@@ -39,6 +43,7 @@
                                             class="mr-2"></i>
                                         <span class="ml-2 font-weight-bold">
                                             {{ index + 1 }}. {{ doctype.text }}
+                                            <span class="text-warning" v-show="doctype.mandatory == 1">*</span>
                                             <span class="badge badge-pill badge-primary ml-2">{{ doctype.files.length
                                             }}</span>
                                         </span>
@@ -48,19 +53,23 @@
                                 </div>
 
                                 <ul v-show="doctype.expanded" class="pl-4 mt-1">
+
                                     <li v-for="file in doctype.files" :key="file.id"
                                         class="cursor-pointer p-1 rounded hover-bg-light small">
                                         <div class="d-flex align-items-center justify-content-between w-100">
-                                            <div @click="previewFile(file)" class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center">
                                                 <i class="fas fa-file-pdf text-danger mr-2"></i>
-                                                <span>{{ file.file_name }}</span>
+                                                <span @click="previewFile(file)">{{ file.file_name }}</span>
                                                 <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
                                                     {{ file.status || 'Pending' }}
                                                 </span>
+                                                <span v-if="file.status !== 'Approved'" class="badge badge-sm badge-primary ml-2"  @click="reuploadFile(file, doctype)">
+                                                    Perbarui
+                                                </span>
                                             </div>
-                                            <button v-if="file.status === 'Rejected'"
+                                            <!-- <button v-if="file.status === 'Rejected'"
                                                 class="btn btn-sm btn-outline-danger ml-2"
-                                                @click="reuploadFile(file, doctype)">Reupload</button>
+                                                @click="reuploadFile(file, doctype)">Reupload</button> -->
                                         </div>
                                         <div v-if="file.status === 'Rejected' && file.verif_notes"
                                             class="text-danger mt-1 ml-4 small">
@@ -84,97 +93,18 @@
     </section>
 
     <!-- Preview Modal -->
-    <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title">📄 Preview Dokumen</h5>
-                    <button type="button" class="close"
-                        @click="previewUrl = null; selectedPreviewFile = null"><span>&times;</span></button>
-                </div>
-                <div class="modal-body p-3">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <table class="table table-sm table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 40%">Tipe Dokumen</th>
-                                        <td>{{ selectedPreviewFile?.doc_type_text || '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Nomor Dokumen</th>
-                                        <td>{{ selectedPreviewFile?.doc_number || '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Tanggal Dokumen</th>
-                                        <td>{{ selectedPreviewFile?.doc_date || '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <td>{{ selectedPreviewFile?.parameter || '—' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Status</th>
-                                        <td>
-                                            <span class="badge" :class="badgeClass(selectedPreviewFile?.status)">
-                                                {{ selectedPreviewFile?.status || 'Pending' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="selectedPreviewFile?.verif_notes">
-                                        <th>Catatan Verifikator</th>
-                                        <td class="text-danger">{{ selectedPreviewFile.verif_notes }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <!-- <div class="col-md-12 mt-4"> -->
-                            <h6 class="text-secondary mb-2">
-                                <i class="fas fa-clipboard-check mr-1"></i> Riwayat Verifikasi
-                            </h6>
-
-                            <div v-if="isLoadingVerval" class="text-muted small d-flex align-items-center">
-                                <i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...
-                            </div>
-
-                            <ul v-else-if="vervalLogs.length" class="list-group list-group-unbordered small mb-2">
-                                <li v-for="(log, idx) in vervalLogs" :key="idx" class="list-group-item py-2 px-2"
-                                    style="line-height: 1.4;">
-                                    <div>
-                                        <span class="font-weight-bold text-sm">{{ log.status }}</span>
-                                        <span class="text-muted mx-1">oleh</span>
-                                        <span class="font-italic text-sm">{{ log.verifier_name }}</span>
-                                        <small class="text-muted"> pada {{ log.verified_at }}</small>
-                                    </div>
-                                    <div v-if="log.notes" class="text-danger mt-1 small">
-                                        <i class="fas fa-comment-dots mr-1"></i>{{ log.notes }}
-                                    </div>
-                                </li>
-                            </ul>
-
-                            <div v-else class="text-muted small">Tidak ada log verifikasi.</div>
-                        </div>
-                        <!-- </div> -->
-                        <div class="col-md-6">
-                            <iframe :src="`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`" class="w-100"
-                                style="height: 70vh; border: 1px solid #ccc;"></iframe>
-                        </div>
-
-
-
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <PreviewModal v-if="previewUrl" :preview-url="previewUrl" :selected-preview-file="selectedPreviewFile"
+        :is-loading-verval="isLoadingVerval" :vervalLogs="vervalLogs" :pdfError="pdfError"
+        @close="previewUrl = null; selectedPreviewFile = null; vervalLogs = [];" />
 
     <!-- Modal Upload -->
     <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
                 <div class="modal-header">
-                    <h5 class="modal-title">Upload Dokumen Pegawai: {{ selectedDoctype?.text }}</h5>
+                    <h5 class="modal-title">
+                        {{ isEditMode ? 'Edit Dokumen Pegawai' : 'Upload Dokumen Pegawai' }} <!--: {{ selectedDoctype?.text }} -->
+                    </h5>
                     <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
                 </div>
 
@@ -189,34 +119,23 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Nomor Dokumen</label>
-                            <input v-model="uploadForm.doc_number" type="text" class="form-control" required autofocus>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tanggal Dokumen</label>
-                            <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-                        </div>
-
-                        <div class="form-group">
-
                             <label>Pilih Parameter (Opsional)</label><br>
                             <div class="btn-group mb-2 flex-wrap">
                                 <button v-for="item in masterDataStore.docParameters" :key="item" type="button"
-                                    class="btn btn-xs btn-outline-secondary mb-1"
-                                    :class="{ active: uploadForm.parameter === item }"
-                                    @click="uploadForm.parameter = item">
-                                    {{ item }}
+                                class="btn btn-xs btn-outline-secondary mb-1" :class="{ active: uploadForm.parameter === item }"
+                                @click="uploadForm.parameter = item">
+                                {{ item }}
                                 </button>
                             </div>
 
                             <div class="input-group mb-3">
-                                <input v-model="uploadForm.parameter" type="text" class="form-control" readonly>
+                                <input v-model="uploadForm.parameter" type="text" class="form-control" required @keydown.prevent
+                                placeholder="Pilih parameter dari tombol di atas" readonly>
                                 <div class="input-group-append">
-                                    <button type="button" class="btn btn-info"
-                                        @click="uploadForm.parameter = ''">Reset</button>
+                                <button type="button" class="btn btn-info" @click="uploadForm.parameter = ''">Reset</button>
                                 </div>
                             </div>
+
                             <small class="form-text text-muted mb-2">
                                 <strong>Info:</strong> Gunakan parameter diatas jika dokumen pada tipe ini bersifat
                                 multiple atau lebih dari
@@ -230,20 +149,27 @@
 
 
 
-                        <!-- <input @change="handleFileChange" type="file" class="form-control"
-                accept="application/pdf" required> -->
+                       
                         <div class="form-group">
-                            <label>Pilih File (PDF)</label>
+                            <label>File Dokumen (PDF)</label>
+
+                            <!-- Tampilkan file lama jika sedang edit -->
+                            <div v-if="isEditMode && existingFileUrl" class="mb-2">
+                                <a :href="existingFileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-file-pdf"></i> Lihat Dokumen Lama
+                                </a>
+                                <br />
+                                <small class="text-muted">Jika tidak ingin mengganti file, biarkan kosong.</small>
+                            </div>
+
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="exampleInputFile"
-                                    accept="application/pdf" @change="handleFileChange" required>
-                                <label class="custom-file-label" for="exampleInputFile">
-                                    {{ uploadForm.fileName || 'Pilih file' }}
+                                <input type="file" class="custom-file-input" id="fileInput" accept="application/pdf"
+                                @change="handleFileChange" :required="!isEditMode">
+                                <label class="custom-file-label" for="fileInput">
+                                {{ uploadForm.fileName || 'Pilih file' }}
                                 </label>
                             </div>
                         </div>
-
-
 
                         <div v-if="loadingUpload" class="mb-3">
                             <div class="progress" style="height: 20px;">
@@ -264,71 +190,14 @@
                             <i class="fas fa-spinner fa-spin"></i> Uploading...
                         </span>
                         <span v-else>
-                            Upload
+                            {{ isEditMode ? 'Simpan Perubahan' : 'Upload' }}
                         </span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- <div v-if="showUploadModal" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Upload Dokumen: {{ selectedDoctype?.text }}</h5>
-                    <button type="button" class="close" @click="closeUploadModal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <form @submit.prevent="submitUpload">
-                        <input type="hidden" :value="selectedDoctype?.id" />
-
-                        <div class="form-group">
-                            <label>Tipe Dokumen</label>
-                            <input type="text" class="form-control" :value="selectedDoctype?.text" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nomor Dokumen</label>
-                            <input v-model="uploadForm.doc_number" type="text" class="form-control" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tanggal Dokumen</label>
-                            <input v-model="uploadForm.doc_date" type="date" class="form-control" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Parameter (Opsional)</label>
-                            <input v-model="uploadForm.parameter" type="text" class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Pilih File (PDF)</label>
-                            <input @change="handleFileChange" type="file" class="form-control" accept="application/pdf"
-                                required>
-                        </div>
-
-                        <div v-if="loadingUpload" class="mb-3">
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                    :class="progressBarColor" role="progressbar"
-                                    :style="{ width: uploadProgress + '%' }">
-                                    {{ uploadProgress }}%
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-right">
-                            <button type="submit" class="btn btn-primary" :disabled="loadingUpload">
-                                <span v-if="loadingUpload"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>
-                                <span v-else>Upload</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div> -->
+    
 </template>
 
 <script setup>
@@ -338,6 +207,8 @@ import Swal from 'sweetalert2';
 import { useMasterDataStore } from '../stores/MasterDataStore';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '../stores/AuthUserStore';
+import LoadingState from '../pages/docs/LoadingState.vue';
+import PreviewModal from '../pages/docs/PreviewModal.vue';
 
 const authUserStore = useAuthUserStore();
 
@@ -361,6 +232,20 @@ const uploadProgress = ref(0);
 const fullName = ref('');
 const vervalLogs = ref([]);
 const isLoadingVerval = ref(false);
+const isEditMode = ref(false); // true = edit, false = upload baru
+const existingFileUrl = ref(''); // e.g. '/storage/docs/123456.pdf'
+
+const pdfFrame = ref(null);
+const pdfError = ref(false);
+const onIframeLoad = () => {
+  // Iframe load berhasil
+  pdfError.value = false;
+};
+
+const onIframeError = () => {
+  // Jika iframe gagal load
+  pdfError.value = true;
+};
 
 const uploadForm = ref({
     doc_number: '',
@@ -387,18 +272,23 @@ const fetchData = async () => {
 
     treeData.value = doctypeList.map((doctype) => {
         const relatedFiles = uploadedDocs.filter(doc =>
-            doc.id_doc_type === doctype.id || doc.doc_type_id === doctype.id
-        ).sort((a, b) => a.file_name.localeCompare(b.file_name));
+            doc.id_doc_type === doctype.id ||
+            doc.doc_type_id === doctype.id ||
+            doc.doc_type === doctype.id
+            ).sort((a, b) => a.file_name.localeCompare(b.file_name)); // Urutkan berdasarkan nama
 
         return {
             id: doctype.id,
             text: doctype.text,
+            mandatory: doctype.mandatory,
+            multiple: doctype.multiple,
             expanded: true,
             files: relatedFiles.map(file => ({
                 ...file,
-                doc_type_text: doctype.text
+                doc_type_text: doctype.text,
             }))
         };
+
     });
 
     isLoading.value = false;
@@ -407,8 +297,10 @@ const fetchData = async () => {
 const refreshSingleFolder = async (id) => {
     const uploadedDocs = await getDocumentsByUserId(props.userId);
     const relatedFiles = uploadedDocs.filter(doc =>
-        doc.id_doc_type === id || doc.doc_type_id === id
-    ).sort((a, b) => a.file_name.localeCompare(b.file_name));
+        doc.id_doc_type === id ||
+        doc.doc_type_id === id ||
+        doc.doc_type === id
+    ).sort((a, b) => a.file_name.localeCompare(b.file_name)); // Tetap diurutkan
 
     const folder = treeData.value.find(f => f.id === id);
     if (folder) folder.files = relatedFiles;
@@ -454,14 +346,63 @@ const fetchVervalLog = async (fileId) => {
     }
 };
 
+const buildPreviewUrl = (path) => `/api/preview/pdf?path=${encodeURI(path)}`;
+
 const previewFile = async (file) => {
+  console.log('file');
+  console.log(file);
+
+  if(file.status == 'Approved') {
+
+    pdfError.value = false;
     selectedPreviewFile.value = file;
-    previewUrl.value = file.file_url;
-    await fetchVervalLog(file.id);
+
+    const path = file?.file_path;
+    if (!path) { pdfError.value = true; return; }
+
+    previewUrl.value = buildPreviewUrl(path);
+    
+  } else {
+    pdfError.value = false;
+      selectedPreviewFile.value = file;
+      previewUrl.value = file.file_url;
+      try {
+        const res = await fetch(file.file_url, { method: 'HEAD' });
+
+        if (!res.ok) {
+          if (res.status === 404) {
+            pdfError.value = 'not_found';
+          } else {
+            pdfError.value = true;
+          }
+          return;
+        }
+
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('pdf')) {
+          pdfError.value = true;
+        }
+      } catch (err) {
+        pdfError.value = true;
+      }
+  } 
+  
+  await fetchVervalLog(file.id);
+};
+
+const refreshData = async () => {
+  isLoading.value = true;
+  await authUserStore.syncFilesIndividual(props.userId);
+  await authUserStore.getDocsUpdateState();
+  console.log('eh kepanggil fetchdata didalam onMounted Doclist');
+  await fetchData();
+  isLoading.value = false;
 };
 
 const openUploadModal = (doctype) => {
     selectedDoctype.value = doctype;
+    isEditMode.value = false; // matikan mode edit
+    existingFileUrl.value = '';
     showUploadModal.value = true;
     uploadForm.value = {
         doc_number: '',
@@ -473,19 +414,35 @@ const openUploadModal = (doctype) => {
 };
 
 const reuploadFile = (file, doctype) => {
-    selectedDoctype.value = doctype;
-    showUploadModal.value = true;
-    uploadForm.value = {
-        doc_number: file.doc_number || '',
-        doc_date: file.doc_date || '',
-        parameter: file.parameter || '',
-        file: null,
-        file_id: file.id
-    };
+  selectedDoctype.value = doctype;
+  showUploadModal.value = true;
+  isEditMode.value = true; // aktifkan mode edit
+
+  // Set file yang sedang diedit
+  existingFileUrl.value = file.file_url || ''; // gunakan URL file lama untuk preview
+  uploadForm.value = {
+    doc_number: file.doc_number || '',
+    doc_date: file.doc_date || '',
+    parameter: file.parameter || '',
+    file: null,               // file baru, jika ada
+    file_id: file.id          // ID file lama untuk keperluan update (PATCH)
+  };
+
+  console.log('uploadForm');
+  console.log(uploadForm);
 };
 
 const closeUploadModal = () => {
     showUploadModal.value = false;
+    isEditMode.value = false;
+    uploadForm.value = {
+        doc_number: '',
+        doc_date: '',
+        parameter: '',
+        file: null,
+        file_id: null
+    };
+    existingFileUrl.value = '';
 };
 
 const handleFileChange = (e) => {
@@ -535,19 +492,35 @@ const submitUpload = async () => {
             });
         }
 
-        Swal.fire({ icon: 'success', title: 'Upload Berhasil', timer: 1500 });
+        Swal.fire({
+            icon: 'success',
+            title: uploadForm.value.file_id 
+                ? 'Dokumen berhasil diperbarui. Perubahan akan tampil dalam 1–2 menit, mohon tunggu sebentar.'
+                : 'Dokumen berhasil diupload. Perubahan akan tampil dalam 1–2 menit, mohon tunggu sebentar.',
+            showConfirmButton: false,
+            timer: 2000
+        });
         await refreshSingleFolder(selectedDoctype.value.id);
         closeUploadModal();
     } catch (error) {
-        const msg = error.response?.data?.message || 'Terjadi kesalahan.';
-        Swal.fire({ icon: 'error', title: 'Upload Gagal', text: msg });
+        let message = 'Terjadi kesalahan saat mengupload file.';
+        if (error.response?.status === 422 && error.response.data.errors) {
+            const errors = error.response.data.errors;
+            message = Object.values(errors).flat().join('\n');
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Upload Gagal',
+            text: message
+        });
     } finally {
         loadingUpload.value = false;
         uploadProgress.value = 0;
     }
 };
 
-// onMounted(fetchData);
+onMounted(fetchData);
 watch(() => props.userId, fetchData);
 </script>
 

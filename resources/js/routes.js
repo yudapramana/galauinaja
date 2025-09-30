@@ -11,6 +11,11 @@ export default [
     component: () => import('./pages/auth/Login.vue'),
   },
   {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('./pages/auth/ResetPassword.vue') // sesuaikan path
+  },
+  {
     path: '/admin',
     meta: { requiresAdmin: true },
     children: [

@@ -10,6 +10,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
+use App\Notifications\CustomResetPasswordNotification;
+
 
 
 class User extends Authenticatable
@@ -172,5 +174,13 @@ class User extends Authenticatable
         } catch (\Throwable $e) {
             return true;
         }
+    }
+
+    /**
+     * Send the password reset notification.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPasswordNotification($token));
     }
 }

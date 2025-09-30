@@ -50,6 +50,7 @@
                     menyimpan, dan menelusuri arsip digital pegawai sesuai standar keamanan & kepatuhan.
                 </p>
                 <div class="d-flex gap-2 flex-wrap">
+                    <a href="/login" class="btn btn-success px-4">Masuk</a>
                     <a href="#tentang" class="btn btn-success px-4">Pelajari SIGARDA</a>
                     <a href="/privacy-policy" class="btn btn-outline-success px-4">Kebijakan Privasi</a>
                 </div>

@@ -64,6 +64,17 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         }
     };
 
+    const syncFilesIndividual = async (user_id = null) => {
+        try {
+            const response = await axios.get('/api/sync-files', {
+                params: user_id ? { user_id } : {} // kirim kalau ada
+            });
+            return response.data;
+        } catch (error) {
+            handleAuthError(error);
+        }
+    };
+
     const getMyDocuments = async () => {
         try {
             console.log('getMyDocuments Running');
@@ -169,7 +180,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
             await axios.get('/sanctum/csrf-cookie');
             // router.push('/login');
-            window.location.href = '/landing';
+            window.location.href = '/';
         } catch (error) {
             console.error("Logout gagal:", error);
         } finally {
@@ -231,6 +242,7 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         getDocumentsByUserId,
         logout,
         switchLayout,
-        handleAuthError
+        handleAuthError,
+        syncFilesIndividual
     };
 });

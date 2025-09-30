@@ -168,14 +168,30 @@ const handleSubmit = async () => {
 
                         </div>
 
+                        <!-- Tombol/Link Reset Password -->
+                        <!-- <div class="row">
+                            <div class="col-12">
+                            Lupa Password?
+
+                            <router-link
+                                
+                                :to="{ name: 'reset-password' }"
+                            >Reset Disini
+                            </router-link>
+                            </div>
+                        </div> -->
+
 
 
                     </form>
 
-                    <p class="mb-1">
+                    <p class="mb-0">
+                        Lupa Password?
                         <a href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya"
-                            target="_blank">Lupa Password? <br> Hubungi Admin Satker</a>
+                            target="_blank"> Reset Disini</a>
                     </p>
+                    <a class="text-sm text-muted" href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya"
+                            target="_blank"> Administrator</a>
                 </div>
             </div>
         </div>

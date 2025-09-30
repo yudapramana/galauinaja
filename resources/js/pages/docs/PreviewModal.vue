@@ -2,13 +2,24 @@
     <div v-if="previewUrl" class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true" id="preview-modal">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title">📄 Preview Dokumen</h5>
+                <div class="modal-header p-2" :class="isApprovedPreview ? 'bg-success' : 'bg-secondary'">
+                    <!-- <h5 class="modal-title">📄 Preview Dokumen</h5> -->
+                     <!-- <h5 class="modal-title">
+                        📄 {{ isApprovedPreview ? 'Dokumen Disetujui' : 'Dokumen Diajukan' }}
+                    </h5> -->
+                    <span v-if="isApprovedPreview">
+                        <span style="font-size:x-large !important;">Dokumen Disetujui</span> 
+                        <span class="badge bg-success ms-2">File tersimpan di GCloud Bucket Storage</span>
+                    </span>
+                    <span v-else>
+                        <span style="font-size:x-large !important;">Dokumen Diajukan</span> 
+                        <span class="badge bg-warning ms-2">Menunggu Persetujuan</span>
+                    </span>
                     <button type="button" class="close" @click="$emit('close')"><span>&times;</span></button>
                 </div>
                 <div class="modal-body p-3">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3" >
                             <table class="table table-sm table-bordered">
                                 <tbody>
                                     <tr>
@@ -97,6 +108,7 @@ const props = defineProps({
     isLoadingVerval: Boolean,
     vervalLogs: Array,
     pdfError: Boolean,
+    isApprovedPreview: Boolean
 });
 
 const emits = defineEmits(['close']);
