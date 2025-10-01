@@ -187,11 +187,11 @@ const handleSubmit = async () => {
 
                     <p class="mb-0">
                         Lupa Password?
-                        <a href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya"
+                        <a href="/password/wa/request"
                             target="_blank"> Reset Disini</a>
                     </p>
                     <a class="text-sm text-muted" href="https://wa.me/6282298476941?text=Halo%2C%20saya%20ingin%20bertanya"
-                            target="_blank"> Administrator</a>
+                            target="_blank">Tanya admin?</a>
                 </div>
             </div>
         </div>
