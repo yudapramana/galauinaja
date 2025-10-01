@@ -151,19 +151,19 @@ const buildJsTree = async () => {
 
             // helper warna progress
             const progressClass = (p) => {
-              if (p >= 80) return 'progress-bar-success';
-              if (p >= 60) return 'progress-bar-info';
-              if (p >= 40) return 'progress-bar-warning';
-              return 'progress-bar-danger';
+              if (p >= 80) return 'bg-success';
+              if (p >= 60) return 'bg-info';
+              if (p >= 40) return 'bg-warning';
+              return 'bg-danger';
             };
 
             // employees on-demand (dengan tombol Dokumen)
             const employees = await fetchEmployees(unitId);
             const employeeNodes = employees.map(emp => {
-            const progress = Number(emp.progress_dokumen ?? 0);
-            const progressStr = progress.toFixed(2);
-            const safeName = escapeHtml(emp.full_name);
-            const barCls = progressClass(progress);
+              const progress = Number(emp.progress_dokumen ?? 0);
+              const progressStr = progress.toFixed(2);
+              const safeName = escapeHtml(emp.full_name);
+              const barCls = progressClass(progress);
 
               return {
                 id: `emp-${unitId}-${emp.id}`,
