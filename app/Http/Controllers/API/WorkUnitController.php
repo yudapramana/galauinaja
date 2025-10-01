@@ -33,7 +33,7 @@ class WorkUnitController extends Controller
         $query = Employee::query()
             ->select([
                 'id',
-                // 'nip',
+                'nip',
                 'full_name',
                 // 'job_title',
                 // 'employment_status',
@@ -45,7 +45,8 @@ class WorkUnitController extends Controller
             ])
             ->where('id_work_unit', $id)
             ->whereNull('deleted_at') // softDeletes filter
-            ->orderBy('progress_dokumen', 'DESC');
+            ->orderByDesc('progress_dokumen')     // 1st key
+            ->orderBy('nip', 'ASC');        // 2nd key
 
         if ($perPage > 0) {
             $paginator = $query->paginate($perPage);
