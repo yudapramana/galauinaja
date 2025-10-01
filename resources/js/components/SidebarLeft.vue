@@ -98,47 +98,12 @@ const logout = () => {
                             </p>
                         </router-link>
                     </li>
-                    <!-- <li class="nav-item">
-                        <router-link to="/admin/reports" :class="$route.path.startsWith('/admin/reports') ? 'active' : ''"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Laporan Kerja
-                            </p>
-                        </router-link>
-                    </li> -->
-                    <!-- <li class="nav-item">
-                        <router-link to="/admin/profile" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-user"></i>
-                            <p>
-                                Profil
-                            </p>
-                        </router-link>
-                    </li> -->
-
-
-                    <!-- <li v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'" class="nav-header">SATUAN KERJA</li>
-                    <li v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'" class="nav-item">
-                        <router-link to="/admin/org-reports" :class="$route.path.startsWith('/admin/org-reports') ? 'active' : ''"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Laporan Kerja
-                            </p>
-                        </router-link>
-                    </li> -->
+                    
 
 
                     <li class="nav-header">KELOLA</li>
 
-                    <!-- <li class="nav-item" v-if="authUserStore.user.role == 'SUPERADMIN'">
-                        <router-link to="/admin/organizations" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-cog"></i>
-                            <p>
-                                Satuan kerja
-                            </p>
-                        </router-link>
-                    </li> -->
+                    
                     <li class="nav-item">
                         <router-link to="/admin/workunits" :class="$route.path.startsWith('/admin/workunits') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'"
                             active-class="active" class="nav-link">

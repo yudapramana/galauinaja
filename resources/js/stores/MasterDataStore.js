@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useLoadingStore } from "./LoadingStore";
 import { useStorage } from '@vueuse/core';
 import { useAuthUserStore } from "./AuthUserStore.js";
@@ -13,10 +13,30 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
     const userList = useStorage('MasterDataStore:userList', ref({}));
     const doctypeList = useStorage('MasterDataStore:doctypeList', ref([]));
     const workunitList = useStorage('MasterDataStore:workunitList', ref([]));
+    const workUnitMonitorList = useStorage('MasterDataStore:workUnitMonitorList', ref([]));
     const docParameters = useStorage('MasterDataStore:docParameters', ref([1, 2, 3, 4, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3', 'IIa', 'IIb', 'IIc', 'IId', 'IIIa', 'IIIb', 'IIIc', 'IIId', 'IVa', 'IVb', 'Suami', 'Istri']));
 
     const loadingStore = useLoadingStore();
     const authUserStore = useAuthUserStore();
+
+    const getWorkUnitMonitorList = async () => {
+
+        console.log('getWorkUnitMonitorList start');
+        if (workUnitMonitorList.value.length == 0) {
+            console.log('getWorkUnitMonitorList runned');
+            loadingStore.toggleLoading();
+            await axios.get('/api/work-units/monitor')
+                .then((response) => {
+                    // workUnitMonitorList.value = response.data.data;
+                    workUnitMonitorList.value = response;
+                    loadingStore.toggleLoading();
+                    console.log('workUnitMonitorList hasbeenfetched');
+                }).catch((error) => {
+                    loadingStore.toggleLoading();
+                    authUserStore.handleAuthError(error);
+                });
+        }
+    };
 
     const getWorkunitList = async () => {
 
@@ -85,6 +105,39 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
             });
     };
 
+
+    const employeesCacheByUnit = reactive({});          // { [unitId]: Employee[] }
+
+    // ===== Actions =====
+    function setEmployees(unitId, list) {
+        employeesCacheByUnit[String(unitId)] = Array.isArray(list) ? list : [];
+        // persist ke sessionStorage
+        try {
+        sessionStorage.setItem('empCache', JSON.stringify(employeesCacheByUnit));
+        } catch (_) {}
+    }
+
+    function hydrateEmployeesCache() {
+        try {
+        const raw = sessionStorage.getItem('empCache');
+        if (!raw) return;
+        const parsed = JSON.parse(raw) || {};
+        // reactive-object friendly: assign per-key
+        for (const k of Object.keys(parsed)) {
+            employeesCacheByUnit[k] = parsed[k];
+        }
+        } catch (_) {}
+    }
+
+    function clearEmployeesCache() {
+        for (const k of Object.keys(employeesCacheByUnit)) {
+        delete employeesCacheByUnit[k];
+        }
+        try {
+        sessionStorage.removeItem('empCache');
+        } catch (_) {}
+    }
+
     return {
         orgId,
         userId,
@@ -93,8 +146,16 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         doctypeList,
         workunitList,
         docParameters,
+        workUnitMonitorList,
+        employeesCacheByUnit,
         getUserList,
         getDoctypeList,
-        getWorkunitList
+        getWorkunitList,
+        getWorkUnitMonitorList,
+        // actions
+        setEmployees,
+        hydrateEmployeesCache,
+        getWorkUnitMonitorList,
+        clearEmployeesCache,
     };
 });
