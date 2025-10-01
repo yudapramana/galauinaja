@@ -67,6 +67,10 @@
                 return '0' + p; // kirim 08… ke API kamu; controller akan normalisasi ke 62…
             }
 
+            const csrf =
+                document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                document.querySelector('input[name="_token"]')?.value || '';
+
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 result.innerHTML = '';
@@ -90,8 +94,11 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf, // <— penting untuk web middleware
                         },
+                        credentials: 'same-origin', // <— kirim cookie sesi (wajib)
                         body: JSON.stringify({
                             phone
                         })
