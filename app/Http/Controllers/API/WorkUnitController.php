@@ -43,6 +43,7 @@ class WorkUnitController extends Controller
                 'progress_dokumen',
                 'id_work_unit',
             ])
+            ->where('employment_category', 'ACTIVE')
             ->where('id_work_unit', $id)
             ->whereNull('deleted_at') // softDeletes filter
             ->orderByDesc('progress_dokumen')     // 1st key
