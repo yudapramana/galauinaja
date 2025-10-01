@@ -17,7 +17,15 @@
     <div class="container-fluid">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Monitoring Pegawai</h5>
-        <button class="btn btn-sm btn-primary" @click="reloadTree">Refresh</button>
+        <!-- <button class="btn btn-sm btn-primary" @click="reloadTree">Refresh</button> -->
+          <div class="btn-group">
+           <button class="btn btn-sm btn-primary" @click="reloadTree">
+             Refresh
+           </button>
+           <button class="btn btn-sm btn-outline-secondary" @click="resetTreeView">
+             Reset View
+           </button>
+         </div>
       </div>
 
       <div id="tree-container"></div>
@@ -141,23 +149,42 @@ const buildJsTree = async () => {
             const unitId = node.id;
             const childUnitNodes = getChildUnitNodes(unitId);
 
+            // helper warna progress
+            const progressClass = (p) => {
+              if (p >= 80) return 'progress-bar-success';
+              if (p >= 60) return 'progress-bar-info';
+              if (p >= 40) return 'progress-bar-warning';
+              return 'progress-bar-danger';
+            };
+
             // employees on-demand (dengan tombol Dokumen)
             const employees = await fetchEmployees(unitId);
             const employeeNodes = employees.map(emp => {
-              const progress = Number(emp.progress_dokumen ?? 0).toFixed(2);
-              const safeName = escapeHtml(emp.full_name);
+            const progress = Number(emp.progress_dokumen ?? 0);
+            const progressStr = progress.toFixed(2);
+            const safeName = escapeHtml(emp.full_name);
+            const barCls = progressClass(progress);
+
               return {
                 id: `emp-${unitId}-${emp.id}`,
                 type: 'employee',
                 children: false,
                 // sisipkan HTML: label + tombol "Dokumen" (delegasi klik ke router)
                 text: `
-                  <span class="emp-label">${safeName} — ${progress}%</span>
-                  <a href="#"
-                     class="badge badge-sm badge-info ml-2 js-doc-link"
-                     data-user-id="${emp.id}">
-                     <i class="far fa-folder"></i> dokumen
-                  </a>
+                  <span class="w-100">
+                    <span class="emp-label">${safeName} — ${progress}%</span>
+                    <a href="#"
+                      class="badge badge-sm badge-info ml-2 js-doc-link"
+                      data-user-id="${emp.id}">
+                      <i class="far fa-folder"></i> dokumen
+                    </a>
+                    <div class="progress progress-xxs">
+                      <div class="progress-bar ${barCls} progress-bar-striped" role="progressbar"
+                          aria-valuenow="${progressStr}" aria-valuemin="0" aria-valuemax="100" style="width: ${Math.max(0, Math.min(100, progress))}%">
+                        <span class="sr-only">${progressStr}% Complete</span>
+                      </div>
+                    </div>
+                  </span>
                 `
               };
             });
@@ -225,6 +252,31 @@ const reloadTree = async () => {
   await buildJsTree();
 };
 
+const resetTreeView = async () => {
+  await nextTick();
+  const $tree = $('#tree-container');
+  const inst = $tree.jstree(true);
+  if (!inst) return;
+
+  // 1) hapus state (supaya tidak auto-expand lagi)
+  try { inst.clear_state(); } catch (_) {}
+
+  // 2) tutup semua node + clear selection
+  try {
+    inst.deselect_all(true);
+    inst.close_all('#', 0); // tutup semua (tanpa animasi)
+  } catch (_) {}
+
+  // 3) (opsional) refresh ringan agar DOM bersih dari anak yang sempat diload
+  //    ini tidak memanggil fetch ulang untuk root, hanya redraw.
+  try { inst.redraw(true); } catch (_) {}
+
+  // Catatan: kita tidak menghapus employees cache di store, supaya bila user expand lagi
+  // tampilnya tetap cepat. Jika ingin benar-benar “bersih”, uncomment baris di bawah:
+  // masterDataStore.clearEmployeesCache();
+};
+
+
 
 const masterDataStore = useMasterDataStore();
 
@@ -251,5 +303,8 @@ onMounted(async () => {
 .text-muted { color: #6c757d !important; }
 .text-danger { color: #dc3545 !important; }
 /* Rapikan label pegawai & tombol */
-#tree-container .emp-label { margin-right: .5rem; }
+#tree-container .emp-label { 
+  margin-right: .5rem;
+  width: 100%; 
+}
 </style>
