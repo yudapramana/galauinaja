@@ -14,7 +14,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
     const doctypeList = useStorage('MasterDataStore:doctypeList', ref([]));
     const workunitList = useStorage('MasterDataStore:workunitList', ref([]));
     const workUnitMonitorList = useStorage('MasterDataStore:workUnitMonitorList', ref([]));
-    const docParameters = useStorage('MasterDataStore:docParameters', ref([1, 2, 3, 4, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3', 'IIa', 'IIb', 'IIc', 'IId', 'IIIa', 'IIIb', 'IIIc', 'IIId', 'IVa', 'IVb', 'Suami', 'Istri']));
+    const docParameters = useStorage('MasterDataStore:docParameters', ref([1, 2, 3, 4, 5, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3', 'IIa', 'IIb', 'IIc', 'IId', 'IIIa', 'IIIb', 'IIIc', 'IIId', 'IVa', 'IVb', 'Suami', 'Istri']));
 
     const loadingStore = useLoadingStore();
     const authUserStore = useAuthUserStore();
