@@ -20,7 +20,7 @@
               <button :disabled="isLoading" class="btn btn-outline-secondary" type="button" @click="refreshData">
                 <!-- <i class="fas fa-sync"></i> -->
                 <i v-if="isLoading" class="fa fa-spinner fa-spin mr-1"></i>
-                <i v-else class="fas fa-sync"></i>
+                <span v-else><i  class="fas fa-sync"></i> Sinkron Data</span>
 
               </button>
               <button class="btn btn-outline-secondary" type="button" @click="clearSearch">Reset</button>
