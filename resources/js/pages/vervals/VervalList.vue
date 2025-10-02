@@ -117,10 +117,10 @@
                   </span>
                 </td>
                 <td>
-                  <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
+                  <!-- <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
                     Maintenance
-                  </button>
-                  <button v-else class="btn btn-sm btn-primary mr-1 mb-1" @click="openVerifModal(doc)">
+                  </button> -->
+                  <button class="btn btn-sm btn-primary mr-1 mb-1" @click="openVerifModal(doc)">
                     Verifikasi
                   </button>
 
@@ -254,10 +254,10 @@
                 </div>
 
                 <div class="text-end mt-3">
-                  <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
+                  <!-- <button v-if="settingStore.showMaintenanceBadge" type="button" class="btn btn-warning btn-sm mr-1 mb-1" disabled>
                     Maintenance
-                  </button>
-                  <button v-else type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
+                  </button> -->
+                  <button type="submit" class="btn btn-sm btn-primary" :disabled="isSubmitting">
                     <i v-if="isSubmitting" class="fas fa-spinner fa-spin me-1"></i>
                     Simpan Verifikasi
                   </button>

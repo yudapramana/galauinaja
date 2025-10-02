@@ -54,10 +54,12 @@ onMounted(() => {
                 <div class="col-12 mb-2">
                     <div class="alert alert-warning alert-dismissible fade show " role="alert">
                         <strong>Pemberitahuan Pemeliharaan Sistem</strong><br>
-                        Yth. Bapak/Ibu Pengguna SIGARDA, saat ini sedang dilakukan pemeliharaan sistem
-                        sehubungan dengan proses integrasi storage server dengan Google Drive.
-                        Selama periode ini, sebagian layanan mungkin tidak dapat diakses.
-                        Kami mohon maaf atas ketidaknyamanan yang terjadi.
+                        Yth. Bapak/Ibu Pengguna SIGARDA, <br>
+                        Sehubungan dengan keterbatasan kapasitas penyimpanan pada server, kami informasikan bahwa proses pemeliharaan (maintenance) akan berlangsung selama 4 hari.
+
+                        <br>Selama periode tersebut, akan dilakukan proses verifikasi dan validasi (verval) agar dokumen yang telah tersimpan dapat dipindahkan ke Google Drive / Google Cloud Storage Bucket.
+
+                        </br>Atas perhatian dan pengertiannya, kami ucapkan terima kasih.
 
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
