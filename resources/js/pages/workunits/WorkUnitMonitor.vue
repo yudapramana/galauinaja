@@ -41,7 +41,8 @@ import $ from 'jquery';
 import 'jstree/dist/jstree';
 import 'jstree/dist/themes/default/style.css';
 import { useMasterDataStore } from '../../stores/MasterDataStore';
-
+import { useAuthUserStore } from '../../stores/AuthUserStore';
+const authUserStore = useAuthUserStore();
 const router = useRouter();
 
 const fullTree = ref([]);                 // pohon work unit dari /monitor
@@ -157,8 +158,11 @@ const buildJsTree = async () => {
               return 'bg-danger';
             };
 
+            
             // employees on-demand (dengan tombol Dokumen)
             const employees = await fetchEmployees(unitId);
+            const canOpenDocs = ['SUPERADMIN', 'ADMIN'].includes(authUserStore.user?.role);
+
             const employeeNodes = employees.map(emp => {
               const progress = Number(emp.progress_dokumen ?? 0);
               const progressStr = progress.toFixed(2);
@@ -169,18 +173,24 @@ const buildJsTree = async () => {
                 id: `emp-${unitId}-${emp.id}`,
                 type: 'employee',
                 children: false,
-                // sisipkan HTML: label + tombol "Dokumen" (delegasi klik ke router)
                 text: `
                   <span class="w-100">
                     <span class="emp-label">${safeName} — ${progress}%</span>
-                    <a href="#"
-                      class="badge badge-sm badge-info ml-2 js-doc-link"
-                      data-user-id="${emp.id}">
-                      <i class="far fa-folder"></i> dokumen
-                    </a>
+                    ${
+                      canOpenDocs
+                        ? `<a href="#"
+                            class="badge badge-sm badge-info ml-2 js-doc-link"
+                            data-user-id="${emp.id}">
+                            <i class="far fa-folder"></i> dokumen
+                          </a>`
+                        : `<span class="badge badge-sm badge-secondary ml-2" title="Hanya untuk admin">
+                            <i class="far fa-folder"></i> dokumen
+                          </span>`
+                    }
                     <div class="progress progress-xxs">
                       <div class="progress-bar ${barCls} progress-bar-striped" role="progressbar"
-                          aria-valuenow="${progressStr}" aria-valuemin="0" aria-valuemax="100" style="width: ${Math.max(0, Math.min(100, progress))}%">
+                          aria-valuenow="${progressStr}" aria-valuemin="0" aria-valuemax="100"
+                          style="width: ${Math.max(0, Math.min(100, progress))}%">
                         <span class="sr-only">${progressStr}% Complete</span>
                       </div>
                     </div>
@@ -188,6 +198,38 @@ const buildJsTree = async () => {
                 `
               };
             });
+
+
+            // const employees = await fetchEmployees(unitId);
+            // const employeeNodes = employees.map(emp => {
+            //   const progress = Number(emp.progress_dokumen ?? 0);
+            //   const progressStr = progress.toFixed(2);
+            //   const safeName = escapeHtml(emp.full_name);
+            //   const barCls = progressClass(progress);
+
+            //   return {
+            //     id: `emp-${unitId}-${emp.id}`,
+            //     type: 'employee',
+            //     children: false,
+            //     // sisipkan HTML: label + tombol "Dokumen" (delegasi klik ke router)
+            //     text: `
+            //       <span class="w-100">
+            //         <span class="emp-label">${safeName} — ${progress}%</span>
+            //         <a href="#"
+            //           class="badge badge-sm badge-info ml-2 js-doc-link"
+            //           data-user-id="${emp.id}">
+            //           <i class="far fa-folder"></i> dokumen
+            //         </a>
+            //         <div class="progress progress-xxs">
+            //           <div class="progress-bar ${barCls} progress-bar-striped" role="progressbar"
+            //               aria-valuenow="${progressStr}" aria-valuemin="0" aria-valuemax="100" style="width: ${Math.max(0, Math.min(100, progress))}%">
+            //             <span class="sr-only">${progressStr}% Complete</span>
+            //           </div>
+            //         </div>
+            //       </span>
+            //     `
+            //   };
+            // });
 
             // Jika tidak ada apa-apa, tampilkan node info (opsional)
             if (childUnitNodes.length === 0 && employeeNodes.length === 0) {
