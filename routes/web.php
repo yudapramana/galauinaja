@@ -52,161 +52,60 @@ Route::post('/password/wa/reset',  [PasswordResetWhatsappController::class, 'res
 Route::post('/wa/send', [WhatsAppController::class, 'send']);
 Route::get('/wa/sendget', [WhatsAppController::class, 'sendGet']);
 
-Route::get('/verval-log-champion', function () {
+// Route::get('/verval-log-champion', function () {
 
-    // Query: hitung jumlah verval per user (verifikator)
-    $logs = DB::select("
-        SELECT 
-            u.id AS user_id,
-            u.name,
-            COUNT(v.id) AS total_vervals
-        FROM verval_logs v
-        JOIN users u ON u.id = v.verified_by
-        GROUP BY u.id, u.name
-        ORDER BY total_vervals DESC
-    ");
-
-    // Bangun HTML tampilan klasemen
-    $html = "
-    <html>
-    <head>
-        <title>Klasemen Verval Log Champion</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background: #f7f8fa;
-                padding: 40px;
-            }
-            h2 {
-                text-align: center;
-                margin-bottom: 25px;
-                color: #333;
-            }
-            table {
-                border-collapse: collapse;
-                margin: 0 auto;
-                background: #fff;
-                width: 80%;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            th, td {
-                padding: 12px 16px;
-                text-align: left;
-                border-bottom: 1px solid #e0e0e0;
-            }
-            th {
-                background-color: #007B5E;
-                color: #fff;
-                font-weight: bold;
-            }
-            tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-            tr:hover {
-                background-color: #f1fff3;
-            }
-            .rank {
-                text-align: center;
-                font-weight: bold;
-            }
-            .champion {
-                background-color: gold !important;
-                font-weight: bold;
-                color: #000;
-            }
-        </style>
-    </head>
-    <body>
-        <h2>🏆 Klasemen Verval Log Champion</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Peringkat</th>
-                    <th>Nama Verifikator</th>
-                    <th>Total Verval</th>
-                </tr>
-            </thead>
-            <tbody>
-    ";
-
-    $rank = 1;
-    foreach ($logs as $row) {
-        $highlight = $rank === 1 ? 'class="champion"' : '';
-        $html .= "
-            <tr {$highlight}>
-                <td class='rank'>{$rank}</td>
-                <td>{$row->name}</td>
-                <td>{$row->total_vervals}</td>
-            </tr>
-        ";
-        $rank++;
-    }
-
-    $html .= "
-            </tbody>
-        </table>
-    </body>
-    </html>
-    ";
-
-    return $html;
-});
-
-
-// Route::get('/show-verval-champion', function () {
-
-//     $counts = DB::select("
+//     // Query: hitung jumlah verval per user (verifikator)
+//     $logs = DB::select("
 //         SELECT 
 //             u.id AS user_id,
 //             u.name,
-//             COUNT(d.id) AS total_documents
-//         FROM emp_documents d
-//         JOIN users u ON u.id = d.assigned_to
+//             COUNT(v.id) AS total_vervals
+//         FROM verval_logs v
+//         JOIN users u ON u.id = v.verified_by
 //         GROUP BY u.id, u.name
-//         ORDER BY total_documents DESC
+//         ORDER BY total_vervals DESC
 //     ");
 
-//     // Bangun HTML
+//     // Bangun HTML tampilan klasemen
 //     $html = "
 //     <html>
 //     <head>
-//         <title>Klasemen Verval Champion</title>
+//         <title>Klasemen Verval Log Champion</title>
 //         <style>
 //             body {
 //                 font-family: Arial, sans-serif;
-//                 background: #f9f9f9;
+//                 background: #f7f8fa;
 //                 padding: 40px;
 //             }
 //             h2 {
 //                 text-align: center;
-//                 margin-bottom: 20px;
+//                 margin-bottom: 25px;
 //                 color: #333;
 //             }
 //             table {
 //                 border-collapse: collapse;
 //                 margin: 0 auto;
 //                 background: #fff;
-//                 box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+//                 width: 80%;
+//                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 //                 border-radius: 8px;
 //                 overflow: hidden;
-//                 width: 70%;
 //             }
 //             th, td {
-//                 border-bottom: 1px solid #ddd;
 //                 padding: 12px 16px;
 //                 text-align: left;
+//                 border-bottom: 1px solid #e0e0e0;
 //             }
 //             th {
-//                 background-color: #4CAF50;
-//                 color: white;
+//                 background-color: #007B5E;
+//                 color: #fff;
+//                 font-weight: bold;
 //             }
 //             tr:nth-child(even) {
-//                 background-color: #f2f2f2;
+//                 background-color: #f9f9f9;
 //             }
 //             tr:hover {
-//                 background-color: #e6ffe6;
+//                 background-color: #f1fff3;
 //             }
 //             .rank {
 //                 text-align: center;
@@ -214,32 +113,32 @@ Route::get('/verval-log-champion', function () {
 //             }
 //             .champion {
 //                 background-color: gold !important;
-//                 color: #000;
 //                 font-weight: bold;
+//                 color: #000;
 //             }
 //         </style>
 //     </head>
 //     <body>
-//         <h2>🏆 Klasemen Verval Champion</h2>
+//         <h2>🏆 Klasemen Verval Log Champion</h2>
 //         <table>
 //             <thead>
 //                 <tr>
 //                     <th>Peringkat</th>
-//                     <th>Nama</th>
-//                     <th>Total Dokumen</th>
+//                     <th>Nama Verifikator</th>
+//                     <th>Total Verval</th>
 //                 </tr>
 //             </thead>
 //             <tbody>
 //     ";
 
 //     $rank = 1;
-//     foreach ($counts as $row) {
+//     foreach ($logs as $row) {
 //         $highlight = $rank === 1 ? 'class="champion"' : '';
 //         $html .= "
 //             <tr {$highlight}>
 //                 <td class='rank'>{$rank}</td>
 //                 <td>{$row->name}</td>
-//                 <td>{$row->total_documents}</td>
+//                 <td>{$row->total_vervals}</td>
 //             </tr>
 //         ";
 //         $rank++;
@@ -254,6 +153,107 @@ Route::get('/verval-log-champion', function () {
 
 //     return $html;
 // });
+
+
+Route::get('/show-verval-champion', function () {
+
+    $counts = DB::select("
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            COUNT(d.id) AS total_documents
+        FROM emp_documents d
+        JOIN users u ON u.id = d.assigned_to
+        GROUP BY u.id, u.name
+        ORDER BY total_documents DESC
+    ");
+
+    // Bangun HTML
+    $html = "
+    <html>
+    <head>
+        <title>Klasemen Verval Champion</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #f9f9f9;
+                padding: 40px;
+            }
+            h2 {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #333;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 0 auto;
+                background: #fff;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                width: 70%;
+            }
+            th, td {
+                border-bottom: 1px solid #ddd;
+                padding: 12px 16px;
+                text-align: left;
+            }
+            th {
+                background-color: #4CAF50;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+            tr:hover {
+                background-color: #e6ffe6;
+            }
+            .rank {
+                text-align: center;
+                font-weight: bold;
+            }
+            .champion {
+                background-color: gold !important;
+                color: #000;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>🏆 Klasemen Verval Champion</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Peringkat</th>
+                    <th>Nama</th>
+                    <th>Total Dokumen</th>
+                </tr>
+            </thead>
+            <tbody>
+    ";
+
+    $rank = 1;
+    foreach ($counts as $row) {
+        $highlight = $rank === 1 ? 'class="champion"' : '';
+        $html .= "
+            <tr {$highlight}>
+                <td class='rank'>{$rank}</td>
+                <td>{$row->name}</td>
+                <td>{$row->total_documents}</td>
+            </tr>
+        ";
+        $rank++;
+    }
+
+    $html .= "
+            </tbody>
+        </table>
+    </body>
+    </html>
+    ";
+
+    return $html;
+});
 
 
 
