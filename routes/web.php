@@ -53,6 +53,23 @@ Route::post('/wa/send', [WhatsAppController::class, 'send']);
 Route::get('/wa/sendget', [WhatsAppController::class, 'sendGet']);
 
 
+Route::get('/show-verval-champion', function() {
+
+    $counts = DB::select("
+    SELECT 
+        u.id AS user_id,
+        u.name,
+        COUNT(d.id) AS total_documents
+    FROM emp_documents d
+    JOIN users u ON u.id = d.assigned_to
+    GROUP BY u.id, u.name
+    ORDER BY total_documents DESC
+");
+
+    return $counts;
+});
+
+
 Route::get('/show-pending-documents', function() {
 
     $rows = DB::table('work_units as wu')
