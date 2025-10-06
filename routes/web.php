@@ -53,21 +53,106 @@ Route::post('/wa/send', [WhatsAppController::class, 'send']);
 Route::get('/wa/sendget', [WhatsAppController::class, 'sendGet']);
 
 
-Route::get('/show-verval-champion', function() {
+Route::get('/show-verval-champion', function () {
 
     $counts = DB::select("
-    SELECT 
-        u.id AS user_id,
-        u.name,
-        COUNT(d.id) AS total_documents
-    FROM emp_documents d
-    JOIN users u ON u.id = d.assigned_to
-    GROUP BY u.id, u.name
-    ORDER BY total_documents DESC
-");
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            COUNT(d.id) AS total_documents
+        FROM emp_documents d
+        JOIN users u ON u.id = d.assigned_to
+        GROUP BY u.id, u.name
+        ORDER BY total_documents DESC
+    ");
 
-    return $counts;
+    // Bangun HTML
+    $html = "
+    <html>
+    <head>
+        <title>Klasemen Verval Champion</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #f9f9f9;
+                padding: 40px;
+            }
+            h2 {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #333;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 0 auto;
+                background: #fff;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                width: 70%;
+            }
+            th, td {
+                border-bottom: 1px solid #ddd;
+                padding: 12px 16px;
+                text-align: left;
+            }
+            th {
+                background-color: #4CAF50;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+            tr:hover {
+                background-color: #e6ffe6;
+            }
+            .rank {
+                text-align: center;
+                font-weight: bold;
+            }
+            .champion {
+                background-color: gold !important;
+                color: #000;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>🏆 Klasemen Verval Champion</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Peringkat</th>
+                    <th>Nama</th>
+                    <th>Total Dokumen</th>
+                </tr>
+            </thead>
+            <tbody>
+    ";
+
+    $rank = 1;
+    foreach ($counts as $row) {
+        $highlight = $rank === 1 ? 'class="champion"' : '';
+        $html .= "
+            <tr {$highlight}>
+                <td class='rank'>{$rank}</td>
+                <td>{$row->name}</td>
+                <td>{$row->total_documents}</td>
+            </tr>
+        ";
+        $rank++;
+    }
+
+    $html .= "
+            </tbody>
+        </table>
+    </body>
+    </html>
+    ";
+
+    return $html;
 });
+
 
 
 Route::get('/show-pending-documents', function() {
