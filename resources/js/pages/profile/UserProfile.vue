@@ -384,7 +384,7 @@ onMounted(() => {
                                                 }}</span>
                                         </div>
 
-                                        <div class="col-md-6">
+                                        <!-- <div class="col-md-6">
                                             <label class="form-label small fw-semibold mb-1">Golongan / Ruang</label>
                                             <input v-model="authUserStore.user.employee.gol_ruang" type="text"
                                                 class="form-control form-control-sm" readonly>
@@ -460,7 +460,7 @@ onMounted(() => {
                                             </select>
                                             <span class="text-danger text-sm" v-if="errors?.employment_category">{{ errors.gender[0]
                                                 }}</span>
-                                        </div>
+                                        </div> -->
 
                                         <hr/>
 
