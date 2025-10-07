@@ -21,7 +21,7 @@ class DocTypesTableSeeder extends Seeder
             ['SK Pengangkatan Pertama dalam Jabatan Fungsional', 'SKJFPERTAMA', false],
             ['SK Kenaikan Jenjang Jabatan Fungsional', 'SKNAIKJF', false, true],
             ['SK Pengangkatan Pertama dalam Jabatan Pelaksana', 'SKJPPERTAMA', false],
-            ['SK Mutasi/Pindah dan SK Jabatan termasuk Perpindahan Jabatan Pelaksana', 'SKMUT&JAB', true, true],
+            ['SK Mutasi/Pindah dan SK Jabatan termasuk Perpindahan Jabatan Pelaksana', 'SKMUTJAB', true, true],
             ['SK Jabatan Pejabat Struktural Eselon III, IV, dan V', 'SKJABSTRUK', false, true],
             ['SK Jabatan Pejabat Fungsional bagi Pengawas, Kepala KUA, Kepala Madrasah dan JFT', 'SKJABFUNG', true, true],
             ['Surat Pernyataan Pelantikan', 'SPP', true, true],
