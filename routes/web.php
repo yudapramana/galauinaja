@@ -172,7 +172,7 @@ Route::get('/auto-verval', function (Request $request) {
         // ==== Update status + log (mengikuti verify()) ====
         DB::transaction(function () use ($doc, $assigneeId) {
             $doc->status      = 'Approved';
-            $doc->verif_notes = 'Auto-approved via /auto-100-verval';
+            $doc->verif_notes = 'Auto-approved via /auto-system-verval';
             $doc->save();
 
             VervalLog::create([
