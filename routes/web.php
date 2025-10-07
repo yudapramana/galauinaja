@@ -376,7 +376,7 @@ Route::get('/wa/sendget', [WhatsAppController::class, 'sendGet']);
 // });
 
 
-Route::get('/show-verval-champion', function () {
+Route::get('/show-verval-champion-hide', function () {
 
     $counts = DB::select("
         SELECT 
