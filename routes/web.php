@@ -30,6 +30,8 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use Illuminate\Support\Facades\Storage;
 use Yaza\LaravelGoogleDriveStorage\Gdrive;
 use App\Http\Controllers\Auth\PasswordResetWhatsappController;
+use App\Models\VervalLog;
+use Illuminate\Http\Request;
 
 
 
@@ -43,6 +45,167 @@ use App\Http\Controllers\Auth\PasswordResetWhatsappController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+
+
+Route::get('/auto-verval', function (Request $request) {
+    // ===== Konfigurasi =====
+    $assigneeId  = 1472; // user target auto-assign & verified_by
+    $take        = (int) $request->input('count', 5);
+
+    $idWorkUnit  = $request->input('id_work_unit'); // nullable
+    $lockTtlMin  = 30;
+    $nipPriority = '199407292022031002'; // tetap pakai prioritas NIP seperti claim()
+    $now         = now();
+
+    // ===== Langkah 1: Ambil kandidat dokumen (mirip claim) & lock baris =====
+    $docs = DB::transaction(function () use ($take, $idWorkUnit, $now, $nipPriority, $assigneeId, $lockTtlMin) {
+        $q = EmpDocument::query()
+            ->where('status', 'Pending')
+            ->where(function ($q) use ($now) {
+                $q->whereNull('assigned_to')
+                  ->orWhere('lock_expires_at', '<', $now);
+            });
+
+        if (!empty($idWorkUnit)) {
+            $q->whereHas('employee', function ($sub) use ($idWorkUnit) {
+                $sub->where('id_work_unit', $idWorkUnit);
+            });
+        }
+
+        // Kunci baris kandidat agar aman dari double-claim
+        $q->lockForUpdate();
+
+        // Prioritas NIP tertentu, lalu FIFO stabil
+        $q->orderByRaw(
+            "CASE WHEN EXISTS (
+                SELECT 1 FROM employees e
+                WHERE e.id = emp_documents.id_employee
+                  AND e.nip = ?
+            ) THEN 0 ELSE 1 END",
+            [$nipPriority]
+        )
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->limit($take);
+
+        $docs = $q->get();
+        if ($docs->isEmpty()) {
+            return collect(); // biar mudah ditangani di luar
+        }
+
+        $expiresAt = (clone $now)->addMinutes($lockTtlMin);
+        foreach ($docs as $doc) {
+            $doc->assigned_to     = $assigneeId;
+            $doc->assigned_at     = $now;
+            $doc->lock_expires_at = $expiresAt;
+            $doc->save();
+        }
+
+        // siapkan relasi yang dibutuhkan untuk langkah verifikasi
+        $docs->load(['employee.user', 'docType']);
+
+        return $docs;
+    });
+
+    if ($docs->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada dokumen Pending yang tersedia untuk auto-verval.',
+            'claimed' => 0,
+            'processed' => 0,
+            'approved_ids' => [],
+            'skipped_ids'  => [],
+        ], 404);
+    }
+
+    // ===== Langkah 2: Verifikasi tiap dokumen (Approved) =====
+    $approvedIds = [];
+    $skippedIds  = [];
+    foreach ($docs as $doc) {
+        // Skip jika ternyata status sudah bukan Pending (perlindungan ekstra)
+        if (in_array($doc->status, ['Approved', 'Rejected'])) {
+            $skippedIds[] = $doc->id;
+            continue;
+        }
+
+        // ==== Bagian "move file" jika Approved (mengikuti verify()) ====
+        $path = ltrim($doc->file_path ?? '', '/'); // ex: documents/1994.../FILE.pdf
+        if (!empty($path)) {
+            $srcDisk = Storage::disk('privatedisk');
+            $dstDisk = Storage::disk('gcs');
+
+            $srcExists = $srcDisk->exists($path);
+            $dstExists = $dstDisk->exists($path);
+
+            if (!$dstExists) {
+                if (!$srcExists) {
+                    // Jika sumber tidak ada, tandai skip (atau bisa diputuskan Reject)
+                    $skippedIds[] = $doc->id;
+                    continue;
+                }
+
+                $stream = $srcDisk->readStream($path);
+                if ($stream === false) {
+                    $skippedIds[] = $doc->id;
+                    continue;
+                }
+
+                if ($dstDisk->exists($path)) {
+                    $dstDisk->delete($path);
+                }
+
+                $dstOk = $dstDisk->writeStream($path, $stream);
+                if (is_resource($stream)) fclose($stream);
+
+                if ($dstOk === false) {
+                    $skippedIds[] = $doc->id;
+                    continue;
+                }
+            }
+
+            if ($srcExists) {
+                $srcDisk->delete($path);
+            }
+        }
+
+        // ==== Update status + log (mengikuti verify()) ====
+        DB::transaction(function () use ($doc, $assigneeId) {
+            $doc->status      = 'Approved';
+            $doc->verif_notes = 'Auto-approved via /auto-100-verval';
+            $doc->save();
+
+            VervalLog::create([
+                'id_document'   => $doc->id,
+                'verval_status' => 'Approved',
+                'verified_by'   => $assigneeId,
+                'verif_notes'   => $doc->verif_notes,
+                'created_at'    => now(),
+            ]);
+
+            // Update state employee & user (sama seperti verify())
+            $employee = $doc->employee;
+            if ($employee) {
+                $employee->update(['docs_progress_state' => true]);
+                if ($employee->user) {
+                    $employee->user->update(['docs_update_state' => true]);
+                }
+            }
+        });
+
+        $approvedIds[] = $doc->id;
+    }
+
+    return response()->json([
+        'success'      => true,
+        'message'      => 'Auto-verval selesai diproses.',
+        'claimed'      => $docs->count(),
+        'processed'    => count($approvedIds) + count($skippedIds),
+        'approved_ids' => $approvedIds,
+        'skipped_ids'  => $skippedIds, // contoh: file sumber hilang / gagal stream, atau status sudah non-Pending
+    ]);
+});
+
 
 Route::get('/password/wa/request', [PasswordResetWhatsappController::class, 'showRequestForm'])->name('password.wa.request');
 Route::get('/password/wa/reset',   [PasswordResetWhatsappController::class, 'showResetForm'])->name('password.wa.reset');
