@@ -46,6 +46,64 @@ use Illuminate\Http\Request;
 |
 */
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+Route::get('/update-progress-dokumen', function (Request $request) {
+    // --- Opsi via query ---
+    $onlyFlagged      = filter_var($request->input('only_flagged', 'true'), FILTER_VALIDATE_BOOLEAN);
+    $employmentStatus = $request->input('employment_status'); // 'PNS' / 'PPPK' (opsional)
+    $chunkSize        = max(50, (int) $request->input('chunk', 300)); // default 300, minimal 50
+
+    // --- Optimasi RAM ---
+    DB::disableQueryLog();
+
+    $q = Employee::query()
+        ->select(['id', 'docs_progress_state', 'employment_status']); // ambil kolom minimal
+
+    if ($onlyFlagged) {
+        $q->where('docs_progress_state', true);
+    }
+    if (!empty($employmentStatus)) {
+        $q->where('employment_status', $employmentStatus);
+    }
+
+    $startedAt = microtime(true);
+    $updated   = 0;
+    $failed    = 0;
+    $seen      = 0;
+
+    $q->chunkById($chunkSize, function ($employees) use (&$updated, &$failed, &$seen) {
+        foreach ($employees as $emp) {
+            $seen++;
+            try {
+                // Mengakses accessor akan menghitung & saveQuietly() sesuai kode Anda
+                $val = $emp->progress_dokumen;
+                $updated++;
+            } catch (\Throwable $e) {
+                $failed++;
+                Log::warning('Recalc progress_dokumen gagal', [
+                    'employee_id' => $emp->id,
+                    'error'       => $e->getMessage(),
+                ]);
+            }
+        }
+    });
+
+    $elapsed = round(microtime(true) - $startedAt, 3);
+
+    return response()->json([
+        'success'           => true,
+        'message'           => 'Update progress_dokumen selesai.',
+        'only_flagged'      => $onlyFlagged,
+        'employment_status' => $employmentStatus,
+        'chunk'             => $chunkSize,
+        'scanned'           => $seen,
+        'updated'           => $updated,
+        'failed'            => $failed,
+        'elapsed_sec'       => $elapsed,
+    ]);
+})->middleware(['auth']);
 
 
 Route::get('/auto-verval', function (Request $request) {
@@ -204,7 +262,7 @@ Route::get('/auto-verval', function (Request $request) {
         'approved_ids' => $approvedIds,
         'skipped_ids'  => $skippedIds, // contoh: file sumber hilang / gagal stream, atau status sudah non-Pending
     ]);
-});
+})->middleware(['auth']);
 
 
 Route::get('/password/wa/request', [PasswordResetWhatsappController::class, 'showRequestForm'])->name('password.wa.request');
