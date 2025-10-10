@@ -77,6 +77,15 @@ router.beforeEach(async (to, from) => {
         if (!mustChangePassword && to.name === 'user.change-password') {
             return { name: 'user.dashboard' }; // atau arahkan ke halaman lain seperti dashboard
         }
+
+        const phone = authUserStore.user?.employee?.phone_number;
+
+        const isEmptyPhone =
+        phone == null || String(phone).trim() === '';
+
+        if (isEmptyPhone && to.name !== 'user.profile') {
+            return { name: 'user.profile' };
+        }
     }
 
 

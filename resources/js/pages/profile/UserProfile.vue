@@ -330,6 +330,13 @@ onMounted(() => {
                                             </div>
                                         </div>
                                     </form> -->
+
+                                    <span class="text-warning d-block my-2">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Harap mengisi nomor HP / WhatsApp sebelum mengisi dokumen.
+                                    </span>
+
+
                                     <form @submit.prevent="updateProfile()" class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label small fw-semibold mb-1">NIP (Nomor Induk
