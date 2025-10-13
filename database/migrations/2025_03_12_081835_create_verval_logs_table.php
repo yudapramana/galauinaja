@@ -18,7 +18,8 @@ class CreateVervalLogsTable extends Migration {
 				'Approved', 
 				'Rejected',
 				'Uploaded by Admin',
-				'Reuploaded by Admin'
+				'Reuploaded by Admin',
+				'Request Change'
 			));
 			$table->text('verif_notes')->nullable();
 		});

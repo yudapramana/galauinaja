@@ -393,7 +393,7 @@ class EmpDocumentController extends Controller
                 ) THEN 0 ELSE 1 END",
                 [$nipPriority]
             )
-            ->orderBy('created_at', 'asc')
+            ->orderBy('updated_at', 'asc')
             ->orderBy('id', 'asc')   // tie-breaker yang stabil
             ->limit($take);
 

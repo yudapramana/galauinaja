@@ -896,6 +896,7 @@ Route::get('/all-users', function () {
 
 Route::middleware('auth')->group(function () {
 
+    
 
     Route::get('api/preview/pdf', [EmpDocumentController::class, 'show'])
         ->name('pdf.preview');
@@ -959,6 +960,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/user-documents/{userId}', [DocumentController::class, 'documentsByUserId']);
     Route::get('/api/sync-files', [DocumentController::class, 'syncFiles']);
 
+    Route::post('api/documents/{id}/request-change', [DocumentController::class, 'requestChange']);
 
 
     Route::prefix('/api/work-units')->group(function () {

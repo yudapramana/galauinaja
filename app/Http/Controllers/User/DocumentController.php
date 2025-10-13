@@ -21,6 +21,98 @@ use Illuminate\Support\Str;
 class DocumentController extends Controller
 {
 
+    public function requestChange($id, Request $request)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $document = EmpDocument::query()->findOrFail($id);
+
+        // --- Ambil path file yang tersimpan di dokumen
+        // Pastikan field yang dipakai konsisten (mis. file_path)
+        $path = ltrim((string) ($document->file_path ?? ''), '/');
+        if ($path === '') {
+            return response()->json([
+                'message' => 'Path file tidak tersedia pada dokumen.',
+                'code'    => 'FILE_PATH_EMPTY',
+            ], 404);
+        }
+
+        // === Reversal: pindahkan file dari google (gcs) -> privatedisk
+        $srcDisk = Storage::disk('gcs');
+        $dstDisk = Storage::disk('privatedisk');
+
+        $srcExists = $srcDisk->exists($path);
+        $dstExists = $dstDisk->exists($path);
+
+        if (!$srcExists && !$dstExists) {
+            // Tidak ada di kedua sisi
+            return response()->json([
+                'message' => 'File sumber tidak ditemukan di Google maupun di Private.',
+                'code'    => 'SOURCE_FILE_MISSING',
+            ], 404);
+        }
+
+        // Jika file belum ada di privatedisk dan ada di gcs -> copy stream ke privatedisk
+        if (!$dstExists && $srcExists) {
+            $stream = $srcDisk->readStream($path);
+            if ($stream === false) {
+                return response()->json([
+                    'message' => 'Gagal membuka stream file sumber dari Google.',
+                    'code'    => 'STREAM_OPEN_FAILED',
+                ], 500);
+            }
+
+            // Pastikan tidak ada file tujuan yang menghalangi (double check)
+            if ($dstDisk->exists($path)) {
+                $dstDisk->delete($path);
+            }
+
+            $dstOk = $dstDisk->writeStream($path, $stream);
+            if (is_resource($stream)) fclose($stream);
+
+            if ($dstOk === false) {
+                return response()->json([
+                    'message' => 'Gagal menulis file ke Private Storage.',
+                    'code'    => 'WRITE_DEST_FAILED',
+                ], 500);
+            }
+        }
+
+        // Hapus file di Google bila ada (supaya sumber tunggal: private)
+        // if ($srcExists) {
+        //     $srcDisk->delete($path);
+        // }
+
+        // === Ubah status dokumen menjadi Pending (idempotent jika sudah Pending/Rejected)
+        if ($document->status !== 'Pending') {
+            $document->status = 'Pending';
+        }
+
+        $document->save();
+
+        // === Simpan ke verval_logs
+        $vervalLog = new VervalLog();
+        $vervalLog->id_document   = $document->id;
+        $vervalLog->verval_status = 'Request Change';                 // sesuai kebutuhan
+        $vervalLog->verified_by   = Auth::id();                       // admin/user pengaju
+        $vervalLog->verif_notes   = $request->input('reason');        // alasan dari form
+        $vervalLog->save();
+
+        return response()->json([
+            'message' => 'File dipindahkan ke Private Storage, status diubah ke Pending, dan log verval tercatat.',
+            'data'    => [
+                'document_id' => $document->id,
+                'status'      => $document->status,
+                'file_path'   => $document->file_path,
+                // 'file_disk' => $document->file_disk ?? null,
+            ],
+        ]);
+    }
+
+
+
     public function documentsByUserId($userId)
     {
         $user = User::find($userId);

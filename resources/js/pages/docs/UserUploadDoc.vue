@@ -9,6 +9,29 @@
   <section class="content">
     <div class="container-fluid">
 
+      <!-- HOW-TO BANNER -->
+      <div v-if="showHowto" class="alert alert-info d-flex align-items-start p-3 rounded-lg mb-3">
+        <i class="fas fa-info-circle fa-lg mr-2 mt-1"></i>
+        <div class="flex-grow-1">
+          <div class="font-weight-bold">Cara memperbarui dokumen & menampilkan perubahan</div>
+          <ol class="mb-2 pl-3">
+            <li>Buka folder jenis dokumen yang ingin diperbarui.</li>
+            <li>Di daftar file, tekan <span class="badge badge-sm badge-primary">Perbarui</span> pada file yang salah (tombol hanya muncul jika status ≠ <span class="badge badge-sm badge-success">Approved</span>).</li>
+            <li>Jika dokumen tipe <em>multiple</em>, pilih <strong>Parameter</strong> yang benar dari tombol pilihan, lalu unggah file PDF yang sesuai dan simpan.</li>
+            <li>Setelah unggah atau perbarui, perubahan biasanya membutuhkan waktu 1–2 menit untuk diproses.</li>
+            <li>Jika data belum muncul, tekan tombol <strong><i class="fas fa-sync"></i> Sinkron Data</strong> untuk memuat ulang.</li>
+          </ol>
+          <div class="small">
+            Catatan: Bila muncul badge <span class="badge badge-warning">Fitur Maintenance</span>, pembaruan sementara dinonaktifkan oleh admin.
+          </div>
+        </div>
+        <button type="button" class="close ml-2" aria-label="Close" @click="dismissHowto">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <!-- END HOW-TO BANNER -->
+
+
       <div class="card shadow-sm rounded-lg">
         <div class="card-body p-3">
 
@@ -72,6 +95,14 @@
                             Perbarui
                           </span>
                         </template>
+
+                        <button
+                          v-if="!settingStore.showMaintenanceBadge && file.status === 'Approved'"
+                          class="btn btn-xs btn-outline-primary ml-2"
+                          @click="requestChange(file)"
+                        >
+                          Minta Perubahan
+                        </button>
                         
                       </div>
                       <!-- <button v-if="file.status === 'Rejected'" class="btn btn-sm btn-outline-danger ml-2"
@@ -208,6 +239,120 @@
   </div>
 
 
+
+  <!-- Backdrop -->
+  <div v-if="showChangeModal" class="modal-backdrop fade show"></div>
+
+
+  <!-- Change Request Modal -->
+  <div v-if="showChangeModal"
+     class="modal d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title">Minta Perubahan Dokumen (Approved → Pending)</h6>
+          <button type="button" class="close" @click="showChangeModal=false"><span>&times;</span></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="alert alert-warning small">
+            Mengajukan perubahan akan mengubah status dokumen ini menjadi <strong>Pending</strong>.
+            Verifikator akan meninjau ulang dokumen Anda. Pastikan alasan jelas.
+          </div>
+
+          <div class="row">
+            <!-- Kolom kiri: ringkasan & alasan -->
+            <div class="col-lg-5">
+              <div class="card mb-3">
+                <div class="card-body p-3">
+                  <div class="font-weight-bold mb-2">Ringkasan Dokumen</div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between">
+                      <span class="text-muted">Jenis Dokumen</span>
+                      <span class="text-right font-weight-bold">
+                        {{ targetChangeFile?.doc_type_text || '—' }}
+                      </span>
+                    </li>
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between" v-if="targetChangeFile?.parameter">
+                      <span class="text-muted">Parameter</span>
+                      <span class="text-right">{{ targetChangeFile.parameter }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between" v-if="targetChangeFile?.doc_number">
+                      <span class="text-muted">Nomor Dokumen</span>
+                      <span class="text-right">{{ targetChangeFile.doc_number }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between" v-if="targetChangeFile?.doc_date">
+                      <span class="text-muted">Tanggal Dokumen</span>
+                      <span class="text-right">{{ targetChangeFile.doc_date }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between">
+                      <span class="text-muted">Status Saat Ini</span>
+                      <span class="text-right">
+                        <span class="badge" :class="badgeClass(targetChangeFile?.status)">
+                          {{ targetChangeFile?.status || 'Pending' }}
+                        </span>
+                      </span>
+                    </li>
+                    <li class="list-group-item px-0 py-1 d-flex justify-content-between" v-if="targetChangeFile?.file_name">
+                      <span class="text-muted">Nama File</span>
+                      <span class="text-right text-truncate" style="max-width: 60%">{{ targetChangeFile.file_name }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1">Alasan perubahan</label>
+                <textarea v-model="changeReason" class="form-control" rows="4"
+                          placeholder="Contoh: Salah parameter/tahun/salah nama pada dokumen, dsb."></textarea>
+              </div>
+            </div>
+
+            <!-- Kolom kanan: preview dokumen lama -->
+            <div class="col-lg-7">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="font-weight-bold">Dokumen Lama</div>
+                <div>
+                  <a v-if="filePreviewLink(targetChangeFile)" :href="filePreviewLink(targetChangeFile)" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt"></i> Buka Dokumen
+                  </a>
+                </div>
+              </div>
+
+              <div class="border rounded" style="height: 70vh; overflow: hidden;">
+                <iframe
+                  v-if="filePreviewLink(targetChangeFile)"
+                  :src="filePreviewLink(targetChangeFile)"
+                  style="border:0; width:100%; height:100%;"
+                  @load="() => { /* noop */ }"
+                ></iframe>
+                <div v-else class="h-100 d-flex align-items-center justify-content-center text-muted">
+                  Tidak dapat menampilkan preview dokumen.
+                </div>
+              </div>
+
+              <small class="text-muted d-block mt-2">
+                Catatan: Jika preview tidak tampil, gunakan tombol <strong>Buka Dokumen</strong> di kanan atas.
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showChangeModal=false">Batal</button>
+          <button class="btn btn-primary" :disabled="submittingChange || !changeReason.trim()" @click="submitChangeRequest">
+            <i v-if="submittingChange" class="fa fa-spinner fa-spin mr-1"></i>
+            Kirim Permintaan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
 </template>
 
 <script setup>
@@ -221,6 +366,79 @@ import SearchBox from './SearchBox.vue';
 import TreeList from './TreeList.vue';
 import PreviewModal from './PreviewModal.vue';
 import { useSettingStore } from '../../stores/SettingStore';
+
+
+const HOWTO_KEY = 'sigarda_upload_howto_hidden';
+const showHowto = ref(true);
+
+const dismissHowto = () => {
+  showHowto.value = false;
+  try { localStorage.setItem(HOWTO_KEY, '1'); } catch (e) {}
+};
+
+onMounted(async () => {
+  // restore banner visibility
+  try { showHowto.value = localStorage.getItem(HOWTO_KEY) !== '1'; } catch (e) {}
+  
+  isLoading.value = true
+  await authUserStore.getDocsUpdateState()
+  console.log('eh kepanggil fetchdata didalam onMounted Doclist')
+  await fetchData()
+  isLoading.value = false
+});
+
+// helper preview link mengikuti pola preview yang sudah ada
+const filePreviewLink = (file) => {
+  if (!file) return null;
+
+  // Jika tersedia file_path gunakan endpoint preview internal
+  if (file.file_path) {
+    return buildPreviewUrl(file.file_path); // sudah didefinisikan di kode Anda
+  }
+
+  // Fallback ke file_url (untuk kasus non-approved atau file publik)
+  if (file.file_url) return file.file_url;
+
+  return null;
+};
+
+
+// di <script setup>
+const showChangeModal = ref(false);
+const changeReason = ref('');
+const submittingChange = ref(false);
+const targetChangeFile = ref(null);
+
+const requestChange = (file) => {
+  targetChangeFile.value = file;
+  changeReason.value = '';
+  showChangeModal.value = true;
+};
+
+const submitChangeRequest = async () => {
+  if (!changeReason.value.trim()) {
+    return Swal.fire({ icon: 'warning', title: 'Alasan wajib diisi' });
+  }
+  submittingChange.value = true;
+  try {
+    await axios.post(`/api/documents/${targetChangeFile.value.id}/request-change`, {
+      reason: changeReason.value
+    });
+
+    Swal.fire({ icon: 'success', title: 'Permintaan perubahan diajukan. Status diubah ke Pending.' });
+
+    // refresh folder saat ini agar status langsung berubah di UI
+    const docTypeId = targetChangeFile.value.id_doc_type || targetChangeFile.value.doc_type_id || targetChangeFile.value.doc_type;
+    await refreshSingleFolder(docTypeId);
+
+    showChangeModal.value = false;
+  } catch (err) {
+    authUserStore.handleAuthError(err);
+    Swal.fire({ icon: 'error', title: 'Gagal mengajukan perubahan' });
+  } finally {
+    submittingChange.value = false;
+  }
+};
 
 const settingStore = useSettingStore();
 settingStore.setting.maintenance =
@@ -636,6 +854,15 @@ onMounted(async () => {
 .badge-sm {
   font-size: 0.65rem;
   padding: 0.25em 0.4em;
+}
+
+.alert ol { margin-bottom: .5rem; }
+
+/* potong teks nama file panjang agar rapi */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Tambahan untuk tampilan mobile */
