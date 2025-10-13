@@ -13,23 +13,49 @@
       <div v-if="showHowto" class="alert alert-info d-flex align-items-start p-3 rounded-lg mb-3">
         <i class="fas fa-info-circle fa-lg mr-2 mt-1"></i>
         <div class="flex-grow-1">
-          <div class="font-weight-bold">Cara memperbarui dokumen & menampilkan perubahan</div>
+          <div class="font-weight-bold mb-1">
+            Cara memperbarui dokumen & menampilkan perubahan
+          </div>
+
           <ol class="mb-2 pl-3">
-            <li>Buka folder jenis dokumen yang ingin diperbarui.</li>
-            <li>Di daftar file, tekan <span class="badge badge-sm badge-primary">Perbarui</span> pada file yang salah (tombol hanya muncul jika status ≠ <span class="badge badge-sm badge-success">Approved</span>).</li>
-            <li>Jika dokumen tipe <em>multiple</em>, pilih <strong>Parameter</strong> yang benar dari tombol pilihan, lalu unggah file PDF yang sesuai dan simpan.</li>
-            <li>Setelah unggah atau perbarui, perubahan biasanya membutuhkan waktu 1–2 menit untuk diproses.</li>
-            <li>Jika data belum muncul, tekan tombol <strong><i class="fas fa-sync"></i> Sinkron Data</strong> untuk memuat ulang.</li>
+            <li>Buka folder <strong>jenis dokumen</strong> yang ingin diperbarui.</li>
+            <li>
+              Jika status dokumen masih <span class="badge badge-secondary">Pending</span> atau
+              <span class="badge badge-danger">Rejected</span>,
+              tekan tombol <span class="badge badge-sm badge-primary">Perbarui</span> pada file yang salah.
+            </li>
+            <li>
+              Jika status dokumen sudah <span class="badge badge-success">Approved</span>,
+              tekan tombol <span class="badge badge-sm badge-outline-primary">Minta&nbsp;Perubahan</span>
+              lalu isi alasan kenapa dokumen perlu diganti.
+              Sistem akan mengubah status menjadi <strong>Pending</strong> agar bisa diperbarui kembali.
+            </li>
+            <li>
+              Untuk dokumen tipe <em>multiple</em>, pilih <strong>Parameter</strong> yang benar dari tombol pilihan,
+              lalu unggah file PDF yang sesuai dan simpan.
+            </li>
+            <li>
+              Setelah unggah atau minta perubahan, perbaruan biasanya membutuhkan waktu 1–2 menit untuk diproses.
+            </li>
+            <li>
+              Jika data belum muncul, tekan tombol
+              <strong><i class="fas fa-sync"></i> Sinkron&nbsp;Data</strong> untuk memuat ulang daftar dokumen.
+            </li>
           </ol>
-          <div class="small">
-            Catatan: Bila muncul badge <span class="badge badge-warning">Fitur Maintenance</span>, pembaruan sementara dinonaktifkan oleh admin.
+
+          <div class="small text-muted">
+            Catatan:
+            Bila muncul badge <span class="badge badge-warning">Fitur Maintenance</span>,
+            pembaruan sementara dinonaktifkan oleh admin.
           </div>
         </div>
+
         <button type="button" class="close ml-2" aria-label="Close" @click="dismissHowto">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <!-- END HOW-TO BANNER -->
+
 
 
       <div class="card shadow-sm rounded-lg">
