@@ -970,6 +970,7 @@ Route::middleware('auth')->group(function () {
         // Get tree data
         Route::get('/tree', [WorkUnitController::class, 'tree']);
         Route::get('/monitor', [WorkUnitController::class, 'monitor']);
+        Route::get('/self-monitor', [WorkUnitController::class, 'selfMonitor']);
         Route::get('/fetch', [WorkUnitController::class, 'fetch']);
     
         // CRUD Routes

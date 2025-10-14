@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\WorkUnit;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
+use Auth;
+use GPBMetadata\Google\Api\Auth as ApiAuth;
 
 class WorkUnitController extends Controller
 {
@@ -153,8 +155,17 @@ class WorkUnitController extends Controller
 
     public function monitor()
     {
-        // return 'ampek';
         $units = WorkUnit::select('id', 'unit_name', 'unit_code')->get();
+        return response()->json($units);
+    }
+
+    public function selfMonitor()
+    {
+        $user = Auth::user();
+        $user->load('employee');
+        $employee = $user->employee;
+
+        $units = WorkUnit::select('id', 'unit_name', 'unit_code')->where('id', $employee->id_work_unit)->get();
         return response()->json($units);
     }
 

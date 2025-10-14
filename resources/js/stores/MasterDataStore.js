@@ -14,6 +14,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
     const doctypeList = useStorage('MasterDataStore:doctypeList', ref([]));
     const workunitList = useStorage('MasterDataStore:workunitList', ref([]));
     const workUnitMonitorList = useStorage('MasterDataStore:workUnitMonitorList', ref([]));
+    const selfWorkUnitMonitorList = useStorage('MasterDataStore:selfWorkUnitMonitorList', ref([]));
     const docParameters = useStorage('MasterDataStore:docParameters', ref([1, 2, 3, 4, 5, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 'D2', 'D3', 'S1', 'S2', 'S3', 'IIa', 'IIb', 'IIc', 'IId', 'IIIa', 'IIIb', 'IIIc', 'IIId', 'IVa', 'IVb', 'IVc', 'IVd', 'Suami', 'Istri']));
 
     const loadingStore = useLoadingStore();
@@ -31,6 +32,25 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
                     workUnitMonitorList.value = response;
                     loadingStore.toggleLoading();
                     console.log('workUnitMonitorList hasbeenfetched');
+                }).catch((error) => {
+                    loadingStore.toggleLoading();
+                    authUserStore.handleAuthError(error);
+                });
+        }
+    };
+
+    const getSelfWorkUnitMonitorList = async () => {
+
+        console.log('getSelfWorkUnitMonitorList start');
+        if (selfWorkUnitMonitorList.value.length == 0) {
+            console.log('getSelfWorkUnitMonitorList runned');
+            loadingStore.toggleLoading();
+            await axios.get('/api/work-units/self-monitor')
+                .then((response) => {
+                    // selfWorkUnitMonitorList.value = response.data.data;
+                    selfWorkUnitMonitorList.value = response;
+                    loadingStore.toggleLoading();
+                    console.log('selfWorkUnitMonitorList hasbeenfetched');
                 }).catch((error) => {
                     loadingStore.toggleLoading();
                     authUserStore.handleAuthError(error);
@@ -147,6 +167,7 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         workunitList,
         docParameters,
         workUnitMonitorList,
+        selfWorkUnitMonitorList,
         employeesCacheByUnit,
         getUserList,
         getDoctypeList,
@@ -157,5 +178,6 @@ export const useMasterDataStore = defineStore('MasterDataStore', () => {
         hydrateEmployeesCache,
         getWorkUnitMonitorList,
         clearEmployeesCache,
+        getSelfWorkUnitMonitorList
     };
 });
