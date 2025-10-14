@@ -113,7 +113,7 @@ const logout = () => {
                             </p>
                         </router-link>
                     </li>
-                    <li class="nav-item" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'">
+                    <li class="nav-item" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'">
                         <router-link to="/admin/users" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
                             <p>
