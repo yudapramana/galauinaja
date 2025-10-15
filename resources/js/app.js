@@ -78,14 +78,16 @@ router.beforeEach(async (to, from) => {
             return { name: 'user.dashboard' }; // atau arahkan ke halaman lain seperti dashboard
         }
 
-        // const phone = authUserStore.user?.employee?.phone_number;
+        if (!mustChangePassword) {
+            const phone = authUserStore.user?.employee?.phone_number;
 
-        // const isEmptyPhone =
-        // phone == null || String(phone).trim() === '';
+            const isEmptyPhone =
+            phone == null || String(phone).trim() === '';
 
-        // if (isEmptyPhone && to.name !== 'user.profile') {
-        //     return { name: 'user.profile' };
-        // }
+            if (isEmptyPhone && to.name !== 'user.profile') {
+                return { name: 'user.profile' };
+            }
+        }
     }
 
 
