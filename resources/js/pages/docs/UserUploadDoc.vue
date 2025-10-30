@@ -29,7 +29,7 @@
             <li>
               Jika status dokumen sudah <span class="badge badge-success">Disetujui</span>, terdapat dua pilihan:
               <ol type="a" class="mt-2">
-                <li>Jika file ingin diubah, klik tombol <span class="badge badge-sm badge-outline-primary">Minta&nbsp;Perubahan</span> lalu isi alasan kenapa dokumen perlu diganti. Sistem akan mengubah status menjadi <strong>Antrian&nbsp;Verval</strong> agar bisa diperbarui kembali.</li>
+                <li>Jika file ingin diubah, klik tombol <span class="badge badge-sm badge-outline-primary">Ajukan&nbsp;Perubahan</span> lalu isi alasan kenapa dokumen perlu diganti. Sistem akan mengubah status menjadi <strong>Antrian&nbsp;Verval</strong> agar bisa diperbarui kembali.</li>
                 <li>Jika file tidak ingin diubah, biarkan saja tanpa tindakan.</li>
               </ol>
             </li>
@@ -138,7 +138,7 @@
                           class="btn btn-xs btn-outline-primary ml-2"
                           @click="requestChange(file)"
                         >
-                          Minta Perubahan
+                          Ajukan Perubahan
                         </button>
                         
                       </div>

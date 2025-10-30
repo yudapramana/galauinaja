@@ -344,7 +344,7 @@ const toWorkUnitId = (val) => {
 const fetchWorkUnits = async () => {
   try {
     // GET /api/work-units/fetch -> [{id, unit_name, unit_code, parent_unit}]
-    const { data } = await axios.get('/api/work-units/fetch')
+    const { data } = await axios.get('/api/work-units/monitor')
     workUnits.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (e) {
     workUnits.value = []
