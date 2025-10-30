@@ -138,6 +138,8 @@ class UserController extends Controller
             'job_title' => $request->job_title,
             'id_work_unit' => $request->id_work_unit,
             'employment_status' => $request->employment_status,
+            'employment_category' => $request->employment_category,
+            'phone_number' => $request->phone_number,
             'tmt_jabatan' => $request->tmt_jabatan,
             'tmt_pangkat' => $request->tmt_pangkat,
         ]);
