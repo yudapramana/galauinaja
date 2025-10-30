@@ -178,6 +178,7 @@
                                             <option value="RETIRED">Pensiun</option>
                                             <option value="LEFT">Berhenti</option>
                                             <option value="DIED">Meninggal</option>
+                                            <option value="MUTATION">Mutasi</option>
                                         </select>
                                     </div>
                                 </div>

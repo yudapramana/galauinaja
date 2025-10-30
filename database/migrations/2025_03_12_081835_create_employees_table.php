@@ -26,7 +26,7 @@ class CreateEmployeesTable extends Migration {
 			$table->date('tmt_pensiun')->nullable();
 			$table->boolean('docs_progress_state')->default(false);
 			$table->decimal('progress_dokumen', 5, 2)->default(0.00);
-			$table->enum('employment_category', array('ACTIVE', 'RETIRED', 'LEFT', 'DIED'))->default('ACTIVE');
+			$table->enum('employment_category', array('ACTIVE', 'RETIRED', 'LEFT', 'DIED', 'MUTATION'))->default('ACTIVE');
 
 		});
 	}
