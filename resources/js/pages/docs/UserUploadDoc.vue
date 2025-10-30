@@ -19,29 +19,36 @@
 
           <ol class="mb-2 pl-3">
             <li>Buka folder <strong>jenis dokumen</strong> yang ingin diperbarui.</li>
+            
             <li>
-              Jika status dokumen masih <span class="badge badge-secondary">Pending</span> atau
-              <span class="badge badge-danger">Rejected</span>,
+              Jika status dokumen masih <span class="badge badge-secondary">Antrian&nbsp;Verval</span> atau
+              <span class="badge badge-danger">Ditolak</span>,
               tekan tombol <span class="badge badge-sm badge-primary">Perbarui</span> pada file yang salah.
             </li>
+            
             <li>
-              Jika status dokumen sudah <span class="badge badge-success">Approved</span>,
-              tekan tombol <span class="badge badge-sm badge-outline-primary">Minta&nbsp;Perubahan</span>
-              lalu isi alasan kenapa dokumen perlu diganti.
-              Sistem akan mengubah status menjadi <strong>Pending</strong> agar bisa diperbarui kembali.
+              Jika status dokumen sudah <span class="badge badge-success">Disetujui</span>, terdapat dua pilihan:
+              <ol type="a" class="mt-2">
+                <li>Jika file ingin diubah, klik tombol <span class="badge badge-sm badge-outline-primary">Minta&nbsp;Perubahan</span> lalu isi alasan kenapa dokumen perlu diganti. Sistem akan mengubah status menjadi <strong>Antrian&nbsp;Verval</strong> agar bisa diperbarui kembali.</li>
+                <li>Jika file tidak ingin diubah, biarkan saja tanpa tindakan.</li>
+              </ol>
             </li>
+            
             <li>
-              Untuk dokumen tipe <em>multiple</em>, pilih <strong>Parameter</strong> yang benar dari tombol pilihan,
-              lalu unggah file PDF yang sesuai dan simpan.
+              Untuk dokumen dengan tipe <em>multiple</em>, pilih <strong>Parameter</strong> yang sesuai dari tombol pilihan,
+              kemudian unggah file PDF yang benar dan tekan <strong>Simpan</strong>.
             </li>
+            
             <li>
-              Setelah unggah atau minta perubahan, perbaruan biasanya membutuhkan waktu 1–2 menit untuk diproses.
+              Setelah melakukan unggah atau permintaan perubahan, proses pembaruan biasanya membutuhkan waktu sekitar 1–2 menit.
             </li>
+            
             <li>
-              Jika data belum muncul, tekan tombol
+              Jika data belum muncul setelah pembaruan, tekan tombol
               <strong><i class="fas fa-sync"></i> Sinkron&nbsp;Data</strong> untuk memuat ulang daftar dokumen.
             </li>
           </ol>
+
 
           <div class="small text-muted">
             Catatan:
@@ -107,8 +114,12 @@
                       <div class="d-flex align-items-center">
                         <i class="fas fa-file-pdf text-danger mr-2"></i>
                         <span @click="previewFile(file)">{{ file.file_name }}</span>
-                        <span class="badge badge-sm ml-2" :class="badgeClass(file.status)">
-                          {{ file.status || 'Pending' }}
+                        <span v-if="file.status == 'Pending'" class="badge badge-sm ml-2" :class="badgeClass(file.status)">
+                          Antrian Verval
+                        </span>
+
+                        <span v-if="file.status == 'Approved'" class="badge badge-sm ml-2" :class="badgeClass(file.status)">
+                          Disetujui
                         </span>
                         
                         <template v-if="settingStore.showMaintenanceBadge">
