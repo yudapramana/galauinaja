@@ -129,7 +129,7 @@ class ImportEmployeesPns extends Command
                 'full_name'         => $fullName,
                 'date_of_birth'     => $dob,      // nullable
                 'gender'            => $gender,   // nullable
-                'phone_number'      => $phone,    // nullable
+                // 'phone_number'      => $phone,    // nullable
                 'email'             => $email,    // nullable unique
                 'job_title'         => $jobTitle,
                 'gol_ruang'         => $golRuang,
@@ -176,7 +176,7 @@ class ImportEmployeesPns extends Command
                     'full_name',
                     'date_of_birth',
                     'gender',
-                    'phone_number',
+                    // 'phone_number',
                     'email',
                     'job_title',
                     'gol_ruang',

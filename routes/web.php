@@ -49,6 +49,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+Route::get('/count-unique-employees', function () {
+    $uniqueEmployees = DB::table('emp_documents')
+        ->distinct('id_employee')
+        ->count('id_employee');
+
+    return response()->json([
+        'unique_employee_count' => $uniqueEmployees
+    ]);
+})->middleware(['auth']);
+
 Route::get('/update-progress-dokumen', function (Request $request) {
     // --- Opsi via query ---
     $onlyFlagged      = filter_var($request->input('only_flagged', 'true'), FILTER_VALIDATE_BOOLEAN);

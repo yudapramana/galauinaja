@@ -45,59 +45,75 @@ const logout = () => {
 
 
                     <li class="nav-item">
-                        <router-link to="/admin/dashboard" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>
-                                Beranda
-                            </p>
-                        </router-link>
+                    <router-link to="/admin/dashboard" active-class="active" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Beranda</p>
+                    </router-link>
                     </li>
-                    
+
                     <li class="nav-item">
-                        <router-link to="/admin/docusers" :class="$route.path.startsWith('/admin/docusers') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Daftar Upload
-                            </p>
-                        </router-link>
+                    <router-link
+                        to="/admin/docusers"
+                        :class="$route.path.startsWith('/admin/docusers') ? 'active' : ''"
+                        v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN'"
+                        active-class="active"
+                        class="nav-link"
+                    >
+                        <i class="nav-icon fas fa-file-upload"></i>
+                        <p>Daftar Upload</p>
+                    </router-link>
                     </li>
+
                     <li class="nav-item">
-                        <router-link to="/admin/docprogress" :class="$route.path.startsWith('/admin/docprogress') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN'"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Progress
-                            </p>
-                        </router-link>
+                    <router-link
+                        to="/admin/docprogress"
+                        :class="$route.path.startsWith('/admin/docprogress') ? 'active' : ''"
+                        v-if="authUserStore.user.role == 'SUPERADMIN'"
+                        active-class="active"
+                        class="nav-link"
+                    >
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>Progress</p>
+                    </router-link>
                     </li>
+
                     <li class="nav-item">
-                        <router-link to="/admin/vervals" :class="$route.path.startsWith('/admin/vervals') ? 'active' : ''"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Verval
-                            </p>
-                        </router-link>
+                    <router-link
+                        to="/admin/vervals"
+                        :class="$route.path.startsWith('/admin/vervals') ? 'active' : ''"
+                        active-class="active"
+                        class="nav-link"
+                    >
+                        <i class="nav-icon fas fa-clipboard-check"></i>
+                        <p>Verval</p>
+                    </router-link>
                     </li>
+
                     <li class="nav-item">
-                        <router-link to="/admin/verval-history" :class="$route.path.startsWith('/admin/verval-history') ? 'active' : ''"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-clipboard-check"></i>
-                            <p>
-                                Log Verval
-                            </p>
-                        </router-link>
+                    <router-link
+                        to="/admin/verval-history"
+                        :class="$route.path.startsWith('/admin/verval-history') ? 'active' : ''"
+                        active-class="active"
+                        class="nav-link"
+                    >
+                        <i class="nav-icon fas fa-history"></i>
+                        <p>Log Verval</p>
+                    </router-link>
                     </li>
+
                     <li class="nav-item">
-                        <router-link to="/admin/monitor-workout" :class="$route.path.startsWith('/admin/monitor-workout') ? 'active' : ''" v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'"
-                            active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>
-                                Monitor Pegawai
-                            </p>
-                        </router-link>
+                    <router-link
+                        to="/admin/monitor-workout"
+                        :class="$route.path.startsWith('/admin/monitor-workout') ? 'active' : ''"
+                        v-if="authUserStore.user.role == 'SUPERADMIN' || authUserStore.user.role == 'ADMIN' || authUserStore.user.role == 'REVIEWER'"
+                        active-class="active"
+                        class="nav-link"
+                    >
+                        <i class="nav-icon fas fa-user-check"></i>
+                        <p>Monitor Pegawai</p>
+                    </router-link>
                     </li>
+
                     
 
 
