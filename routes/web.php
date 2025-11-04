@@ -81,7 +81,8 @@ Route::get('/sigarda-employees-status', function (Request $request) {
             DB::raw('COUNT(d.id) as docs_count')
         )
         ->where('e.employment_category', 'ACTIVE') // ✅ hanya pegawai aktif
-        ->groupBy('e.id', 'e.full_name', 'e.nip', 'e.job_title');
+        ->groupBy('e.id', 'e.full_name', 'e.nip', 'e.job_title')
+        ->orderBy('e.nip', 'asc'); // ✅ urutkan berdasarkan NIP naik
 
     // Terapkan filter status
     if ($filter === 'done') {
