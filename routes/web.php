@@ -54,9 +54,10 @@ Route::get('/sigarda-employees-status', function (Request $request) {
     $filter = $request->query('status'); // null | 'done' | 'pending'
 
     // Ringkasan jumlah
-    $total = DB::table('employees')->count();
+    $total = DB::table('employees')->where('employment_category', 'ACTIVE')->count();
 
     $done = DB::table('employees as e')
+        ->where('e.employment_category', 'ACTIVE') // ✅ hanya pegawai aktif
         ->whereExists(function ($q) {
             $q->select(DB::raw(1))
               ->from('emp_documents as d')
