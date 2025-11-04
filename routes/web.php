@@ -49,6 +49,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+
+Route::get('/sigarda-status', function (Request $request) {
+    $filter = $request->query('status'); // 'done' | 'pending' | null
+
+    // Subquery EXISTS untuk cek punya dokumen aktif (tidak soft-deleted)
+    $existsSub = DB::table('emp_documents as d')
+        ->select(DB::raw('1'))
+        ->whereColumn('d.id_employee', 'e.id')
+        ->whereNull('d.deleted_at');
+
+    // Query utama daftar pegawai + flag has_docs (0/1)
+    $query = DB::table('employees as e')
+        ->select([
+            'e.id',
+            'e.nama',
+            'e.nip',
+            'e.satuan_kerja',
+            DB::raw('EXISTS(' . $existsSub->toSql() . ') as has_docs'),
+        ])
+        ->mergeBindings($existsSub) // penting agar bindings subquery ikut
+        ->orderBy('e.nama', 'asc');
+
+    // Terapkan filter bila ada
+    if ($filter === 'done') {
+        $query->whereExists($existsSub);
+    } elseif ($filter === 'pending') {
+        $query->whereNotExists($existsSub);
+    }
+
+    // Pagination
+    $employees = $query->paginate(50)->withQueryString();
+
+    // Hitung ringkasannya (jumlah total/done/pending)
+    $total   = DB::table('employees')->count();
+    $done    = DB::table('employees as e')->whereExists($existsSub)->count();
+    $pending = $total - $done;
+
+    return view('sigarda_status', compact('employees', 'total', 'done', 'pending', 'filter'));
+})->middleware(['auth']);
+
+
 Route::get('/count-unique-employees', function () {
     $uniqueEmployees = DB::table('emp_documents')
         ->distinct('id_employee')
