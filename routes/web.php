@@ -50,44 +50,138 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 
-Route::get('/sigarda-status', function (Request $request) {
-    $filter = $request->query('status'); // 'done' | 'pending' | null
+Route::get('/sigarda-employees-status', function (Request $request) {
+    $filter = $request->query('status'); // null | 'done' | 'pending'
 
-    // Subquery EXISTS untuk cek punya dokumen aktif (tidak soft-deleted)
-    $existsSub = DB::table('emp_documents as d')
-        ->select(DB::raw('1'))
-        ->whereColumn('d.id_employee', 'e.id')
-        ->whereNull('d.deleted_at');
+    // Ringkasan jumlah
+    $total = DB::table('employees')->count();
 
-    // Query utama daftar pegawai + flag has_docs (0/1)
-    $query = DB::table('employees as e')
-        ->select([
-            'e.id',
-            'e.nama',
-            'e.nip',
-            'e.satuan_kerja',
-            DB::raw('EXISTS(' . $existsSub->toSql() . ') as has_docs'),
-        ])
-        ->mergeBindings($existsSub) // penting agar bindings subquery ikut
-        ->orderBy('e.nama', 'asc');
+    $done = DB::table('employees as e')
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('emp_documents as d')
+              ->whereColumn('d.id_employee', 'e.id')
+              ->whereNull('d.deleted_at');
+        })
+        ->count();
 
-    // Terapkan filter bila ada
-    if ($filter === 'done') {
-        $query->whereExists($existsSub);
-    } elseif ($filter === 'pending') {
-        $query->whereNotExists($existsSub);
-    }
-
-    // Pagination
-    $employees = $query->paginate(50)->withQueryString();
-
-    // Hitung ringkasannya (jumlah total/done/pending)
-    $total   = DB::table('employees')->count();
-    $done    = DB::table('employees as e')->whereExists($existsSub)->count();
     $pending = $total - $done;
 
-    return view('sigarda_status', compact('employees', 'total', 'done', 'pending', 'filter'));
-})->middleware(['auth']);
+    // Query utama: left join + hitung dokumen aktif per pegawai
+    $base = DB::table('employees as e')
+        ->leftJoin('emp_documents as d', function ($j) {
+            $j->on('d.id_employee', '=', 'e.id')
+              ->whereNull('d.deleted_at');
+        })
+        ->select(
+            'e.id',
+            'e.full_name',
+            'e.nip',
+            'e.job_title',
+            DB::raw('COUNT(d.id) as docs_count')
+        )
+        ->groupBy('e.id', 'e.full_name', 'e.nip', 'e.job_title');
+
+    // Terapkan filter status
+    if ($filter === 'done') {
+        $base->havingRaw('COUNT(d.id) > 0');
+    } elseif ($filter === 'pending') {
+        $base->havingRaw('COUNT(d.id) = 0');
+    }
+
+    $rows = $base->orderBy('e.full_name', 'asc')->get();
+
+    // Build HTML sederhana (tanpa Blade)
+    $currentUrl = url('/sigarda-employees-status');
+    $activeAll = empty($filter) ? 'btn-primary' : 'btn-default';
+    $activeDone = $filter === 'done' ? 'btn-primary' : 'btn-default';
+    $activePending = $filter === 'pending' ? 'btn-primary' : 'btn-default';
+
+    $htmlRows = '';
+    $no = 1;
+    foreach ($rows as $r) {
+        $statusLabel = ($r->docs_count > 0)
+            ? '<span class="label label-success">Sudah Isi</span>'
+            : '<span class="label label-default">Belum Isi</span>';
+
+        $htmlRows .= '<tr>'
+            . '<td style="width:60px;">' . $no++ . '</td>'
+            . '<td>' . e($r->full_name) . '</td>'
+            . '<td>' . e($r->nip) . '</td>'
+            . '<td>' . e($r->job_title) . '</td>'
+            . '<td class="text-center" style="width:140px;">' . $statusLabel . '</td>'
+            . '</tr>';
+    }
+
+    $html = <<<HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Status Pengisian SIGARDA — Employees</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 3 agar selaras dengan halaman yang sudah ada -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        table.table-smaller { font-size: 12px; }
+        .toolbar { margin: 12px 0; }
+        .page-header { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h3 class="text-muted">Kementerian Agama Kab. Pesisir Selatan</h3>
+        <h2 style="margin-top:5px;">Status Pengisian SIGARDA (Employees)</h2>
+        <p class="lead" style="margin-bottom:0;">
+            Total: <span class="badge">{$total}</span>
+            &middot; Sudah isi: <span class="badge">{$done}</span>
+            &middot; Belum isi: <span class="badge">{$pending}</span>
+        </p>
+    </div>
+
+    <div class="toolbar">
+        <div class="btn-group">
+            <a href="{$currentUrl}" class="btn {$activeAll}">
+                Semua <span class="badge">{$total}</span>
+            </a>
+            <a href="{$currentUrl}?status=done" class="btn {$activeDone}">
+                Sudah Isi <span class="badge">{$done}</span>
+            </a>
+            <a href="{$currentUrl}?status=pending" class="btn {$activePending}">
+                Belum Isi <span class="badge">{$pending}</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed table-striped table-hover table-smaller">
+            <thead>
+                <tr>
+                    <th style="width:60px;">#</th>
+                    <th>Full Name</th>
+                    <th>NIP</th>
+                    <th>Job Title</th>
+                    <th class="text-center" style="width:140px;">Status SIGARDA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {$htmlRows}
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; {date('Y')} Pranata Komputer YD</p>
+    </footer>
+</div>
+</body>
+</html>
+HTML;
+
+    return response($html);
+});
+
 
 
 Route::get('/count-unique-employees', function () {
