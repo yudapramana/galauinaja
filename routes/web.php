@@ -183,7 +183,7 @@ Route::get('/sigarda-employees-status', function (Request $request) {
 HTML;
 
     return response($html);
-});
+})->middleware(['auth']);
 
 
 
