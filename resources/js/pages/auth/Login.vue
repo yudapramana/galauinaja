@@ -208,7 +208,7 @@ const handleSubmit = async () => {
           </p>
           <a
             class="text-sm text-muted"
-            href="https://wa.me/6282298476941?text=Assalamualaikum Wr Wb Admin Sigarda,%2C%20Saya%20Ingin%20Bertanya%20Tentang%20Sigarda,%20NIP%20Saya%20adalah:"
+            href="https://wa.me/6282386652950?text=Assalamualaikum Wr Wb Admin Sigarda,%2C%20Saya%20Ingin%20Bertanya%20Tentang%20Sigarda,%20NIP%20Saya%20adalah:"
             target="_blank"
             >Tanya admin?</a
           >
